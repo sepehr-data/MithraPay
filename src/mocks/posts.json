@@ -1,0 +1,20 @@
+[
+  {
+    "id": "b1",
+    "slug": "apple-music-guide",
+    "title": "راهنمای شروع اپل موزیک",
+    "excerpt": "چطور Apple Music را فعال کنیم.",
+    "content": "<p>این یک متن نمونه است. برای محتوای واقعی بعداً API متصل کنید.</p>",
+    "date": "2025-10-10",
+    "cover": "https://placehold.co/960x400?text=Apple+Music"
+  },
+  {
+    "id": "b2",
+    "slug": "icloud-tips",
+    "title": "نکات آیکلود",
+    "excerpt": "بهترین روش استفاده از iCloud+.",
+    "content": "<p>نمونه متن.</p>",
+    "date": "2025-09-15",
+    "cover": "https://placehold.co/960x400?text=iCloud"
+  }
+]

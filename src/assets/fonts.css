@@ -1,0 +1,5 @@
+/* Already loading Vazirmatn from index.html as a webfont. Keep as hook for future self-hosting. */
+:root {
+  --app-font: "Vazirmatn", ui-sans-serif, system-ui, "Segoe UI", Helvetica, Arial;
+}
+html, body { font-family: var(--app-font); }

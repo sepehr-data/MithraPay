@@ -1,0 +1,107 @@
+[
+  {
+    "id": "p1",
+    "slug": "apple-music-3m",
+    "title": "Apple Music (3 ماهه)",
+    "description": "اشتراک اپل موزیک ۳ ماهه - تحویل فوری.",
+    "price": 249000,
+    "compareAt": 299000,
+    "rating": 5,
+    "image": "/products/apple-music.png",
+    "categoryId": "cat-acc",
+    "isDigital": true,
+    "tags": [
+      "apple",
+      "music"
+    ]
+  },
+  {
+    "id": "p2",
+    "slug": "icloud-200gb",
+    "title": "iCloud+ (200GB)",
+    "description": "فضای ابری اپل آیکلود ۲۰۰ گیگابایتی.",
+    "price": 189000,
+    "rating": 4,
+    "image": "https://placehold.co/800x600?text=iCloud",
+    "categoryId": "cat-acc",
+    "isDigital": true
+  },
+  {
+    "id": "p3",
+    "slug": "youtube-premium-1m",
+    "title": "YouTube Premium (1 ماهه)",
+    "description": "یوتیوب پرمیوم با حذف تبلیغات.",
+    "price": 129000,
+    "compareAt": 159000,
+    "rating": 4,
+    "image": "https://placehold.co/800x600?text=YouTube+Premium",
+    "categoryId": "cat-acc",
+    "isDigital": true
+  },
+  {
+    "id": "p4",
+    "slug": "netflix-uhd",
+    "title": "Netflix (UHD)",
+    "description": "نتفلیکس کیفیت ۴K UHD.",
+    "price": 349000,
+    "rating": 4,
+    "image": "https://placehold.co/800x600?text=Netflix",
+    "categoryId": "cat-acc",
+    "isDigital": true
+  },
+  {
+    "id": "p5",
+    "slug": "telegram-premium",
+    "title": "Telegram Premium",
+    "description": "تلگرام پرمیوم با امکانات ویژه.",
+    "price": 99000,
+    "rating": 5,
+    "image": "https://placehold.co/800x600?text=Telegram+Premium",
+    "categoryId": "cat-acc",
+    "isDigital": true
+  },
+  {
+    "id": "p6",
+    "slug": "apple-gift-25",
+    "title": "Apple Gift Card $25",
+    "description": "گیفت‌کارت اپل ۲۵ دلاری.",
+    "price": 1190000,
+    "rating": 5,
+    "image": "https://placehold.co/800x600?text=Apple+Gift+Card",
+    "categoryId": "cat-gift",
+    "isDigital": true
+  },
+  {
+    "id": "p7",
+    "slug": "psn-gift-20",
+    "title": "PlayStation Store $20",
+    "description": "گیفت‌کارت پلی‌استیشن ۲۰ دلاری.",
+    "price": 999000,
+    "rating": 4,
+    "image": "https://placehold.co/800x600?text=PSN+Gift",
+    "categoryId": "cat-gift",
+    "isDigital": true
+  },
+  {
+    "id": "p8",
+    "slug": "magsafe-charger",
+    "title": "شارژر MagSafe",
+    "description": "شارژ سریع بی‌سیم اپل.",
+    "price": 3199000,
+    "rating": 4,
+    "image": "https://placehold.co/800x600?text=MagSafe",
+    "categoryId": "cat-accs",
+    "isDigital": false
+  },
+  {
+    "id": "p9",
+    "slug": "apple-tv-4k",
+    "title": "Apple TV 4K",
+    "description": "اپل تی‌وی ۴K (نسخه جدید).",
+    "price": 14999000,
+    "rating": 5,
+    "image": "https://placehold.co/800x600?text=Apple+TV+4K",
+    "categoryId": "cat-accs",
+    "isDigital": false
+  }
+]

@@ -1,0 +1,17 @@
+[
+  {
+    "id": "cat-acc",
+    "slug": "accounts",
+    "title": "اکانت‌ها"
+  },
+  {
+    "id": "cat-gift",
+    "slug": "gift-cards",
+    "title": "گیفت‌کارت"
+  },
+  {
+    "id": "cat-accs",
+    "slug": "accessories",
+    "title": "لوازم جانبی"
+  }
+]
