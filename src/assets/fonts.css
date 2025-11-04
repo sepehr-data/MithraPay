@@ -1,5 +1,65 @@
-/* Already loading Vazirmatn from index.html as a webfont. Keep as hook for future self-hosting. */
-:root {
-  --app-font: "Vazirmatn", ui-sans-serif, system-ui, "Segoe UI", Helvetica, Arial;
+/* src/assets/font.css */
+
+/* Light */
+@font-face {
+  font-family: 'MithraFont';
+  src: url('@/assets/fonts/YekanBakh-Light.ttf') format('ttf');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
 }
-html, body { font-family: var(--app-font); }
+
+/* Regular */
+@font-face {
+  font-family: 'MithraFont';
+  src: url('@/assets/fonts/YekanBakh-Regular.ttf') format('ttf');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Medium */
+@font-face {
+  font-family: 'MithraFont';
+  src: url('@/assets/fonts/YekanBakh-Medium.ttf') format('ttf');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Bold */
+@font-face {
+  font-family: 'MithraFont';
+  src: url('@/assets/fonts/YekanBakh-Bold.ttf') format('ttf');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Heavy */
+@font-face {
+  font-family: 'MithraFont';
+  src: url('@/assets/fonts/YekanBakh-Heavy.ttf') format('ttf');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Fat */
+@font-face {
+  font-family: 'MithraFont';
+  src: url('@/assets/fonts/YekanBakh-Fat.ttf') format('ttf');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* حالا متغیر روت رو از Vazirmatn به فونت خودت عوض کن */
+:root {
+  --app-font: 'MithraFont', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+html,
+body {
+  font-family: var(--app-font);
+}

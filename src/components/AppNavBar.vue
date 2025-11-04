@@ -17,7 +17,7 @@
         <!-- logo -->
         <RouterLink class="flex items-center gap-2" to="/">
           <!-- باکس لوگو -->
-          <div class="h-14 w-40 overflow-hidden flex items-center">
+          <div class="h-13 w-40 overflow-hidden flex items-center">
             <img
                 :src="mithraLogo"
                 alt="MithraPay"
@@ -170,7 +170,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import mithraLogo from '@/assets/mithrapay.png'
+import mithraLogo from '@/assets/logo.png'
 import { useUiStore } from '@/stores/ui'
 import { useCartStore } from '@/stores/cart'
 import { useRouter } from 'vue-router'

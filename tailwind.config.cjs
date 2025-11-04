@@ -7,7 +7,7 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["Vazirmatn", "ui-sans-serif", "system-ui", "Segoe UI", "Helvetica", "Arial"]
+        sans: ["MithraFont", "Vazirmatn", "ui-sans-serif", "system-ui", "Segoe UI", "Helvetica", "Arial"]
       }
     }
   },

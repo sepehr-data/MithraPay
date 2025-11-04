@@ -7,7 +7,7 @@
     "price": 249000,
     "compareAt": 299000,
     "rating": 5,
-    "image": "/products/apple-music.png",
+    "image": "@/assets/products/apple-music.png",
     "categoryId": "cat-acc",
     "isDigital": true,
     "tags": [
