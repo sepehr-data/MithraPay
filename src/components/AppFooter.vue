@@ -26,17 +26,23 @@
           </p>
           <p class="flex items-center gap-2">
             <span class="text-base-content/50">✉️</span>
-            support@accountplus.ir
+            support@mitheraPay.ir
           </p>
         </div>
 
         <!-- socials -->
         <div class="flex gap-3 pt-2 text-base-content/60">
-          <a href="#" class="hover:text-primary"></a>
-          <a href="#" class="hover:text-primary"></a>
-          <a href="#" class="hover:text-primary"></a>
-          <a href="#" class="hover:text-primary"></a>
+          <a href="#" class="hover:opacity-80">
+            <img src="@/assets/socials/telegram.png" class="h-10 w-10 object-contain" />
+          </a>
+          <a href="#" class="hover:opacity-80">
+            <img src="@/assets/socials/instagram.png" class="h-10 w-10 object-contain" />
+          </a>
+          <a href="#" class="hover:opacity-80">
+            <img src="@/assets/socials/whatsapp.png" class="h-10 w-10 object-contain" />
+          </a>
         </div>
+
       </div>
 
       <!-- middle: links -->
@@ -90,7 +96,9 @@
 
     <!-- bottom bar -->
     <div class="border-t border-base-200 py-4 text-center text-sm text-base-content/60">
-      تمامی حقوق برای فروشگاه میترا-پی محفوظ است. © ۱۴۰۴
+      تمامی حقوق برای فروشگاه سپهر داده دیجیتال محفوظ است. © ۱۴۰۴
     </div>
   </footer>
 </template>
+<script setup lang="ts">
+</script>

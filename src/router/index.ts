@@ -11,8 +11,9 @@ const routes: RouteRecordRaw[] = [
   { path: '/support', name: 'support', component: () => import('@/pages/SupportPage.vue') },
   { path: '/about', name: 'about', component: () => import('@/pages/AboutPage.vue') },
   { path: '/profile', name: 'profile', component: () => import('@/pages/ProfilePage.vue') },
-  { path: '/login', name: 'login', component: () => import('@/pages/LoginPage.vue') },
   { path: '/search', name: 'search', component: () => import('@/pages/SearchPage.vue') },
+  { path: '/auth/login', name: 'login', component: () => import('@/pages/LoginPage.vue'), meta: { auth: true }},
+  { path: '/auth/register', name: 'register', component: () => import('@/pages/RegisterPage.vue'), meta: { auth: true }},
   { path: '/:pathMatch(.*)*', redirect: '/' }
 ]
 

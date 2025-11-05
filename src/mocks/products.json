@@ -7,7 +7,7 @@
     "price": 249000,
     "compareAt": 299000,
     "rating": 5,
-    "image": "@/assets/products/apple-music.png",
+    "image": "https://offers.applemusic.apple/mdsa/assets/storage/blobs/images/675b38d46c7678d0d854b909/en-us-large@1x.png",
     "categoryId": "cat-acc",
     "isDigital": true,
     "tags": [
@@ -22,7 +22,29 @@
     "description": "فضای ابری اپل آیکلود ۲۰۰ گیگابایتی.",
     "price": 189000,
     "rating": 4,
-    "image": "https://placehold.co/800x600?text=iCloud",
+    "image": "https://cdn.mos.cms.futurecdn.net/Cdpw6TMsvTS3tPWmYuVXz6-650-80.png.webp",
+    "categoryId": "cat-acc",
+    "isDigital": true
+  },
+  {
+    "id": "p4",
+    "slug": "netflix-uhd",
+    "title": "Netflix (UHD)",
+    "description": "نتفلیکس کیفیت ۴K UHD.",
+    "price": 349000,
+    "rating": 4,
+    "image": "https://images.ctfassets.net/4cd45et68cgf/637ArQo6YNsJf48Xw3zUAg/d030f9065a0fe54de777eaa600cf3fcb/N-Games_March_936x622.png",
+    "categoryId": "cat-acc",
+    "isDigital": true
+  },
+  {
+    "id": "p5",
+    "slug": "telegram-premium",
+    "title": "Telegram Premium",
+    "description": "تلگرام پرمیوم با امکانات ویژه.",
+    "price": 99000,
+    "rating": 5,
+    "image": "https://applespbevent.ru/content/images/2022/12/p1_3536957_2dd9d192.jpg",
     "categoryId": "cat-acc",
     "isDigital": true
   },
@@ -34,29 +56,7 @@
     "price": 129000,
     "compareAt": 159000,
     "rating": 4,
-    "image": "https://placehold.co/800x600?text=YouTube+Premium",
-    "categoryId": "cat-acc",
-    "isDigital": true
-  },
-  {
-    "id": "p4",
-    "slug": "netflix-uhd",
-    "title": "Netflix (UHD)",
-    "description": "نتفلیکس کیفیت ۴K UHD.",
-    "price": 349000,
-    "rating": 4,
-    "image": "https://placehold.co/800x600?text=Netflix",
-    "categoryId": "cat-acc",
-    "isDigital": true
-  },
-  {
-    "id": "p5",
-    "slug": "telegram-premium",
-    "title": "Telegram Premium",
-    "description": "تلگرام پرمیوم با امکانات ویژه.",
-    "price": 99000,
-    "rating": 5,
-    "image": "https://placehold.co/800x600?text=Telegram+Premium",
+    "image": "https://miro.medium.com/v2/resize:fit:720/format:webp/0*-fDdXp0fC1T_MqAy.jpg",
     "categoryId": "cat-acc",
     "isDigital": true
   },

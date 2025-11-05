@@ -1,7 +1,7 @@
 <template>
   <header class="sticky top-0 z-50 bg-base-100/90 backdrop-blur border-b border-base-300">
     <div class="navbar max-w-7xl mx-auto px-3 lg:px-4 relative">
-      <!-- RIGHT / START (RTL) -->
+      <!-- RIGHT / START -->
       <div class="navbar-start gap-2">
         <!-- mobile menu -->
         <button
@@ -16,7 +16,6 @@
 
         <!-- logo -->
         <RouterLink class="flex items-center gap-2" to="/">
-          <!-- باکس لوگو -->
           <div class="h-13 w-40 overflow-hidden flex items-center">
             <img
                 :src="mithraLogo"
@@ -32,7 +31,8 @@
         <ul class="menu menu-horizontal gap-1 text-sm">
           <li><RouterLink to="/">صفحه اصلی</RouterLink></li>
 
-          <li class="relative group">
+          <!-- STORE -->
+          <li class="group">
             <button class="flex items-center gap-1">
               فروشگاه
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" stroke="currentColor" fill="none">
@@ -40,15 +40,33 @@
               </svg>
             </button>
 
-            <!-- MEGA -->
-            <div class="absolute right-0 top-full pt-4 z-40 hidden group-hover:block">
+            <!-- MEGA (CENTERED) -->
+            <div
+                class="absolute left-1/2 top-full -translate-x-1/2 pt-4 z-40 hidden group-hover:block"
+            >
               <div
-                  class="w-[1100px] max-w-[calc(100vw-1.5rem)]
+                  class="mega-shell w-[1100px] max-w-[calc(100vw-1.5rem)]
                        rounded-2xl bg-base-100 shadow-xl border border-base-200
-                       px-6 py-5 flex gap-6"
+                       px-6 py-5 flex gap-6 flex-row-reverse"
               >
-                <div class="flex gap-6 flex-1">
-                  <div class="min-w-[150px]">
+                <!-- promo box -->
+                <div
+                    class="w-[240px] rounded-xl bg-base-200/80 border border-base-200 flex flex-col justify-between p-4 text-right"
+                >
+                  <div>
+                    <p class="text-sm text-base-content/70 mb-1">اکانت‌ها، گیفت‌کارت و لوازم</p>
+                    <h3 class="text-lg font-bold mb-2">خرید آسان، تحویل سریع</h3>
+                    <p class="text-xs text-base-content/60">
+                      پشتیبانی حرفه‌ای و دسته‌بندی کامل محصولات
+                    </p>
+                  </div>
+                  <RouterLink to="/shop" class="btn btn-sm btn-primary mt-4">مشاهده اکانت‌ها</RouterLink>
+                </div>
+
+                <!-- columns -->
+                <div class="mega-panel grid grid-cols-4 gap-8 flex-1 text-right">
+                  <!-- col 1 -->
+                  <div class="mega-col">
                     <h3 class="font-semibold mb-2">اشتراک های پریمیوم اپل</h3>
                     <ul class="space-y-1.5 text-sm leading-relaxed">
                       <li><RouterLink class="hover:text-primary" to="/product/apple-one">اشتراک اپل وان</RouterLink></li>
@@ -58,7 +76,8 @@
                     </ul>
                   </div>
 
-                  <div class="min-w-[150px] border-r border-base-200 pr-6">
+                  <!-- col 2 -->
+                  <div class="mega-col">
                     <h3 class="font-semibold mb-2">اشتراک های کاربردی</h3>
                     <ul class="space-y-1.5 text-sm leading-relaxed">
                       <li><RouterLink class="hover:text-primary" to="/category/accounts">یوتیوب پریمیوم</RouterLink></li>
@@ -68,7 +87,8 @@
                     </ul>
                   </div>
 
-                  <div class="min-w-[150px] border-r border-base-200 pr-6">
+                  <!-- col 3 -->
+                  <div class="mega-col">
                     <h3 class="font-semibold mb-2">گیفت کارت</h3>
                     <ul class="space-y-1.5 text-sm leading-relaxed">
                       <li><RouterLink class="hover:text-primary" to="/category/gift-cards">گیفت کارت اپل</RouterLink></li>
@@ -78,17 +98,8 @@
                     </ul>
                   </div>
 
-                  <div class="min-w-[150px] border-r border-base-200 pr-6">
-                    <h3 class="font-semibold mb-2">محصولات فیزیکی</h3>
-                    <ul class="space-y-1.5 text-sm leading-relaxed">
-                      <li><RouterLink class="hover:text-primary" to="/category/accessories">هندزفری و اسپیکر</RouterLink></li>
-                      <li><RouterLink class="hover:text-primary" to="/category/accessories">محافظ و کاور</RouterLink></li>
-                      <li><RouterLink class="hover:text-primary" to="/category/accessories">کابل و آداپتور</RouterLink></li>
-                      <li><RouterLink class="hover:text-primary" to="/category/accessories">پایه و نگهدارنده</RouterLink></li>
-                    </ul>
-                  </div>
-
-                  <div class="min-w-[150px]">
+                  <!-- col 4 -->
+                  <div class="mega-col">
                     <h3 class="font-semibold mb-2">خدمات</h3>
                     <ul class="space-y-1.5 text-sm leading-relaxed">
                       <li><RouterLink class="hover:text-primary" to="/support">ساخت اپل آیدی</RouterLink></li>
@@ -96,17 +107,6 @@
                       <li><RouterLink class="hover:text-primary" to="/support">پشتیبانی</RouterLink></li>
                     </ul>
                   </div>
-                </div>
-
-                <div class="w-[270px] rounded-xl bg-base-200/80 border border-base-200 flex flex-col justify-between p-4">
-                  <div>
-                    <p class="text-sm text-base-content/70 mb-1">اکانت‌ها، گیفت‌کارت و لوازم</p>
-                    <h3 class="text-lg font-bold mb-2">خرید آسان، تحویل سریع</h3>
-                    <p class="text-xs text-base-content/60">
-                      پشتیبانی حرفه‌ای و دسته‌بندی کامل محصولات
-                    </p>
-                  </div>
-                  <RouterLink to="/shop" class="btn btn-sm btn-primary mt-4">مشاهده اکانت‌ها</RouterLink>
                 </div>
               </div>
             </div>
@@ -120,9 +120,6 @@
 
       <!-- LEFT / END -->
       <div class="navbar-end gap-3">
-
-
-        <!-- search (desktop input) -->
         <label class="input input-bordered items-center gap-2 hidden lg:flex">
           <input
               type="text"
@@ -134,30 +131,22 @@
           <kbd class="kbd kbd-sm">↵</kbd>
         </label>
 
-        <!-- cart -->
         <button class="btn btn-ghost btn-circle" @click="openCart" aria-label="cart">
           <div class="indicator">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                 stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 21a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
+                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 21a1 1 0 1 0 0-2 1 1 0 0 0 0 2z" />
             </svg>
             <span v-if="cartCount" class="badge badge-sm indicator-item">{{ cartCount }}</span>
           </div>
         </button>
 
-        <!-- auth links -->
         <div class="hidden md:flex items-center gap-2 text-sm">
-          <RouterLink to="/auth/login" class="hover:text-primary whitespace-nowrap">
-            وارد شوید
-          </RouterLink>
+          <RouterLink to="/auth/login" class="hover:text-primary whitespace-nowrap">وارد شوید</RouterLink>
           <span class="opacity-30">|</span>
-          <RouterLink to="/auth/register" class="hover:text-primary whitespace-nowrap">
-            عضویت
-          </RouterLink>
+          <RouterLink to="/auth/register" class="hover:text-primary whitespace-nowrap">عضویت</RouterLink>
         </div>
 
-        <!-- mobile search icon -->
         <button class="btn btn-ghost btn-circle lg:hidden" @click="goSearch">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m21 21-5.2-5.2m0-6.3a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0Z" />
@@ -193,3 +182,17 @@ function goSearch() {
 
 onMounted(() => ui.init())
 </script>
+
+<style scoped>
+/* hard reset borders INSIDE panel (daisyui likes to add some) */
+:deep(.mega-panel > .mega-col),
+:deep(.mega-panel > .mega-col *){
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+/* make sure panel itself stays RTL */
+.mega-panel {
+  direction: rtl;
+}
+</style>

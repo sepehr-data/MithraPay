@@ -1,173 +1,246 @@
 <template>
-  <div class="min-h-screen">
-    <!-- HERO -->
-    <section class="mb-10">
-      <div class="hero rounded-3xl bg-base-100 border border-base-300">
-        <div class="hero-content flex-col lg:flex-row-reverse">
-          <img src="https://placehold.co/480x320" class="max-w-sm rounded-2xl shadow" />
-          <div>
-            <h1 class="text-3xl font-extrabold mb-3">اکانت‌ها، گیفت‌کارت و لوازم جانبی</h1>
-            <p class="opacity-80 mb-4">خرید آسان، تحویل سریع، پشتیبانی حرفه‌ای</p>
-            <div class="join">
-              <RouterLink to="/category/accounts" class="btn btn-primary join-item">مشاهده اکانت‌ها</RouterLink>
-              <RouterLink to="/category/gift-cards" class="btn btn-secondary join-item">گیفت‌کارت‌ها</RouterLink>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+  <div class="bg-base-200 min-h-screen pb-16">
+    <div class="max-w-6xl mx-auto px-4 lg:px-0 space-y-14 pt-8">
 
-    <!-- TOP PRODUCTS -->
-    <section class="space-y-6">
-      <h2 class="text-xl font-bold">پرفروش‌های این هفته</h2>
-      <ProductGrid :products="top" />
-    </section>
-
-    <!-- APPLE SERVICES / DIGITAL CARDS (new) -->
-    <section class="mt-16 space-y-6">
-      <div class="flex items-center justify-between">
-        <h2 class="text-xl font-bold">محبوب‌ترین اکانت‌ها</h2>
-        <div class="w-12 h-[3px] bg-base-content/80 rounded-full"></div>
-      </div>
-
-      <div class="grid gap-6 md:grid-cols-3 sm:grid-cols-2">
-        <div
-            v-for="card in serviceCards"
-            :key="card.slug"
-            class="rounded-[30px] px-6 py-6 text-white flex flex-col gap-3 relative overflow-hidden"
-            :style="{ background: card.bg }"
+      <!-- 4 BANNERS (2x2) -->
+      <section class="grid gap-4 sm:grid-cols-2">
+        <RouterLink
+            v-for="banner in banners"
+            :key="banner.id"
+            :to="banner.to"
+            class="block rounded-[28px] overflow-hidden bg-base-100"
         >
-          <div class="flex items-center gap-2">
-            <img v-if="card.icon" :src="card.icon" class="w-10 h-10" alt="" />
-            <h3 class="text-lg font-bold">{{ card.title }}</h3>
-          </div>
-          <p class="text-sm text-white/80 leading-relaxed">
-            {{ card.desc }}
-          </p>
-          <RouterLink
-              :to="card.to"
-              class="btn btn-sm bg-white text-black border-0 rounded-full w-fit mt-auto"
-          >
-            {{ card.action }}
-          </RouterLink>
           <img
-              v-if="card.thumb"
-              :src="card.thumb"
-              class="absolute left-4 bottom-3 w-20 opacity-80 pointer-events-none"
+              :src="banner.image"
+              :alt="banner.alt"
+              class="w-full h-auto block"
           />
-        </div>
-      </div>
-    </section>
-
-    <!-- PHYSICAL PRODUCTS -->
-    <section class="mt-16 space-y-8">
-      <!-- banner -->
-      <div
-          class="rounded-[30px] bg-base-100 border border-base-200 px-6 py-10 md:px-12 flex flex-col md:flex-row items-center gap-8 overflow-hidden"
-      >
-        <div class="flex-1">
-          <h2 class="text-3xl md:text-4xl font-extrabold mb-3">محصولات فیزیکی</h2>
-          <p class="text-base-content/70 mb-4">
-            تحویل سریع، تضمین قیمت، گارانتی اصالت
-          </p>
-          <RouterLink to="/category/accessories" class="btn btn-primary rounded-full">
-            مشاهده کل محصولات
-          </RouterLink>
-        </div>
-        <div class="w-full md:w-[320px]">
-          <img
-              src="https://placehold.co/480x280?text=Apple+Accessories"
-              class="w-full h-auto object-contain"
-              alt="محصولات فیزیکی"
-          />
-        </div>
-      </div>
-
-      <!-- list -->
-      <div class="flex items-center justify-between">
-        <h3 class="text-lg font-bold">محصولات فیزیکی</h3>
-        <RouterLink to="/category/accessories" class="text-sm text-primary hover:underline">
-          مشاهده همه
         </RouterLink>
-      </div>
+      </section>
 
-      <div class="grid gap-6 md:grid-cols-4 sm:grid-cols-2">
+
+      <!-- HERO -->
+<!--      <section>-->
+<!--        <div-->
+<!--            class="hero rounded-3xl bg-base-100/90 border border-base-300 px-6 py-6 lg:py-8"-->
+<!--        >-->
+<!--          <div class="hero-content flex-col lg:flex-row-reverse gap-8">-->
+<!--            <img-->
+<!--                src="https://eshop.macsales.com/blog/wp-content/uploads/2023/03/Apple-Arcade-macos-ventura.png"-->
+<!--                class="max-w-sm rounded-2xl shadow-md"-->
+<!--                alt="اکانت‌ها و گیفت‌کارت‌ها"-->
+<!--            />-->
+<!--            <div class="text-right space-y-3 flex-1">-->
+<!--              <p class="text-sm text-base-content/60">خرید سریع و مطمئن</p>-->
+<!--              <h1 class="text-3xl font-extrabold leading-relaxed">-->
+<!--                اکانت‌ها، گیفت‌کارت و لوازم جانبی-->
+<!--              </h1>-->
+<!--              <p class="opacity-80">-->
+<!--                خرید آسان، تحویل سریع، پشتیبانی حرفه‌ای-->
+<!--              </p>-->
+<!--              <div class="flex gap-3 justify-end">-->
+<!--                <RouterLink to="/category/accounts" class="btn btn-primary">-->
+<!--                  مشاهده اکانت‌ها-->
+<!--                </RouterLink>-->
+<!--                <RouterLink to="/category/gift-cards" class="btn btn-outline">-->
+<!--                  گیفت‌کارت‌ها-->
+<!--                </RouterLink>-->
+<!--              </div>-->
+<!--            </div>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </section>-->
+
+      <!-- BANNER SLIDER -->
+      <section class="relative">
         <div
-            v-for="item in physical"
-            :key="item.id"
-            class="rounded-2xl border border-base-200 bg-base-100 overflow-hidden flex flex-col"
+            class="relative overflow-hidden rounded-[32px] bg-base-100 border border-base-300"
         >
-          <div class="h-36 bg-base-200/40 flex items-center justify-center">
+          <RouterLink :to="slides[current].to" class="block">
             <img
-                :src="item.image || 'https://placehold.co/200x200?text=Item'"
-                :alt="item.title"
-                class="h-28 object-contain"
+                :src="slides[current].image"
+                :alt="slides[current].alt"
+                class="w-full h-[230px] md:h-[340px] object-cover"
             />
-          </div>
-          <div class="p-4 flex flex-col gap-2">
-            <h4 class="font-medium line-clamp-2">{{ item.title }}</h4>
-            <p v-if="item.price" class="text-sm font-bold">{{ formatPrice(item.price) }}</p>
-            <RouterLink :to="`/product/${item.slug}`" class="btn btn-sm btn-outline mt-auto">
-              مشاهده
-            </RouterLink>
+          </RouterLink>
+
+          <!-- arrows -->
+          <button
+              class="absolute top-1/2 -translate-y-1/2 right-4 w-8 h-8 md:w-9 md:h-9 rounded-full bg-base-100/90 backdrop-blur flex items-center justify-center text-base-content hover:bg-base-100"
+              @click="prev"
+          >
+            ←
+          </button>
+          <button
+              class="absolute top-1/2 -translate-y-1/2 left-4 w-8 h-8 md:w-9 md:h-9 rounded-full bg-base-100/90 backdrop-blur flex items-center justify-center text-base-content hover:bg-base-100"
+              @click="next"
+          >
+            →
+          </button>
+
+          <!-- dots -->
+          <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+            <button
+                v-for="(s, idx) in slides"
+                :key="s.id"
+                class="w-2.5 h-2.5 rounded-full transition"
+                :class="idx === current ? 'bg-primary' : 'bg-base-300'"
+                @click="go(idx)"
+            ></button>
           </div>
         </div>
+      </section>
 
-        <p v-if="!physical.length" class="text-sm text-base-content/50 col-span-full">
-          هنوز محصول فیزیکی اضافه نشده است.
-        </p>
-      </div>
-    </section>
-
-    <!-- BLOG SECTION -->
-    <section class="mt-16 mb-10">
-      <div class="flex flex-col items-center mb-10">
-        <h2 class="text-2xl font-bold">وبلاگ پلاس</h2>
-        <div class="w-16 h-1 bg-base-content/80 rounded-full mt-3"></div>
-      </div>
-
-      <div class="grid gap-6 md:grid-cols-3">
-        <article
-            v-for="post in blogPosts"
-            :key="post.slug"
-            class="relative bg-base-100 rounded-2xl overflow-hidden shadow-sm"
-        >
-          <div class="h-44 overflow-hidden">
-            <img :src="post.image" :alt="post.title" class="w-full h-full object-cover" />
-          </div>
-          <div
-              class="bg-base-100 rounded-xl shadow-md px-5 py-4 absolute left-5 right-5 -bottom-10 md:-bottom-9"
-          >
-            <h3 class="font-medium text-base mb-2 line-clamp-2">
-              {{ post.title }}
-            </h3>
-            <p class="text-xs text-base-content/60 flex items-center justify-between">
-              <span>{{ post.date }}</span>
-              <RouterLink :to="`/blog/${post.slug}`" class="text-primary text-xs">مطالعه</RouterLink>
+      <!-- TOP PRODUCTS -->
+      <section class="space-y-6">
+        <div class="flex items-center justify-between gap-4">
+          <div>
+            <h2 class="text-xl font-bold">پرفروش‌های این هفته</h2>
+            <p class="text-sm text-base-content/60">
+              محصولاتی که مشتری‌ها بیشتر انتخابشون کردن 🔥
             </p>
           </div>
-          <div class="h-12"></div>
-        </article>
-      </div>
-    </section>
+          <RouterLink
+              to="/category/accounts"
+              class="text-sm text-primary hover:underline"
+          >
+            مشاهده همه
+          </RouterLink>
+        </div>
+        <ProductGrid :products="top" />
+      </section>
+
+      <!-- GIFT CARDS -->
+      <section class="space-y-6">
+        <div class="flex items-center justify-between gap-4">
+          <div>
+            <h2 class="text-xl font-bold">خرید گیفت‌کارت‌ها</h2>
+            <p class="text-sm text-base-content/60">
+              گیفت‌کارت‌های اپل، استیم، گوگل‌پلی و سرویس‌های محبوب
+            </p>
+          </div>
+          <RouterLink
+              to="/category/gift-cards"
+              class="text-sm text-primary hover:underline"
+          >
+            مشاهده همه گیفت‌کارت‌ها
+          </RouterLink>
+        </div>
+        <ProductGrid :products="giftCards" />
+      </section>
+
+      <!-- APPLE SERVICES -->
+      <section class="space-y-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-xl font-bold">محبوب‌ترین اکانت‌ها</h2>
+            <p class="text-sm text-base-content/60">
+              سرویس‌های اپل و اشتراک‌های پرطرفدار
+            </p>
+          </div>
+          <div class="w-12 h-[3px] bg-base-content/80 rounded-full"></div>
+        </div>
+
+        <div class="grid gap-6 sm:grid-cols-2 md:grid-cols-3">
+          <div
+              v-for="card in serviceCards"
+              :key="card.slug"
+              class="rounded-[26px] px-5 py-5 text-white flex flex-col gap-3 relative overflow-hidden min-h-[170px]"
+              :style="{ background: card.bg }"
+          >
+            <div class="flex items-center gap-2">
+              <img v-if="card.icon" :src="card.icon" class="w-9 h-9" alt="" />
+              <h3 class="text-base font-bold">{{ card.title }}</h3>
+            </div>
+            <p class="text-xs text-white/75 leading-relaxed line-clamp-3">
+              {{ card.desc }}
+            </p>
+            <RouterLink
+                :to="card.to"
+                class="btn btn-xs bg-white text-black border-0 rounded-full w-fit mt-auto"
+            >
+              {{ card.action }}
+            </RouterLink>
+            <img
+                v-if="card.thumb"
+                :src="card.thumb"
+                class="absolute left-2 bottom-2 w-16 opacity-80 pointer-events-none"
+            />
+          </div>
+        </div>
+      </section>
+
+      <!-- BLOG -->
+      <section class="mb-4">
+        <div class="flex flex-col items-center mb-10 text-center">
+          <h2 class="text-2xl font-bold">وبلاگ پلاس</h2>
+          <p class="text-sm text-base-content/60 mt-2">
+            آموزش‌ها و نکته‌های کاربردی برای سرویس‌های دیجیتال
+          </p>
+          <div class="w-16 h-1 bg-base-content/80 rounded-full mt-3"></div>
+        </div>
+
+        <div class="grid gap-6 md:grid-cols-3">
+          <article
+              v-for="post in blogPosts"
+              :key="post.slug"
+              class="relative bg-base-100 rounded-2xl overflow-hidden shadow-sm"
+          >
+            <div class="h-44 overflow-hidden">
+              <img
+                  :src="post.image"
+                  :alt="post.title"
+                  class="w-full h-full object-cover"
+              />
+            </div>
+            <div
+                class="bg-base-100 rounded-xl shadow-md px-5 py-4 absolute left-5 right-5 -bottom-10 md:-bottom-9"
+            >
+              <h3 class="font-medium text-base mb-2 line-clamp-2">
+                {{ post.title }}
+              </h3>
+              <p
+                  class="text-xs text-base-content/60 flex items-center justify-between"
+              >
+                <span>{{ post.date }}</span>
+                <RouterLink
+                    :to="`/blog/${post.slug}`"
+                    class="text-primary text-xs"
+                >
+                  مطالعه
+                </RouterLink>
+              </p>
+            </div>
+            <div class="h-12"></div>
+          </article>
+        </div>
+      </section>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import ProductGrid from '@/components/ProductGrid.vue'
-import { useProductsStore } from '@/stores/products'
 import { onMounted, computed, ref } from 'vue'
+import { useProductsStore } from '@/stores/products'
+import ProductGrid from '@/components/ProductGrid.vue'
 
 const store = useProductsStore()
 onMounted(() => store.load())
 
 const top = computed(() => store.products.slice(0, 8))
 
-const physical = computed(() =>
-    store.products.filter((p: any) => !p.isDigital).slice(0, 4)
+const giftCards = computed(() =>
+    store.products
+        .filter(
+            (p: any) =>
+                p.categoryId === 'gift-cards' ||
+                p?.tags?.includes('gift-card') ||
+                p?.tags?.includes('گیفت‌کارت') ||
+                p?.tags?.includes('گیفت')
+        )
+        .slice(0, 8)
 )
 
-// cards for banner (you can change colors / links)
 const serviceCards = ref([
   {
     slug: 'apple-tv-plus',
@@ -219,7 +292,6 @@ const serviceCards = ref([
   },
 ])
 
-// blog data
 const blogPosts = ref([
   {
     slug: 'icloud-common-issues',
@@ -231,7 +303,6 @@ const blogPosts = ref([
     slug: 'apple-arcade-on-mac',
     title: 'چگونه از اپل آرکید در مک‌بوک و آی مک استفاده کنیم؟',
     date: 'جمعه ۲ آبان ۱۴۰۴',
-    // 👇 توضیحش پایین‌تر
     image: 'https://placehold.co/600x360?text=Apple+Arcade',
   },
   {
@@ -242,8 +313,57 @@ const blogPosts = ref([
   },
 ])
 
-function formatPrice(val: number) {
-  if (!val && val !== 0) return ''
-  return new Intl.NumberFormat('fa-IR').format(val) + ' تومان'
+const slides = ref([
+  {
+    id: 'ps-plus',
+    image: '/banners/slider2.webp',
+    alt: 'اکانت پلی‌استیشن پلاس قانونی',
+    to: '/product/playstation-plus',
+  },
+  {
+    id: 'apple-music',
+    image: '/banners/slider1.webp',
+    alt: 'Apple Music',
+    to: '/product/apple-music-3m',
+  },
+])
+
+const banners = [
+  {
+    id: 'apple-tv',
+    image: '/banners/slider3.webp',
+    alt: 'Apple TV+',
+    to: '/product/apple-tv',
+  },
+  {
+    id: 'apple-music',
+    image: '/banners/slider4.webp',
+    alt: 'Apple Music',
+    to: '/product/apple-music-3m',
+  },
+  {
+    id: 'apple-arcade',
+    image: '/banners/slider5.webp',
+    alt: 'Apple Arcade',
+    to: '/product/apple-arcade',
+  },
+  {
+    id: 'icloud-plus',
+    image: '/banners/slider6.webp',
+    alt: 'iCloud+',
+    to: '/product/icloud',
+  },
+]
+
+const current = ref(0)
+function next() {
+  current.value = (current.value + 1) % slides.value.length
+}
+function prev() {
+  current.value =
+      (current.value - 1 + slides.value.length) % slides.value.length
+}
+function go(i: number) {
+  current.value = i
 }
 </script>
