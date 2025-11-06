@@ -8,7 +8,7 @@
           <!-- bigger logo box -->
           <div class="h-16 w-16 rounded-xl overflow-hidden flex items-center justify-center bg-base-100">
             <img
-                src="/src/assets/logo.png"
+                src="/src/assets/logo2.png"
                 alt="logo"
                 class="h-16 w-auto object-contain"
             />
@@ -21,11 +21,11 @@
 
         <div class="space-y-1 text-sm text-base-content/70">
           <p class="flex items-center gap-2">
-            <span class="text-base-content/50">📞</span>
-            02191031933
+            <span class="text-base-content/50"><img src="@/assets/icons/call.png"></span>
+            09171004008
           </p>
           <p class="flex items-center gap-2">
-            <span class="text-base-content/50">✉️</span>
+            <span class="text-base-content/50"><img src="@/assets/icons/email.png" /> </span>
             support@mitheraPay.ir
           </p>
         </div>

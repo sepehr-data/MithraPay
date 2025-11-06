@@ -128,15 +128,12 @@
               @keyup.enter="goSearch"
               v-model="q"
           />
-          <kbd class="kbd kbd-sm">↵</kbd>
+          <kbd class="kbd kbd-sm"><img src="@/assets/icons/search.png" /> </kbd>
         </label>
 
         <button class="btn btn-ghost btn-circle" @click="openCart" aria-label="cart">
           <div class="indicator">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 21a1 1 0 1 0 0-2 1 1 0 0 0 0 2z" />
-            </svg>
+            <img src="@/assets/icons/card.png">
             <span v-if="cartCount" class="badge badge-sm indicator-item">{{ cartCount }}</span>
           </div>
         </button>
@@ -144,7 +141,7 @@
         <div class="hidden md:flex items-center gap-2 text-sm">
           <RouterLink to="/auth/login" class="hover:text-primary whitespace-nowrap">وارد شوید</RouterLink>
           <span class="opacity-30">|</span>
-          <RouterLink to="/auth/register" class="hover:text-primary whitespace-nowrap">عضویت</RouterLink>
+          <RouterLink to="/auth/login" class="hover:text-primary whitespace-nowrap">عضویت</RouterLink>
         </div>
 
         <button class="btn btn-ghost btn-circle lg:hidden" @click="goSearch">
@@ -159,7 +156,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import mithraLogo from '@/assets/logo.png'
+import mithraLogo from '@/assets/logo.webp'
 import { useUiStore } from '@/stores/ui'
 import { useCartStore } from '@/stores/cart'
 import { useRouter } from 'vue-router'
