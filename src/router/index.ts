@@ -1,4 +1,11 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
+import AdminLayout from '@/layouts/AdminLayout.vue'
+import AdminDashboard from '@/pages/admin/AdminDashboard.vue'
+import AdminProducts from '@/pages/admin/AdminProducts.vue'
+import AdminProductForm from '@/pages/admin/AdminProductForm.vue'
+import AdminBanners from '@/pages/admin/AdminBanners.vue'
+import AdminUsers from '@/pages/admin/AdminUsers.vue'
+import AdminOrders from '@/pages/admin/AdminOrders.vue'
 
 const routes: RouteRecordRaw[] = [
   { path: '/', name: 'home', component: () => import('@/pages/HomePage.vue') },
@@ -14,6 +21,23 @@ const routes: RouteRecordRaw[] = [
   { path: '/search', name: 'search', component: () => import('@/pages/SearchPage.vue') },
   { path: '/auth/login', name: 'login', component: () => import('@/pages/LoginPage.vue'), meta: { auth: true }},
   { path: '/auth/register', name: 'register', component: () => import('@/pages/RegisterPage.vue'), meta: { auth: true }},
+  {
+    path: '/admin',
+    component: AdminLayout,
+    children: [
+      { path: '', component: AdminDashboard },
+      { path: 'products', component: AdminProducts },
+      { path: 'products/new', component: AdminProductForm },
+      { path: 'products/:id', component: AdminProductForm },
+      { path: 'banners', component: AdminBanners },
+      { path: 'users', component: AdminUsers },
+      { path: 'orders', component: AdminOrders },
+
+      { path: 'blogs', component: () => import('@/pages/admin/AdminBlogs.vue') },
+      { path: 'blogs/new', component: () => import('@/pages/admin/AdminBlogForm.vue') },
+      { path: 'blogs/:id', component: () => import('@/pages/admin/AdminBlogForm.vue') },
+    ],
+  },
   { path: '/:pathMatch(.*)*', redirect: '/' }
 ]
 
