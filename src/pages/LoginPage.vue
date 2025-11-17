@@ -117,6 +117,7 @@
 import { ref, computed, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import authBg from '@/assets/auth-bg.png' // 👈 background
+import { requestOtp, verifyOtp } from '@/services/api'   // 👈 add this
 
 const router = useRouter()
 
@@ -144,15 +145,22 @@ function startResendTimer() {
 async function sendCode() {
   if (!isPhoneValid.value) return
   loading.value = true
-  // TODO: call your backend: await api.sendOtp(phone.value)
-  setTimeout(() => {
-    loading.value = false
+
+  try {
+    // call backend
+    await requestOtp(phone.value)
+
     step.value = 2
     startResendTimer()
-    nextTick(() => {
-      otpInputs.value?.[0]?.focus()
-    })
-  }, 800)
+
+    await nextTick()
+    otpInputs.value?.[0]?.focus()
+  } catch (err: any) {
+    console.error(err)
+    alert(err?.response?.data?.message || 'خطا در ارسال کد تأیید')
+  } finally {
+    loading.value = false
+  }
 }
 
 function onOtpInput(idx: number) {
@@ -182,11 +190,29 @@ function reset() {
 async function verify() {
   const code = otp.value.join('')
   if (code.length !== 6) return
+
   verifying.value = true
-  // TODO: call backend verify
-  setTimeout(() => {
-    verifying.value = false
+  try {
+    const data = await verifyOtp(phone.value, code)
+
+    // assuming backend returns { access_token, user }
+    const token = data.access_token || data.token
+    if (token) {
+      localStorage.setItem('auth_token', token)
+    }
+
+    // you can also store user info if backend returns it
+    if (data.user) {
+      localStorage.setItem('auth_user', JSON.stringify(data.user))
+    }
+
     router.push('/')
-  }, 800)
+  } catch (err: any) {
+    console.error(err)
+    alert(err?.response?.data?.message || 'کد وارد شده صحیح نیست')
+  } finally {
+    verifying.value = false
+  }
 }
+
 </script>

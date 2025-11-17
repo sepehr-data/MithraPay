@@ -3,6 +3,7 @@ import productsJson from '@/mocks/products.json'
 import categoriesJson from '@/mocks/categories.json'
 import postsJson from '@/mocks/posts.json'
 import type { Product, Category, BlogPost, ID } from './types'
+import { http } from './http'
 
 const delay = (ms = 250) => new Promise(res => setTimeout(res, ms))
 
@@ -33,4 +34,21 @@ export async function listPosts(): Promise<BlogPost[]> {
 export async function getPost(slug: string): Promise<BlogPost | undefined> {
   await delay()
   return (postsJson as BlogPost[]).find(p => p.slug === slug)
+}
+
+export async function requestOtp(phone: string) {
+  // adjust field name if backend uses "mobile" or "phone_number"
+  const res = await http.post('/auth/request-otp', {
+    phone
+  })
+  return res.data
+}
+
+export async function verifyOtp(phone: string, code: string) {
+  const res = await http.post('/auth/verify-otp', {
+    phone,
+    code
+  })
+  // expected response: { access_token: '...', user: {...} }
+  return res.data
 }
