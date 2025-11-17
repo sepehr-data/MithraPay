@@ -2,8 +2,9 @@ import { defineStore } from 'pinia'
 
 export const useUiStore = defineStore('ui', {
   state: () => ({
-    theme: (localStorage.getItem('theme') || 'accountplus') as string,
-    isCartOpen: false
+    // theme: (localStorage.getItem('theme') || 'accountplus') as string,
+      theme: (localStorage.getItem('theme') || 'autumn') as string,
+      isCartOpen: false
   }),
   actions: {
     toggleTheme() {
