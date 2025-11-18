@@ -51,18 +51,18 @@
         <div v-else class="space-y-5">
           <p class="text-sm opacity-70">
             کد ۶ رقمی ارسال شده به
-            <strong>{{ prettyPhone }}</strong>
+            <strong dir="ltr" class="font-mono">{{ prettyPhone }}</strong>
             را وارد کنید.
           </p>
 
-          <div class="flex gap-2 justify-center">
+          <div class="flex gap-2 justify-center otp-boxes" dir="ltr">
             <input
                 v-for="(d, idx) in 6"
                 :key="idx"
                 ref="otpInputs"
                 maxlength="1"
                 type="text"
-                class="input input-bordered w-12 h-12 text-center text-lg"
+                class="input input-bordered w-12 h-12 text-center text-lg otp-input"
                 v-model="otp[idx]"
                 @input="onOtpInput(idx)"
                 @keydown.backspace.prevent="onBackspace(idx)"
@@ -118,6 +118,8 @@ import { ref, computed, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import authBg from '@/assets/auth-bg.png' // 👈 background
 import { requestOtp, verifyOtp } from '@/services/api'   // 👈 add this
+import { useToast } from "vue-toastification"
+const toast = useToast()
 
 const router = useRouter()
 
@@ -188,31 +190,42 @@ function reset() {
 }
 
 async function verify() {
-  const code = otp.value.join('')
+  const code = otp.value.join("")
   if (code.length !== 6) return
 
   verifying.value = true
   try {
     const data = await verifyOtp(phone.value, code)
 
-    // assuming backend returns { access_token, user }
     const token = data.access_token || data.token
     if (token) {
-      localStorage.setItem('auth_token', token)
+      localStorage.setItem("auth_token", token)
     }
 
-    // you can also store user info if backend returns it
     if (data.user) {
-      localStorage.setItem('auth_user', JSON.stringify(data.user))
+      localStorage.setItem("auth_user", JSON.stringify(data.user))
     }
 
-    router.push('/')
+    toast.success("ورود با موفقیت انجام شد")
+    router.push("/")
   } catch (err: any) {
-    console.error(err)
-    alert(err?.response?.data?.message || 'کد وارد شده صحیح نیست')
+    toast.error(err?.response?.data?.message || "کد وارد شده صحیح نیست")
   } finally {
     verifying.value = false
   }
 }
 
+
+
 </script>
+
+<style scoped>
+.otp-boxes {
+  direction: ltr !important;
+}
+
+.otp-input {
+  direction: ltr !important;
+  unicode-bidi: plaintext; /* force natural LTR ordering */
+}
+</style>
