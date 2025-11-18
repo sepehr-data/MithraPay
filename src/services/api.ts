@@ -2,7 +2,7 @@
 import productsJson from '@/mocks/products.json'
 import categoriesJson from '@/mocks/categories.json'
 import postsJson from '@/mocks/posts.json'
-import type { Product, Category, BlogPost, ID } from './types'
+import type { Product, Category, BlogPost, ID, Order } from './types'
 import { http } from './http'
 
 const delay = (ms = 250) => new Promise(res => setTimeout(res, ms))
@@ -51,4 +51,10 @@ export async function verifyOtp(phone: string, code: string) {
   })
   // expected response: { access_token: '...', user: {...} }
   return res.data
+}
+
+// ---- ORDERS ----
+export async function listOrders(): Promise<Order[]> {
+  const res = await http.get('/orders/')
+  return res.data as Order[]
 }

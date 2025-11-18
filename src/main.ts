@@ -9,6 +9,13 @@ import Toast from "vue-toastification"
 import "vue-toastification/dist/index.css"
 import "@/styles/toast.css"
 
+// 👇 NEW
+import DatePicker from '@alireza-ab/vue3-persian-datepicker'
+// (you probably need to import its css file too; if Vite complains,
+// open node_modules/@alireza-ab/vue3-persian-datepicker/dist and import
+// the css you see there, e.g.:
+// import '@alireza-ab/vue3-persian-datepicker/dist/style.css'
+
 const app = createApp(App)
 app.use(createPinia())
 app.use(router)
@@ -21,5 +28,7 @@ app.use(Toast, {
     pauseOnHover: true,
     draggable: true,
 })
+
+app.component('DatePicker', DatePicker)
 
 app.mount('#app')

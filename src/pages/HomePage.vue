@@ -18,39 +18,6 @@
         </RouterLink>
       </section>
 
-
-      <!-- HERO -->
-<!--      <section>-->
-<!--        <div-->
-<!--            class="hero rounded-3xl bg-base-100/90 border border-base-300 px-6 py-6 lg:py-8"-->
-<!--        >-->
-<!--          <div class="hero-content flex-col lg:flex-row-reverse gap-8">-->
-<!--            <img-->
-<!--                src="https://eshop.macsales.com/blog/wp-content/uploads/2023/03/Apple-Arcade-macos-ventura.png"-->
-<!--                class="max-w-sm rounded-2xl shadow-md"-->
-<!--                alt="اکانت‌ها و گیفت‌کارت‌ها"-->
-<!--            />-->
-<!--            <div class="text-right space-y-3 flex-1">-->
-<!--              <p class="text-sm text-base-content/60">خرید سریع و مطمئن</p>-->
-<!--              <h1 class="text-3xl font-extrabold leading-relaxed">-->
-<!--                اکانت‌ها، گیفت‌کارت و لوازم جانبی-->
-<!--              </h1>-->
-<!--              <p class="opacity-80">-->
-<!--                خرید آسان، تحویل سریع، پشتیبانی حرفه‌ای-->
-<!--              </p>-->
-<!--              <div class="flex gap-3 justify-end">-->
-<!--                <RouterLink to="/category/accounts" class="btn btn-primary">-->
-<!--                  مشاهده اکانت‌ها-->
-<!--                </RouterLink>-->
-<!--                <RouterLink to="/category/gift-cards" class="btn btn-outline">-->
-<!--                  گیفت‌کارت‌ها-->
-<!--                </RouterLink>-->
-<!--              </div>-->
-<!--            </div>-->
-<!--          </div>-->
-<!--        </div>-->
-<!--      </section>-->
-
       <!-- BANNER SLIDER -->
       <section class="relative">
         <div

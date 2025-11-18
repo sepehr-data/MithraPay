@@ -118,9 +118,11 @@ import { ref, computed, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import authBg from '@/assets/auth-bg.png' // 👈 background
 import { requestOtp, verifyOtp } from '@/services/api'   // 👈 add this
+import { useAuthStore } from '@/stores/auth'
 import { useToast } from "vue-toastification"
 const toast = useToast()
 
+const auth = useAuthStore()
 const router = useRouter()
 
 const step = ref<1 | 2>(1)
@@ -190,7 +192,7 @@ function reset() {
 }
 
 async function verify() {
-  const code = otp.value.join("")
+  const code = otp.value.join('')
   if (code.length !== 6) return
 
   verifying.value = true
@@ -198,18 +200,20 @@ async function verify() {
     const data = await verifyOtp(phone.value, code)
 
     const token = data.access_token || data.token
-    if (token) {
-      localStorage.setItem("auth_token", token)
+    const user = data.user || { phone: phone.value }
+
+    if (!token) {
+      throw new Error('توکن از سرور برنگشت')
     }
 
-    if (data.user) {
-      localStorage.setItem("auth_user", JSON.stringify(data.user))
-    }
+    // Save in auth store (this also updates localStorage)
+    auth.login({ token, user })
 
-    toast.success("ورود با موفقیت انجام شد")
-    router.push("/")
+    toast.success('ورود با موفقیت انجام شد')
+    router.push('/')   // redirect to home
   } catch (err: any) {
-    toast.error(err?.response?.data?.message || "کد وارد شده صحیح نیست")
+    console.error(err)
+    toast.error(err?.response?.data?.message || 'کد وارد شده صحیح نیست')
   } finally {
     verifying.value = false
   }
