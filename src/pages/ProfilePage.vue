@@ -249,6 +249,8 @@ import { computed, onMounted, ref } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
 import { useToast } from 'vue-toastification'
+import { http } from '@/services/http'
+
 
 const auth = useAuthStore()
 const router = useRouter()
@@ -313,28 +315,31 @@ async function submitProfile() {
     }
   }
 
+  const payload: any = {
+    name: firstName.value || null,
+    last_name: lastName.value || null,
+    email: email.value || null,
+    birthday: birthday.value || null,   // Jalali string, stored as-is
+    phone: newPhone.value || null,
+    sheba: sheba.value || null
+  }
+
+  if (password.value) {
+    payload.password = password.value
+  }
+
   try {
-    // TODO: call backend /profile/update endpoint here
-    // await api.updateProfile({...})
+    const res = await http.put('/users/me', payload)
 
-    // locally update auth store (mock)
-    auth.user = {
-      ...(auth.user || {}),
-      name: firstName.value,
-      lastName: lastName.value,
-      email: email.value,
-      birthday: birthday.value,
-      phone: newPhone.value || auth.user?.phone,
-      sheba: sheba.value
-    } as any
-
+    // backend returns { message, user }
+    auth.user = res.data.user
     localStorage.setItem('auth_user', JSON.stringify(auth.user))
 
     toast.success('اطلاعات شما با موفقیت به‌روزرسانی شد')
     closeEdit()
-  } catch (e) {
+  } catch (e: any) {
     console.error(e)
-    toast.error('خطا در به‌روزرسانی پروفایل')
+    toast.error(e?.response?.data?.error || 'خطا در به‌روزرسانی پروفایل')
   }
 }
 </script>
