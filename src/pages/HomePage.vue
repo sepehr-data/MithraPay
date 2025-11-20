@@ -18,39 +18,6 @@
         </RouterLink>
       </section>
 
-
-      <!-- HERO -->
-<!--      <section>-->
-<!--        <div-->
-<!--            class="hero rounded-3xl bg-base-100/90 border border-base-300 px-6 py-6 lg:py-8"-->
-<!--        >-->
-<!--          <div class="hero-content flex-col lg:flex-row-reverse gap-8">-->
-<!--            <img-->
-<!--                src="https://eshop.macsales.com/blog/wp-content/uploads/2023/03/Apple-Arcade-macos-ventura.png"-->
-<!--                class="max-w-sm rounded-2xl shadow-md"-->
-<!--                alt="اکانت‌ها و گیفت‌کارت‌ها"-->
-<!--            />-->
-<!--            <div class="text-right space-y-3 flex-1">-->
-<!--              <p class="text-sm text-base-content/60">خرید سریع و مطمئن</p>-->
-<!--              <h1 class="text-3xl font-extrabold leading-relaxed">-->
-<!--                اکانت‌ها، گیفت‌کارت و لوازم جانبی-->
-<!--              </h1>-->
-<!--              <p class="opacity-80">-->
-<!--                خرید آسان، تحویل سریع، پشتیبانی حرفه‌ای-->
-<!--              </p>-->
-<!--              <div class="flex gap-3 justify-end">-->
-<!--                <RouterLink to="/category/accounts" class="btn btn-primary">-->
-<!--                  مشاهده اکانت‌ها-->
-<!--                </RouterLink>-->
-<!--                <RouterLink to="/category/gift-cards" class="btn btn-outline">-->
-<!--                  گیفت‌کارت‌ها-->
-<!--                </RouterLink>-->
-<!--              </div>-->
-<!--            </div>-->
-<!--          </div>-->
-<!--        </div>-->
-<!--      </section>-->
-
       <!-- BANNER SLIDER -->
       <section class="relative">
         <div
@@ -96,9 +63,9 @@
         <div class="flex items-center justify-between gap-4">
           <div>
             <h2 class="text-xl font-bold">پرفروش‌های این هفته</h2>
-            <p class="text-sm text-base-content/60">
-              محصولاتی که مشتری‌ها بیشتر انتخابشون کردن 🔥
-            </p>
+<!--            <p class="text-sm text-base-content/60">-->
+<!--              محصولاتی که مشتری‌ها بیشتر انتخابشون کردن 🔥-->
+<!--            </p>-->
           </div>
           <RouterLink
               to="/category/accounts"
@@ -171,50 +138,50 @@
       </section>
 
       <!-- BLOG -->
-      <section class="mb-4">
-        <div class="flex flex-col items-center mb-10 text-center">
-          <h2 class="text-2xl font-bold">وبلاگ پلاس</h2>
-          <p class="text-sm text-base-content/60 mt-2">
-            آموزش‌ها و نکته‌های کاربردی برای سرویس‌های دیجیتال
-          </p>
-          <div class="w-16 h-1 bg-base-content/80 rounded-full mt-3"></div>
-        </div>
+<!--      <section class="mb-4">-->
+<!--        <div class="flex flex-col items-center mb-10 text-center">-->
+<!--          <h2 class="text-2xl font-bold">وبلاگ پلاس</h2>-->
+<!--          <p class="text-sm text-base-content/60 mt-2">-->
+<!--            آموزش‌ها و نکته‌های کاربردی برای سرویس‌های دیجیتال-->
+<!--          </p>-->
+<!--          <div class="w-16 h-1 bg-base-content/80 rounded-full mt-3"></div>-->
+<!--        </div>-->
 
-        <div class="grid gap-6 md:grid-cols-3">
-          <article
-              v-for="post in blogPosts"
-              :key="post.slug"
-              class="relative bg-base-100 rounded-2xl overflow-hidden shadow-sm"
-          >
-            <div class="h-44 overflow-hidden">
-              <img
-                  :src="post.image"
-                  :alt="post.title"
-                  class="w-full h-full object-cover"
-              />
-            </div>
-            <div
-                class="bg-base-100 rounded-xl shadow-md px-5 py-4 absolute left-5 right-5 -bottom-10 md:-bottom-9"
-            >
-              <h3 class="font-medium text-base mb-2 line-clamp-2">
-                {{ post.title }}
-              </h3>
-              <p
-                  class="text-xs text-base-content/60 flex items-center justify-between"
-              >
-                <span>{{ post.date }}</span>
-                <RouterLink
-                    :to="`/blog/${post.slug}`"
-                    class="text-primary text-xs"
-                >
-                  مطالعه
-                </RouterLink>
-              </p>
-            </div>
-            <div class="h-12"></div>
-          </article>
-        </div>
-      </section>
+<!--        <div class="grid gap-6 md:grid-cols-3">-->
+<!--          <article-->
+<!--              v-for="post in blogPosts"-->
+<!--              :key="post.slug"-->
+<!--              class="relative bg-base-100 rounded-2xl overflow-hidden shadow-sm"-->
+<!--          >-->
+<!--            <div class="h-44 overflow-hidden">-->
+<!--              <img-->
+<!--                  :src="post.image"-->
+<!--                  :alt="post.title"-->
+<!--                  class="w-full h-full object-cover"-->
+<!--              />-->
+<!--            </div>-->
+<!--            <div-->
+<!--                class="bg-base-100 rounded-xl shadow-md px-5 py-4 absolute left-5 right-5 -bottom-10 md:-bottom-9"-->
+<!--            >-->
+<!--              <h3 class="font-medium text-base mb-2 line-clamp-2">-->
+<!--                {{ post.title }}-->
+<!--              </h3>-->
+<!--              <p-->
+<!--                  class="text-xs text-base-content/60 flex items-center justify-between"-->
+<!--              >-->
+<!--                <span>{{ post.date }}</span>-->
+<!--                <RouterLink-->
+<!--                    :to="`/blog/${post.slug}`"-->
+<!--                    class="text-primary text-xs"-->
+<!--                >-->
+<!--                  مطالعه-->
+<!--                </RouterLink>-->
+<!--              </p>-->
+<!--            </div>-->
+<!--            <div class="h-12"></div>-->
+<!--          </article>-->
+<!--        </div>-->
+<!--      </section>-->
     </div>
   </div>
 </template>
@@ -233,7 +200,8 @@ const giftCards = computed(() =>
     store.products
         .filter(
             (p: any) =>
-                p.categoryId === 'gift-cards' ||
+                p.categoryId === 'cat-gift' ||     // ✅ match mock category
+                p.categoryId === 'gift-cards' ||   // (optional: future API)
                 p?.tags?.includes('gift-card') ||
                 p?.tags?.includes('گیفت‌کارت') ||
                 p?.tags?.includes('گیفت')

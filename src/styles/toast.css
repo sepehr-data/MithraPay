@@ -1,0 +1,16 @@
+/* Main toast */
+.Vue-Toastification__toast {
+    font-family: 'MithraFont', 'YekanBakh', 'Vazirmatn', sans-serif !important;
+    direction: rtl !important;
+    text-align: right !important;
+}
+
+/* Toast body text */
+.Vue-Toastification__toast-body {
+    font-family: inherit !important;
+}
+
+/* Close button */
+.Vue-Toastification__close-button {
+    font-family: inherit !important;
+}

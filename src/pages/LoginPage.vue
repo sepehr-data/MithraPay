@@ -51,18 +51,18 @@
         <div v-else class="space-y-5">
           <p class="text-sm opacity-70">
             کد ۶ رقمی ارسال شده به
-            <strong>{{ prettyPhone }}</strong>
+            <strong dir="ltr" class="font-mono">{{ prettyPhone }}</strong>
             را وارد کنید.
           </p>
 
-          <div class="flex gap-2 justify-center">
+          <div class="flex gap-2 justify-center otp-boxes" dir="ltr">
             <input
                 v-for="(d, idx) in 6"
                 :key="idx"
                 ref="otpInputs"
                 maxlength="1"
                 type="text"
-                class="input input-bordered w-12 h-12 text-center text-lg"
+                class="input input-bordered w-12 h-12 text-center text-lg otp-input"
                 v-model="otp[idx]"
                 @input="onOtpInput(idx)"
                 @keydown.backspace.prevent="onBackspace(idx)"
@@ -117,7 +117,12 @@
 import { ref, computed, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import authBg from '@/assets/auth-bg.png' // 👈 background
+import { requestOtp, verifyOtp } from '@/services/api'   // 👈 add this
+import { useAuthStore } from '@/stores/auth'
+import { useToast } from "vue-toastification"
+const toast = useToast()
 
+const auth = useAuthStore()
 const router = useRouter()
 
 const step = ref<1 | 2>(1)
@@ -144,15 +149,22 @@ function startResendTimer() {
 async function sendCode() {
   if (!isPhoneValid.value) return
   loading.value = true
-  // TODO: call your backend: await api.sendOtp(phone.value)
-  setTimeout(() => {
-    loading.value = false
+
+  try {
+    // call backend
+    await requestOtp(phone.value)
+
     step.value = 2
     startResendTimer()
-    nextTick(() => {
-      otpInputs.value?.[0]?.focus()
-    })
-  }, 800)
+
+    await nextTick()
+    otpInputs.value?.[0]?.focus()
+  } catch (err: any) {
+    console.error(err)
+    alert(err?.response?.data?.message || 'خطا در ارسال کد تأیید')
+  } finally {
+    loading.value = false
+  }
 }
 
 function onOtpInput(idx: number) {
@@ -182,11 +194,42 @@ function reset() {
 async function verify() {
   const code = otp.value.join('')
   if (code.length !== 6) return
+
   verifying.value = true
-  // TODO: call backend verify
-  setTimeout(() => {
+  try {
+    const data = await verifyOtp(phone.value, code)
+
+    const token = data.access_token || data.token
+    const user = data.user || { phone: phone.value }
+
+    if (!token) {
+      throw new Error('توکن از سرور برنگشت')
+    }
+
+    // Save in auth store (this also updates localStorage)
+    auth.login({ token, user })
+
+    toast.success('ورود با موفقیت انجام شد')
+    router.push('/')   // redirect to home
+  } catch (err: any) {
+    console.error(err)
+    toast.error(err?.response?.data?.message || 'کد وارد شده صحیح نیست')
+  } finally {
     verifying.value = false
-    router.push('/')
-  }, 800)
+  }
 }
+
+
+
 </script>
+
+<style scoped>
+.otp-boxes {
+  direction: ltr !important;
+}
+
+.otp-input {
+  direction: ltr !important;
+  unicode-bidi: plaintext; /* force natural LTR ordering */
+}
+</style>

@@ -34,3 +34,20 @@ export interface CartItem {
   productId: ID
   qty: number
 }
+
+export type OrderStatus = 'pending' | 'paid' | 'completed' | 'canceled'
+
+export interface OrderItemSummary {
+  productTitle: string
+  quantity: number
+  // you can extend this later with price, etc.
+}
+
+export interface Order {
+  id: ID
+  code: string            // e.g. "OR0000951660A"
+  status: OrderStatus
+  createdAt: string       // ISO date string
+  items: OrderItemSummary[]
+  totalAmount?: number    // optional
+}

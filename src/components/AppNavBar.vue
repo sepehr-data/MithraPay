@@ -139,10 +139,32 @@
         </button>
 
         <div class="hidden md:flex items-center gap-2 text-sm">
-          <RouterLink to="/auth/login" class="hover:text-primary whitespace-nowrap">وارد شوید</RouterLink>
-          <span class="opacity-30">|</span>
-          <RouterLink to="/auth/login" class="hover:text-primary whitespace-nowrap">عضویت</RouterLink>
+          <template v-if="isLoggedIn">
+            <!-- User avatar / icon -->
+            <button
+                class="btn btn-ghost btn-circle"
+                @click="goProfile"
+                aria-label="profile"
+            >
+              <div class="avatar placeholder">
+                <div class="bg-primary text-primary-content rounded-full w-9">
+                  <span class="text-sm">{{ userInitial }}</span>
+                </div>
+              </div>
+            </button>
+          </template>
+
+          <template v-else>
+            <RouterLink to="/auth/login" class="hover:text-primary whitespace-nowrap">
+              وارد شوید
+            </RouterLink>
+            <span class="opacity-30">|</span>
+            <RouterLink to="/auth/login" class="hover:text-primary whitespace-nowrap">
+              عضویت
+            </RouterLink>
+          </template>
         </div>
+
 
         <button class="btn btn-ghost btn-circle lg:hidden" @click="goSearch">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -159,16 +181,24 @@ import { ref, onMounted, computed } from 'vue'
 import mithraLogo from '@/assets/logo.webp'
 import { useUiStore } from '@/stores/ui'
 import { useCartStore } from '@/stores/cart'
+import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
 
 const ui = useUiStore()
 const cart = useCartStore()
+const auth = useAuthStore()
 const router = useRouter()
 
 const drawerOpen = ref(false)
 const q = ref('')
 
 const cartCount = computed(() => cart.count)
+const isLoggedIn = computed(() => auth.isAuthenticated)
+const userInitial = computed(() => {
+  if (auth.user?.name) return auth.user.name.charAt(0)
+  if (auth.user?.phone) return auth.user.phone.slice(-2)
+  return '👤'
+})
 
 const openCart = () => ui.openCart()
 
@@ -177,8 +207,13 @@ function goSearch() {
   router.push({ name: 'search', query: { q: q.value } })
 }
 
+function goProfile() {
+  router.push({ name: 'profile' })  // /profile -> ProfilePage.vue
+}
+
 onMounted(() => ui.init())
 </script>
+
 
 <style scoped>
 /* hard reset borders INSIDE panel (daisyui likes to add some) */
