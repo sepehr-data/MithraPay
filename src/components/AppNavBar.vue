@@ -113,7 +113,7 @@
           </li>
 
           <li><RouterLink to="/blog">وبلاگ</RouterLink></li>
-          <li><RouterLink to="/support">با ما ارتباط</RouterLink></li>
+          <li><RouterLink to="/support">ارتباط با ما</RouterLink></li>
           <li><RouterLink to="/about">درباره ما</RouterLink></li>
         </ul>
       </div>

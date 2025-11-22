@@ -32,7 +32,7 @@
               <input
                   v-model="phone"
                   type="tel"
-                  placeholder="مثلاً 0912xxxxxxx"
+                  placeholder="0912xxxxxxx"
                   class="input input-bordered join-item w-full"
               />
               <span class="btn btn-ghost join-item" disabled>+98</span>
