@@ -7,13 +7,13 @@
           <div class="flex items-center gap-3">
             <div class="h-16 w-16 rounded-2xl overflow-hidden flex items-center justify-center bg-base-100 shadow">
               <img
-                  src="/src/assets/logo2.png"
+                  src="/src/assets/logo3.png"
                   alt="logo"
                   class="h-16 w-auto object-contain"
               />
             </div>
             <div>
-              <p class="font-bold text-lg">MitheraPay</p>
+              <p class="font-bold text-lg">SepehrBox</p>
               <p class="text-sm text-base-content/70">فروش اکانت و گیفت‌کارت</p>
             </div>
           </div>

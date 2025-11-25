@@ -199,7 +199,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import mithraLogo from '@/assets/logo.webp'
+import mithraLogo from '@/assets/logo3.png'
 import { useUiStore } from '@/stores/ui'
 import { useCartStore } from '@/stores/cart'
 import { useAuthStore } from '@/stores/auth'
