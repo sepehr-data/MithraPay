@@ -135,17 +135,6 @@
 
                     <!-- col 4 -->
                     <div class="mega-col">
-                      <h3 class="mega-title">محصولات فیزیکی</h3>
-                      <ul class="mega-list">
-                        <li><a class="mega-link" href="#">کیبورد و موس</a></li>
-                        <li><a class="mega-link" href="#">گجت و لوازم جانبی</a></li>
-                        <li><a class="mega-link" href="#">کابل و مبدل</a></li>
-                        <li><a class="mega-link" href="#">کارت هدیه فیزیکی</a></li>
-                      </ul>
-                    </div>
-
-                    <!-- col 5 -->
-                    <div class="mega-col">
                       <h3 class="mega-title">خدمات</h3>
                       <ul class="mega-list">
                         <li><RouterLink class="mega-link" to="/support">ساخت اپل آیدی</RouterLink></li>

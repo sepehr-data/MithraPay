@@ -110,55 +110,6 @@
         </div>
       </section>
 
-      <!-- APPLE SERVICES -->
-      <section aria-labelledby="apple-services" class="space-y-5">
-        <header class="flex items-center justify-between gap-4">
-          <div class="space-y-1">
-            <p class="text-xs text-primary font-semibold">خدمات اپل</p>
-            <div class="flex items-center gap-3">
-              <h2 id="apple-services" class="text-2xl font-bold">محبوب‌ترین اکانت‌ها</h2>
-              <span class="h-1 w-10 rounded-full bg-primary/70 hidden sm:inline-block"></span>
-            </div>
-            <p class="text-sm text-base-content/60">
-              سرویس‌های اپل و اشتراک‌های پرطرفدار
-            </p>
-          </div>
-          <div class="hidden sm:flex items-center gap-2 text-xs text-base-content/60">
-            <span class="h-1 w-8 rounded-full bg-primary/60"></span>
-            تجربه‌ای پریمیوم برای دستگاه‌های اپل
-          </div>
-        </header>
-
-        <div class="grid gap-5 sm:grid-cols-2 md:grid-cols-3">
-          <div
-            v-for="card in serviceCards"
-            :key="card.slug"
-            class="group relative overflow-hidden rounded-[26px] px-6 py-5 text-white flex flex-col gap-4 min-h-[190px] shadow-md ring-1 ring-white/10 transition duration-300 hover:-translate-y-1 hover:shadow-xl"
-            :style="{ background: card.bg }"
-          >
-            <div class="flex items-center gap-3">
-              <img v-if="card.icon" :src="card.icon" class="w-10 h-10" alt="" />
-              <h3 class="text-lg font-bold drop-shadow-sm">{{ card.title }}</h3>
-            </div>
-            <p class="text-sm text-white/80 leading-relaxed line-clamp-3">
-              {{ card.desc }}
-            </p>
-            <RouterLink
-              :to="card.to"
-              class="btn btn-sm bg-white/90 hover:bg-white text-black border-0 rounded-full w-fit mt-auto shadow-sm"
-            >
-              {{ card.action }}
-            </RouterLink>
-            <div class="pointer-events-none absolute inset-0 bg-white/5 mix-blend-screen opacity-0 transition group-hover:opacity-10"></div>
-            <img
-              v-if="card.thumb"
-              :src="card.thumb"
-              class="absolute left-3 bottom-3 w-16 opacity-80"
-              alt=""
-            />
-          </div>
-        </div>
-      </section>
 
       <!-- BLOG -->
       <section aria-labelledby="blog" class="space-y-6">
