@@ -1,18 +1,45 @@
 <template>
-  <header class="sticky top-0 z-50 bg-base-100/90 backdrop-blur border-b border-base-300">
-    <div class="navbar max-w-7xl mx-auto px-3 lg:px-4 relative">
+  <header class="sticky top-0 z-50 border-b border-base-200 bg-base-100/80 backdrop-blur">
+    <div class="navbar max-w-7xl mx-auto px-3 lg:px-6">
       <!-- RIGHT / START -->
-      <div class="navbar-start gap-2">
+      <div class="navbar-start w-auto lg:w-1/3 gap-2">
         <!-- mobile menu -->
-        <button
-            class="btn btn-ghost btn-circle lg:hidden"
-            @click="drawerOpen = true"
-            aria-label="menu"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        </button>
+        <div class="dropdown lg:hidden">
+          <label tabindex="0" class="btn btn-ghost btn-circle" aria-label="menu" @click="drawerOpen = true">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </label>
+          <ul
+              tabindex="0"
+              class="menu menu-sm dropdown-content mt-3 z-[1] p-3 shadow-xl bg-base-100 rounded-2xl w-64 border border-base-200"
+          >
+            <li><RouterLink to="/">صفحه اصلی</RouterLink></li>
+            <li>
+              <details class="w-full">
+                <summary>فروشگاه</summary>
+                <ul class="p-2 space-y-1">
+                  <li><RouterLink to="/product/apple-one">اشتراک اپل وان</RouterLink></li>
+                  <li><RouterLink to="/product/apple-music">اپل موزیک</RouterLink></li>
+                  <li><RouterLink to="/product/icloud">فضای آیکلاد</RouterLink></li>
+                  <li><RouterLink to="/product/apple-tv">اپل تی‌وی پلاس</RouterLink></li>
+                  <li><RouterLink to="/category/accounts">یوتیوب پریمیوم</RouterLink></li>
+                  <li><RouterLink to="/category/accounts">اسپاتیفای</RouterLink></li>
+                  <li><RouterLink to="/category/gift-cards">گیفت کارت اپل</RouterLink></li>
+                  <li><RouterLink to="/category/gift-cards">گیفت کارت پلی‌استیشن</RouterLink></li>
+                  <li><RouterLink to="/category/gift-cards">گیفت کارت آمازون</RouterLink></li>
+                  <li><RouterLink to="/category/gift-cards">گیفت کارت استیم</RouterLink></li>
+                  <li><RouterLink to="/support">ساخت اپل آیدی</RouterLink></li>
+                  <li><RouterLink to="/support">فعالسازی اشتراک</RouterLink></li>
+                  <li><RouterLink to="/support">پشتیبانی</RouterLink></li>
+                </ul>
+              </details>
+            </li>
+            <li><RouterLink to="/blog">وبلاگ</RouterLink></li>
+            <li><RouterLink to="/support">با ما ارتباط</RouterLink></li>
+            <li><RouterLink to="/about">درباره ما</RouterLink></li>
+          </ul>
+        </div>
 
         <!-- logo -->
         <RouterLink class="flex items-center gap-2" to="/">
@@ -28,12 +55,12 @@
 
       <!-- CENTER MENU -->
       <div class="navbar-center hidden lg:flex">
-        <ul class="menu menu-horizontal gap-1 text-sm">
-          <li><RouterLink to="/">صفحه اصلی</RouterLink></li>
+        <ul class="menu menu-horizontal gap-1 text-sm font-semibold">
+          <li><RouterLink class="rounded-full px-4" to="/">صفحه اصلی</RouterLink></li>
 
           <!-- STORE -->
           <li class="group">
-            <button class="flex items-center gap-1">
+            <button class="flex items-center gap-1 rounded-full px-4">
               فروشگاه
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" stroke="currentColor" fill="none">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 9l6 6 6-6" />
@@ -46,7 +73,7 @@
             >
               <div
                   class="mega-shell w-[1100px] max-w-[calc(100vw-1.5rem)]
-                       rounded-2xl bg-base-100 shadow-xl border border-base-200
+                       rounded-2xl bg-base-100 shadow-2xl border border-base-200/80
                        px-6 py-5 flex gap-6 flex-row-reverse"
               >
                 <!-- promo box -->
@@ -60,7 +87,7 @@
                       پشتیبانی حرفه‌ای و دسته‌بندی کامل محصولات
                     </p>
                   </div>
-                  <RouterLink to="/shop" class="btn btn-sm btn-primary mt-4">مشاهده اکانت‌ها</RouterLink>
+                  <RouterLink to="/shop" class="btn btn-sm btn-primary mt-4 rounded-full">مشاهده اکانت‌ها</RouterLink>
                 </div>
 
                 <!-- columns -->
@@ -112,15 +139,15 @@
             </div>
           </li>
 
-          <li><RouterLink to="/blog">وبلاگ</RouterLink></li>
-          <li><RouterLink to="/support">با ما ارتباط</RouterLink></li>
-          <li><RouterLink to="/about">درباره ما</RouterLink></li>
+          <li><RouterLink class="rounded-full px-4" to="/blog">وبلاگ</RouterLink></li>
+          <li><RouterLink class="rounded-full px-4" to="/support">با ما ارتباط</RouterLink></li>
+          <li><RouterLink class="rounded-full px-4" to="/about">درباره ما</RouterLink></li>
         </ul>
       </div>
 
       <!-- LEFT / END -->
-      <div class="navbar-end gap-3">
-        <label class="input input-bordered items-center gap-2 hidden lg:flex">
+      <div class="navbar-end gap-3 w-auto lg:w-1/3 justify-end">
+        <label class="input input-bordered items-center gap-2 hidden lg:flex bg-base-100/80 rounded-full shadow-sm">
           <input
               type="text"
               class="grow"
@@ -128,7 +155,7 @@
               @keyup.enter="goSearch"
               v-model="q"
           />
-          <kbd class="kbd kbd-sm"><img src="@/assets/icons/search.png" /> </kbd>
+          <kbd class="kbd kbd-sm"><img src="@/assets/icons/search.png" /></kbd>
         </label>
 
         <button class="btn btn-ghost btn-circle" @click="openCart" aria-label="cart">
@@ -155,16 +182,10 @@
           </template>
 
           <template v-else>
-            <RouterLink to="/auth/login" class="hover:text-primary whitespace-nowrap">
-              وارد شوید
-            </RouterLink>
-            <span class="opacity-30">|</span>
-            <RouterLink to="/auth/login" class="hover:text-primary whitespace-nowrap">
-              عضویت
-            </RouterLink>
+            <RouterLink to="/auth/login" class="btn btn-sm btn-primary rounded-full px-4">وارد شوید</RouterLink>
+            <RouterLink to="/auth/login" class="btn btn-sm btn-ghost rounded-full px-4 border border-base-200">عضویت</RouterLink>
           </template>
         </div>
-
 
         <button class="btn btn-ghost btn-circle lg:hidden" @click="goSearch">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
