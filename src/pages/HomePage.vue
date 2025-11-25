@@ -61,6 +61,57 @@
         </div>
       </section>
 
+      <!-- SERVICES -->
+      <section aria-labelledby="services" class="space-y-5">
+        <header class="flex items-center justify-between gap-4">
+          <div class="space-y-1">
+            <p class="text-xs text-primary font-semibold">سرویس‌های محبوب</p>
+            <div class="flex items-center gap-3">
+              <h2 id="services" class="text-2xl font-bold">خرید اشتراک سرویس‌ها</h2>
+              <span class="h-1 w-10 rounded-full bg-primary/70 hidden sm:inline-block"></span>
+            </div>
+            <p class="text-sm text-base-content/60">سرویس‌های اپل و اشتراک‌های پرطرفدار</p>
+          </div>
+        </header>
+
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div v-if="servicesLoading" class="col-span-full text-center py-8 text-sm text-base-content/60">
+            در حال بارگذاری...
+          </div>
+          <div v-else-if="servicesError" class="col-span-full text-center py-8 text-error text-sm">
+            {{ servicesError }}
+          </div>
+          <div v-else-if="!serviceCards.length" class="col-span-full text-center py-8 text-sm text-base-content/60">
+            سرویسی برای نمایش وجود ندارد.
+          </div>
+          <RouterLink
+            v-else
+            v-for="card in serviceCards"
+            :key="card.slug"
+            :to="card.to"
+            class="group relative overflow-hidden rounded-3xl shadow-sm ring-1 ring-base-300/70 transition hover:-translate-y-1 hover:shadow-lg"
+            :style="{ background: card.bg }"
+          >
+            <div class="p-5 space-y-3 text-white/90">
+              <p class="text-lg font-bold flex items-center gap-2">
+                <span>{{ card.title }}</span>
+              </p>
+              <p class="text-sm leading-6 text-white/80 line-clamp-2">{{ card.desc }}</p>
+              <span class="inline-flex items-center gap-2 text-sm font-semibold text-white group-hover:translate-x-1 transition">
+                {{ card.action }}
+                <span class="text-lg">←</span>
+              </span>
+            </div>
+            <img
+              v-if="card.image"
+              :src="card.image"
+              :alt="card.title"
+              class="absolute left-2 bottom-2 w-20 h-20 object-contain opacity-70 pointer-events-none"
+            />
+          </RouterLink>
+        </div>
+      </section>
+
       <!-- TOP PRODUCTS -->
       <section aria-labelledby="top-products" class="space-y-5">
         <header class="flex items-center justify-between gap-4">
@@ -162,10 +213,29 @@
 </template>
 
 <script setup lang="ts">
+import axios from 'axios'
 import { onMounted, computed, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useProductsStore } from '@/stores/products'
 import ProductGrid from '@/components/ProductGrid.vue'
+
+type BackendProduct = {
+  slug: string
+  title: string
+  description?: string | null
+  short_description?: string | null
+  image_url?: string | null
+}
+
+type ServiceCard = {
+  slug: string
+  title: string
+  desc: string
+  action: string
+  to: string
+  bg: string
+  image?: string | null
+}
 
 const store = useProductsStore()
 const { topWeeklyProducts, topWeeklyLoading, topWeeklyError } = storeToRefs(store)
@@ -173,6 +243,7 @@ const { topWeeklyProducts, topWeeklyLoading, topWeeklyError } = storeToRefs(stor
 onMounted(() => {
   store.load()
   store.fetchTopWeeklyProducts(8)
+  fetchServiceCards()
 })
 
 const giftCards = computed(() =>
@@ -188,56 +259,43 @@ const giftCards = computed(() =>
     .slice(0, 8)
 )
 
-const serviceCards = ref([
-  {
-    slug: 'apple-tv-plus',
-    title: ' tv+',
-    desc: 'تماشای بهترین فیلم‌ها و سریال‌های روز دنیا',
-    action: 'خرید اشتراک اپل تی‌وی',
-    to: '/product/apple-tv',
-    bg: 'radial-gradient(circle at top, #0f172a, #020617)',
-  },
-  {
-    slug: 'apple-music',
-    title: ' Music',
-    desc: 'دسترسی به میلیون‌ها موزیک اوریجینال',
-    action: 'خرید اشتراک اپل موزیک',
-    to: '/product/apple-music',
-    bg: 'linear-gradient(160deg, #065f46 0%, #042f2e 100%)',
-  },
-  {
-    slug: 'apple-arcade',
-    title: ' Arcade',
-    desc: 'دنیا‌یی از بازی‌های جذاب اپل',
-    action: 'خرید اشتراک آرکید',
-    to: '/product/apple-arcade',
-    bg: 'linear-gradient(160deg, #1f2937 0%, #111827 100%)',
-  },
-  {
-    slug: 'icloud-plus',
-    title: ' iCloud+',
-    desc: 'فضای ابری تا 2TB برای دستگاه‌های اپل',
-    action: 'خرید اشتراک آیکلاد',
-    to: '/product/icloud',
-    bg: 'linear-gradient(160deg, #38bdf8 0%, #0ea5e9 100%)',
-  },
-  {
-    slug: 'apple-news-plus',
-    title: ' News+',
-    desc: 'آرشیو روزنامه‌ها و مجلات منتخب',
-    action: 'خرید اشتراک نیوز پلاس',
-    to: '/product/apple-news',
-    bg: 'linear-gradient(160deg, #f97316 0%, #ea580c 100%)',
-  },
-  {
-    slug: 'apple-fitness-plus',
-    title: ' Fitness+',
-    desc: 'تمرین‌های روزانه و کالری‌سوزی هوشمند',
-    action: 'خرید اشتراک فیتنس',
-    to: '/product/apple-fitness',
-    bg: 'linear-gradient(160deg, #c026d3 0%, #701a75 100%)',
-  },
-])
+const gradients: Record<string, string> = {
+  'apple-tv-plus': 'radial-gradient(circle at top, #0f172a, #020617)',
+  'apple-music': 'linear-gradient(160deg, #065f46 0%, #042f2e 100%)',
+  'apple-arcade': 'linear-gradient(160deg, #1f2937 0%, #111827 100%)',
+  'icloud-plus': 'linear-gradient(160deg, #38bdf8 0%, #0ea5e9 100%)',
+  'apple-news-plus': 'linear-gradient(160deg, #f97316 0%, #ea580c 100%)',
+  'apple-fitness-plus': 'linear-gradient(160deg, #c026d3 0%, #701a75 100%)',
+}
+
+const defaultGradient = 'linear-gradient(135deg, #0f172a 0%, #111827 100%)'
+
+const serviceCards = ref<ServiceCard[]>([])
+const servicesLoading = ref(false)
+const servicesError = ref<string | null>(null)
+
+const mapToCard = (product: BackendProduct): ServiceCard => ({
+  slug: product.slug,
+  title: product.title,
+  desc: product.description ?? product.short_description ?? '',
+  action: product.short_description ?? 'خرید اشتراک',
+  to: `/product/${product.slug}`,
+  bg: gradients[product.slug] ?? defaultGradient,
+  image: product.image_url ?? undefined,
+})
+
+const fetchServiceCards = async () => {
+  servicesLoading.value = true
+  servicesError.value = null
+  try {
+    const { data } = await axios.get<BackendProduct[]>('http://localhost:5000/products/')
+    serviceCards.value = data.slice(0, 8).map(mapToCard)
+  } catch (error) {
+    servicesError.value = 'خطا در بارگذاری سرویس‌ها. لطفاً دوباره تلاش کنید.'
+  } finally {
+    servicesLoading.value = false
+  }
+}
 
 const blogPosts = ref([
   {
