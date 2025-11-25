@@ -1,188 +1,203 @@
 <template>
-  <div class="bg-base-200 min-h-screen pb-16">
-    <div class="max-w-6xl mx-auto px-4 lg:px-0 space-y-14 pt-8">
+  <div class="bg-base-200/80 min-h-screen">
+    <main class="max-w-6xl mx-auto px-4 lg:px-0 py-8 space-y-12">
 
       <!-- 4 BANNERS (2x2) -->
-      <section class="grid gap-4 sm:grid-cols-2">
+      <section aria-label="ویژگی ها" class="grid gap-4 sm:grid-cols-2">
         <RouterLink
-            v-for="banner in banners"
-            :key="banner.id"
-            :to="banner.to"
-            class="block rounded-[28px] overflow-hidden bg-base-100"
+          v-for="banner in banners"
+          :key="banner.id"
+          :to="banner.to"
+          class="group relative block overflow-hidden rounded-[26px] bg-gradient-to-br from-base-100 to-base-100/80 shadow-sm ring-1 ring-base-300/60 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
         >
           <img
-              :src="banner.image"
-              :alt="banner.alt"
-              class="w-full h-auto block"
+            :src="banner.image"
+            :alt="banner.alt"
+            class="w-full h-full object-cover"
           />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 transition group-hover:opacity-70"></div>
         </RouterLink>
       </section>
 
       <!-- BANNER SLIDER -->
-      <section class="relative">
+      <section aria-label="بنر اصلی" class="relative">
         <div
-            class="relative overflow-hidden rounded-[32px] bg-base-100 border border-base-300"
+          class="relative overflow-hidden rounded-[36px] bg-gradient-to-br from-base-100 to-base-100/60 border border-base-300/70 shadow-lg"
         >
           <RouterLink :to="slides[current].to" class="block">
-            <img
+            <div class="bg-gradient-to-t from-base-300/50 to-transparent">
+              <img
                 :src="slides[current].image"
                 :alt="slides[current].alt"
-                class="w-full h-[230px] md:h-[340px] object-cover"
-            />
+                class="w-full h-[240px] md:h-[360px] object-cover"
+              />
+            </div>
           </RouterLink>
 
           <!-- arrows -->
           <button
-              class="absolute top-1/2 -translate-y-1/2 right-4 w-8 h-8 md:w-9 md:h-9 rounded-full bg-base-100/90 backdrop-blur flex items-center justify-center text-base-content hover:bg-base-100"
-              @click="prev"
+            class="absolute top-1/2 -translate-y-1/2 right-5 w-10 h-10 rounded-full bg-base-100/90 shadow-md flex items-center justify-center text-lg text-base-content transition hover:bg-primary hover:text-primary-content"
+            @click="prev"
           >
             ←
           </button>
           <button
-              class="absolute top-1/2 -translate-y-1/2 left-4 w-8 h-8 md:w-9 md:h-9 rounded-full bg-base-100/90 backdrop-blur flex items-center justify-center text-base-content hover:bg-base-100"
-              @click="next"
+            class="absolute top-1/2 -translate-y-1/2 left-5 w-10 h-10 rounded-full bg-base-100/90 shadow-md flex items-center justify-center text-lg text-base-content transition hover:bg-primary hover:text-primary-content"
+            @click="next"
           >
             →
           </button>
 
           <!-- dots -->
-          <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+          <div class="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-2">
             <button
-                v-for="(s, idx) in slides"
-                :key="s.id"
-                class="w-2.5 h-2.5 rounded-full transition"
-                :class="idx === current ? 'bg-primary' : 'bg-base-300'"
-                @click="go(idx)"
+              v-for="(s, idx) in slides"
+              :key="s.id"
+              class="w-2.5 h-2.5 rounded-full transition-all duration-200"
+              :class="idx === current ? 'bg-primary scale-110' : 'bg-base-300 hover:bg-primary/70'"
+              @click="go(idx)"
             ></button>
           </div>
         </div>
       </section>
 
       <!-- TOP PRODUCTS -->
-      <section class="space-y-6">
-        <div class="flex items-center justify-between gap-4">
-          <div>
-            <h2 class="text-xl font-bold">پرفروش‌های این هفته</h2>
-<!--            <p class="text-sm text-base-content/60">-->
-<!--              محصولاتی که مشتری‌ها بیشتر انتخابشون کردن 🔥-->
-<!--            </p>-->
+      <section aria-labelledby="top-products" class="space-y-5">
+        <header class="flex items-center justify-between gap-4">
+          <div class="space-y-1">
+            <p class="text-xs text-primary font-semibold">منتخب ویژه</p>
+            <div class="flex items-center gap-3">
+              <h2 id="top-products" class="text-2xl font-bold">پرفروش‌های این هفته</h2>
+              <span class="h-1 w-10 rounded-full bg-primary/70 hidden sm:inline-block"></span>
+            </div>
           </div>
           <RouterLink
-              to="/category/accounts"
-              class="text-sm text-primary hover:underline"
+            to="/category/accounts"
+            class="text-sm text-primary hover:text-primary/80 font-medium flex items-center gap-1"
           >
             مشاهده همه
+            <span class="text-base">←</span>
           </RouterLink>
+        </header>
+        <div class="rounded-[24px] bg-base-100/80 shadow-sm ring-1 ring-base-300/70 px-3 sm:px-4 py-4">
+          <ProductGrid :products="top" />
         </div>
-        <ProductGrid :products="top" />
       </section>
 
       <!-- GIFT CARDS -->
-      <section class="space-y-6">
-        <div class="flex items-center justify-between gap-4">
-          <div>
-            <h2 class="text-xl font-bold">خرید گیفت‌کارت‌ها</h2>
+      <section aria-labelledby="gift-cards" class="space-y-5">
+        <header class="flex items-center justify-between gap-4">
+          <div class="space-y-1">
+            <p class="text-xs text-primary font-semibold">گیفت کارت</p>
+            <div class="flex items-center gap-3">
+              <h2 id="gift-cards" class="text-2xl font-bold">خرید گیفت‌کارت‌ها</h2>
+              <span class="h-1 w-10 rounded-full bg-primary/70 hidden sm:inline-block"></span>
+            </div>
             <p class="text-sm text-base-content/60">
               گیفت‌کارت‌های اپل، استیم، گوگل‌پلی و سرویس‌های محبوب
             </p>
           </div>
           <RouterLink
-              to="/category/gift-cards"
-              class="text-sm text-primary hover:underline"
+            to="/category/gift-cards"
+            class="text-sm text-primary hover:text-primary/80 font-medium flex items-center gap-1"
           >
             مشاهده همه گیفت‌کارت‌ها
+            <span class="text-base">←</span>
           </RouterLink>
+        </header>
+        <div class="rounded-[24px] bg-base-100/80 shadow-sm ring-1 ring-base-300/70 px-3 sm:px-4 py-4">
+          <ProductGrid :products="giftCards" />
         </div>
-        <ProductGrid :products="giftCards" />
       </section>
 
       <!-- APPLE SERVICES -->
-      <section class="space-y-6">
-        <div class="flex items-center justify-between">
-          <div>
-            <h2 class="text-xl font-bold">محبوب‌ترین اکانت‌ها</h2>
+      <section aria-labelledby="apple-services" class="space-y-5">
+        <header class="flex items-center justify-between gap-4">
+          <div class="space-y-1">
+            <p class="text-xs text-primary font-semibold">خدمات اپل</p>
+            <div class="flex items-center gap-3">
+              <h2 id="apple-services" class="text-2xl font-bold">محبوب‌ترین اکانت‌ها</h2>
+              <span class="h-1 w-10 rounded-full bg-primary/70 hidden sm:inline-block"></span>
+            </div>
             <p class="text-sm text-base-content/60">
               سرویس‌های اپل و اشتراک‌های پرطرفدار
             </p>
           </div>
-          <div class="w-12 h-[3px] bg-base-content/80 rounded-full"></div>
-        </div>
+          <div class="hidden sm:flex items-center gap-2 text-xs text-base-content/60">
+            <span class="h-1 w-8 rounded-full bg-primary/60"></span>
+            تجربه‌ای پریمیوم برای دستگاه‌های اپل
+          </div>
+        </header>
 
-        <div class="grid gap-6 sm:grid-cols-2 md:grid-cols-3">
+        <div class="grid gap-5 sm:grid-cols-2 md:grid-cols-3">
           <div
-              v-for="card in serviceCards"
-              :key="card.slug"
-              class="rounded-[26px] px-5 py-5 text-white flex flex-col gap-3 relative overflow-hidden min-h-[170px]"
-              :style="{ background: card.bg }"
+            v-for="card in serviceCards"
+            :key="card.slug"
+            class="group relative overflow-hidden rounded-[26px] px-6 py-5 text-white flex flex-col gap-4 min-h-[190px] shadow-md ring-1 ring-white/10 transition duration-300 hover:-translate-y-1 hover:shadow-xl"
+            :style="{ background: card.bg }"
           >
-            <div class="flex items-center gap-2">
-              <img v-if="card.icon" :src="card.icon" class="w-9 h-9" alt="" />
-              <h3 class="text-base font-bold">{{ card.title }}</h3>
+            <div class="flex items-center gap-3">
+              <img v-if="card.icon" :src="card.icon" class="w-10 h-10" alt="" />
+              <h3 class="text-lg font-bold drop-shadow-sm">{{ card.title }}</h3>
             </div>
-            <p class="text-xs text-white/75 leading-relaxed line-clamp-3">
+            <p class="text-sm text-white/80 leading-relaxed line-clamp-3">
               {{ card.desc }}
             </p>
             <RouterLink
-                :to="card.to"
-                class="btn btn-xs bg-white text-black border-0 rounded-full w-fit mt-auto"
+              :to="card.to"
+              class="btn btn-sm bg-white/90 hover:bg-white text-black border-0 rounded-full w-fit mt-auto shadow-sm"
             >
               {{ card.action }}
             </RouterLink>
+            <div class="pointer-events-none absolute inset-0 bg-white/5 mix-blend-screen opacity-0 transition group-hover:opacity-10"></div>
             <img
-                v-if="card.thumb"
-                :src="card.thumb"
-                class="absolute left-2 bottom-2 w-16 opacity-80 pointer-events-none"
+              v-if="card.thumb"
+              :src="card.thumb"
+              class="absolute left-3 bottom-3 w-16 opacity-80"
+              alt=""
             />
           </div>
         </div>
       </section>
 
       <!-- BLOG -->
-<!--      <section class="mb-4">-->
-<!--        <div class="flex flex-col items-center mb-10 text-center">-->
-<!--          <h2 class="text-2xl font-bold">وبلاگ پلاس</h2>-->
-<!--          <p class="text-sm text-base-content/60 mt-2">-->
-<!--            آموزش‌ها و نکته‌های کاربردی برای سرویس‌های دیجیتال-->
-<!--          </p>-->
-<!--          <div class="w-16 h-1 bg-base-content/80 rounded-full mt-3"></div>-->
-<!--        </div>-->
+      <section aria-labelledby="blog" class="space-y-6">
+        <div class="flex flex-col items-center text-center gap-2">
+          <p class="text-xs text-primary font-semibold">وبلاگ پلاس</p>
+          <h2 id="blog" class="text-2xl font-bold">آخرین مطالب</h2>
+          <p class="text-sm text-base-content/60">آموزش‌ها و نکته‌های کاربردی برای سرویس‌های دیجیتال</p>
+          <div class="w-16 h-1 bg-primary/70 rounded-full"></div>
+        </div>
 
-<!--        <div class="grid gap-6 md:grid-cols-3">-->
-<!--          <article-->
-<!--              v-for="post in blogPosts"-->
-<!--              :key="post.slug"-->
-<!--              class="relative bg-base-100 rounded-2xl overflow-hidden shadow-sm"-->
-<!--          >-->
-<!--            <div class="h-44 overflow-hidden">-->
-<!--              <img-->
-<!--                  :src="post.image"-->
-<!--                  :alt="post.title"-->
-<!--                  class="w-full h-full object-cover"-->
-<!--              />-->
-<!--            </div>-->
-<!--            <div-->
-<!--                class="bg-base-100 rounded-xl shadow-md px-5 py-4 absolute left-5 right-5 -bottom-10 md:-bottom-9"-->
-<!--            >-->
-<!--              <h3 class="font-medium text-base mb-2 line-clamp-2">-->
-<!--                {{ post.title }}-->
-<!--              </h3>-->
-<!--              <p-->
-<!--                  class="text-xs text-base-content/60 flex items-center justify-between"-->
-<!--              >-->
-<!--                <span>{{ post.date }}</span>-->
-<!--                <RouterLink-->
-<!--                    :to="`/blog/${post.slug}`"-->
-<!--                    class="text-primary text-xs"-->
-<!--                >-->
-<!--                  مطالعه-->
-<!--                </RouterLink>-->
-<!--              </p>-->
-<!--            </div>-->
-<!--            <div class="h-12"></div>-->
-<!--          </article>-->
-<!--        </div>-->
-<!--      </section>-->
-    </div>
+        <div class="grid gap-6 md:grid-cols-3">
+          <article
+            v-for="post in blogPosts"
+            :key="post.slug"
+            class="group relative bg-base-100 rounded-2xl overflow-hidden shadow-sm ring-1 ring-base-300/60 transition hover:-translate-y-1 hover:shadow-lg"
+          >
+            <div class="h-44 overflow-hidden">
+              <img
+                :src="post.image"
+                :alt="post.title"
+                class="w-full h-full object-cover transition duration-300 group-hover:scale-105"
+              />
+            </div>
+            <div class="px-5 py-4 space-y-2">
+              <h3 class="font-semibold text-base leading-7 line-clamp-2">{{ post.title }}</h3>
+              <div class="flex items-center justify-between text-xs text-base-content/60">
+                <span>{{ post.date }}</span>
+                <RouterLink
+                  :to="`/blog/${post.slug}`"
+                  class="text-primary font-medium hover:text-primary/80"
+                >
+                  مطالعه
+                </RouterLink>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
   </div>
 </template>
 
@@ -197,16 +212,16 @@ onMounted(() => store.load())
 const top = computed(() => store.products.slice(0, 8))
 
 const giftCards = computed(() =>
-    store.products
-        .filter(
-            (p: any) =>
-                p.categoryId === 'cat-gift' ||     // ✅ match mock category
-                p.categoryId === 'gift-cards' ||   // (optional: future API)
-                p?.tags?.includes('gift-card') ||
-                p?.tags?.includes('گیفت‌کارت') ||
-                p?.tags?.includes('گیفت')
-        )
-        .slice(0, 8)
+  store.products
+    .filter(
+      (p: any) =>
+        p.categoryId === 'cat-gift' || // ✅ match mock category
+        p.categoryId === 'gift-cards' || // (optional: future API)
+        p?.tags?.includes('gift-card') ||
+        p?.tags?.includes('گیفت‌کارت') ||
+        p?.tags?.includes('گیفت')
+    )
+    .slice(0, 8)
 )
 
 const serviceCards = ref([
@@ -328,8 +343,7 @@ function next() {
   current.value = (current.value + 1) % slides.value.length
 }
 function prev() {
-  current.value =
-      (current.value - 1 + slides.value.length) % slides.value.length
+  current.value = (current.value - 1 + slides.value.length) % slides.value.length
 }
 function go(i: number) {
   current.value = i
