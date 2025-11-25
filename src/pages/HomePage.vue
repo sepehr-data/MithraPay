@@ -80,7 +80,16 @@
           </RouterLink>
         </header>
         <div class="rounded-[24px] bg-base-100/80 shadow-sm ring-1 ring-base-300/70 px-3 sm:px-4 py-4">
-          <ProductGrid :products="top" />
+          <div v-if="topWeeklyLoading" class="text-center py-8 text-sm text-base-content/60">
+            در حال بارگذاری پرفروش‌ها...
+          </div>
+          <div v-else-if="topWeeklyError" class="text-center py-8 text-error text-sm">
+            {{ topWeeklyError }}
+          </div>
+          <div v-else-if="!topWeeklyProducts.length" class="text-center py-8 text-sm text-base-content/60">
+            در حال حاضر محصول پرفروشی ثبت نشده است.
+          </div>
+          <ProductGrid v-else :products="topWeeklyProducts" />
         </div>
       </section>
 
@@ -154,13 +163,17 @@
 
 <script setup lang="ts">
 import { onMounted, computed, ref } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useProductsStore } from '@/stores/products'
 import ProductGrid from '@/components/ProductGrid.vue'
 
 const store = useProductsStore()
-onMounted(() => store.load())
+const { topWeeklyProducts, topWeeklyLoading, topWeeklyError } = storeToRefs(store)
 
-const top = computed(() => store.products.slice(0, 8))
+onMounted(() => {
+  store.load()
+  store.fetchTopWeeklyProducts(8)
+})
 
 const giftCards = computed(() =>
   store.products
