@@ -54,13 +54,17 @@
       </div>
 
       <!-- CENTER MENU -->
-      <div class="navbar-center hidden lg:flex">
+      <div class="navbar-center hidden lg:flex relative">
         <ul class="menu menu-horizontal gap-1 text-sm font-semibold">
           <li><RouterLink class="rounded-full px-4" to="/">صفحه اصلی</RouterLink></li>
 
           <!-- STORE -->
-          <li class="group">
-            <button class="flex items-center gap-1 rounded-full px-4">
+          <li class="relative" @mouseenter="openStoreMenu" @mouseleave="scheduleCloseStoreMenu">
+            <button
+                class="flex items-center gap-1 rounded-full px-4"
+                type="button"
+                @click.prevent="toggleStoreMenu"
+            >
               فروشگاه
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" stroke="currentColor" fill="none">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 9l6 6 6-6" />
@@ -69,70 +73,87 @@
 
             <!-- MEGA (CENTERED) -->
             <div
-                class="absolute left-1/2 top-full -translate-x-1/2 pt-4 z-40 hidden group-hover:block"
+                v-show="isStoreMenuOpen"
+                class="absolute left-1/2 top-full -translate-x-1/2 pt-4 z-40 w-screen max-w-6xl px-4"
+                @mouseenter="openStoreMenu"
+                @mouseleave="scheduleCloseStoreMenu"
             >
               <div
-                  class="mega-shell w-[1100px] max-w-[calc(100vw-1.5rem)]
+                  class="mega-shell w-full lg:w-[88vw] xl:w-[82vw] mx-auto
                        rounded-2xl bg-base-100 shadow-2xl border border-base-200/80
-                       px-6 py-5 flex gap-6 flex-row-reverse"
+                       px-5 sm:px-6 lg:px-8 py-6 flex flex-col gap-6"
               >
-                <!-- promo box -->
-                <div
-                    class="w-[240px] rounded-xl bg-base-200/80 border border-base-200 flex flex-col justify-between p-4 text-right"
-                >
-                  <div>
-                    <p class="text-sm text-base-content/70 mb-1">اکانت‌ها، گیفت‌کارت و لوازم</p>
-                    <h3 class="text-lg font-bold mb-2">خرید آسان، تحویل سریع</h3>
-                    <p class="text-xs text-base-content/60">
-                      پشتیبانی حرفه‌ای و دسته‌بندی کامل محصولات
-                    </p>
-                  </div>
-                  <RouterLink to="/shop" class="btn btn-sm btn-primary mt-4 rounded-full">مشاهده اکانت‌ها</RouterLink>
-                </div>
-
-                <!-- columns -->
-                <div class="mega-panel grid grid-cols-4 gap-8 flex-1 text-right">
-                  <!-- col 1 -->
-                  <div class="mega-col">
-                    <h3 class="font-semibold mb-2">اشتراک های پریمیوم اپل</h3>
-                    <ul class="space-y-1.5 text-sm leading-relaxed">
-                      <li><RouterLink class="hover:text-primary" to="/product/apple-one">اشتراک اپل وان</RouterLink></li>
-                      <li><RouterLink class="hover:text-primary" to="/product/apple-music">اپل موزیک</RouterLink></li>
-                      <li><RouterLink class="hover:text-primary" to="/product/icloud">فضای آیکلاد</RouterLink></li>
-                      <li><RouterLink class="hover:text-primary" to="/product/apple-tv">اپل تی‌وی پلاس</RouterLink></li>
-                    </ul>
+                <div class="flex flex-col gap-4 text-right lg:flex-row lg:items-start lg:gap-8">
+                  <!-- promo box -->
+                  <div
+                      class="lg:w-[240px] rounded-2xl bg-base-200/80 border border-base-200 flex flex-col justify-between p-5 text-right shadow-sm"
+                  >
+                    <div>
+                      <p class="text-sm text-base-content/70 mb-2">اکانت‌ها، گیفت‌کارت و لوازم</p>
+                      <h3 class="text-lg font-bold mb-3 leading-7">خرید آسان، تحویل سریع</h3>
+                      <p class="text-xs text-base-content/60 leading-6">
+                        پشتیبانی حرفه‌ای، ارسال سریع و چیدمان دقیق محصولات محبوب شما.
+                      </p>
+                    </div>
+                    <RouterLink to="/shop" class="btn btn-sm btn-primary mt-5 rounded-full">مشاهده اکانت‌ها</RouterLink>
                   </div>
 
-                  <!-- col 2 -->
-                  <div class="mega-col">
-                    <h3 class="font-semibold mb-2">اشتراک های کاربردی</h3>
-                    <ul class="space-y-1.5 text-sm leading-relaxed">
-                      <li><RouterLink class="hover:text-primary" to="/category/accounts">یوتیوب پریمیوم</RouterLink></li>
-                      <li><RouterLink class="hover:text-primary" to="/category/accounts">اسپاتیفای</RouterLink></li>
-                      <li><RouterLink class="hover:text-primary" to="/category/accounts">تلگرام پریمیوم</RouterLink></li>
-                      <li><RouterLink class="hover:text-primary" to="/category/accounts">کانوا</RouterLink></li>
-                    </ul>
-                  </div>
+                  <!-- columns -->
+                  <div class="mega-panel grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 flex-1 text-right">
+                    <!-- col 1 -->
+                    <div class="mega-col">
+                      <h3 class="mega-title">اشتراک های پریمیوم اپل</h3>
+                      <ul class="mega-list">
+                        <li><RouterLink class="mega-link" to="/product/apple-one">اشتراک اپل وان</RouterLink></li>
+                        <li><RouterLink class="mega-link" to="/product/apple-music">اپل موزیک</RouterLink></li>
+                        <li><RouterLink class="mega-link" to="/product/icloud">فضای آیکلاد</RouterLink></li>
+                        <li><RouterLink class="mega-link" to="/product/apple-tv">اپل تی‌وی پلاس</RouterLink></li>
+                      </ul>
+                    </div>
 
-                  <!-- col 3 -->
-                  <div class="mega-col">
-                    <h3 class="font-semibold mb-2">گیفت کارت</h3>
-                    <ul class="space-y-1.5 text-sm leading-relaxed">
-                      <li><RouterLink class="hover:text-primary" to="/category/gift-cards">گیفت کارت اپل</RouterLink></li>
-                      <li><RouterLink class="hover:text-primary" to="/category/gift-cards">گیفت کارت پلی‌استیشن</RouterLink></li>
-                      <li><RouterLink class="hover:text-primary" to="/category/gift-cards">گیفت کارت آمازون</RouterLink></li>
-                      <li><RouterLink class="hover:text-primary" to="/category/gift-cards">گیفت کارت استیم</RouterLink></li>
-                    </ul>
-                  </div>
+                    <!-- col 2 -->
+                    <div class="mega-col">
+                      <h3 class="mega-title">اشتراک های کاربردی</h3>
+                      <ul class="mega-list">
+                        <li><RouterLink class="mega-link" to="/category/accounts">یوتیوب پریمیوم</RouterLink></li>
+                        <li><RouterLink class="mega-link" to="/category/accounts">اسپاتیفای</RouterLink></li>
+                        <li><RouterLink class="mega-link" to="/category/accounts">تلگرام پریمیوم</RouterLink></li>
+                        <li><RouterLink class="mega-link" to="/category/accounts">کانوا</RouterLink></li>
+                      </ul>
+                    </div>
 
-                  <!-- col 4 -->
-                  <div class="mega-col">
-                    <h3 class="font-semibold mb-2">خدمات</h3>
-                    <ul class="space-y-1.5 text-sm leading-relaxed">
-                      <li><RouterLink class="hover:text-primary" to="/support">ساخت اپل آیدی</RouterLink></li>
-                      <li><RouterLink class="hover:text-primary" to="/support">فعالسازی اشتراک</RouterLink></li>
-                      <li><RouterLink class="hover:text-primary" to="/support">پشتیبانی</RouterLink></li>
-                    </ul>
+                    <!-- col 3 -->
+                    <div class="mega-col">
+                      <h3 class="mega-title">گیفت کارت</h3>
+                      <ul class="mega-list">
+                        <li><RouterLink class="mega-link" to="/category/gift-cards">گیفت کارت اپل</RouterLink></li>
+                        <li><RouterLink class="mega-link" to="/category/gift-cards">گیفت کارت پلی‌استیشن</RouterLink></li>
+                        <li><RouterLink class="mega-link" to="/category/gift-cards">گیفت کارت آمازون</RouterLink></li>
+                        <li><RouterLink class="mega-link" to="/category/gift-cards">گیفت کارت استیم</RouterLink></li>
+                      </ul>
+                    </div>
+
+                    <!-- col 4 -->
+                    <div class="mega-col">
+                      <h3 class="mega-title">محصولات فیزیکی</h3>
+                      <ul class="mega-list">
+                        <li><a class="mega-link" href="#">کیبورد و موس</a></li>
+                        <li><a class="mega-link" href="#">گجت و لوازم جانبی</a></li>
+                        <li><a class="mega-link" href="#">کابل و مبدل</a></li>
+                        <li><a class="mega-link" href="#">کارت هدیه فیزیکی</a></li>
+                      </ul>
+                    </div>
+
+                    <!-- col 5 -->
+                    <div class="mega-col">
+                      <h3 class="mega-title">خدمات</h3>
+                      <ul class="mega-list">
+                        <li><RouterLink class="mega-link" to="/support">ساخت اپل آیدی</RouterLink></li>
+                        <li><RouterLink class="mega-link" to="/support">فعالسازی اشتراک</RouterLink></li>
+                        <li><RouterLink class="mega-link" to="/support">پشتیبانی</RouterLink></li>
+                        <li><a class="mega-link" href="#">مشاوره خرید</a></li>
+                      </ul>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -198,7 +219,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, onBeforeUnmount } from 'vue'
 import mithraLogo from '@/assets/logo3.png'
 import { useUiStore } from '@/stores/ui'
 import { useCartStore } from '@/stores/cart'
@@ -212,6 +233,8 @@ const router = useRouter()
 
 const drawerOpen = ref(false)
 const q = ref('')
+const isStoreMenuOpen = ref(false)
+let storeMenuTimer: number | undefined
 
 const cartCount = computed(() => cart.count)
 const isLoggedIn = computed(() => auth.isAuthenticated)
@@ -232,7 +255,28 @@ function goProfile() {
   router.push({ name: 'profile' })  // /profile -> ProfilePage.vue
 }
 
+function openStoreMenu() {
+  if (storeMenuTimer) clearTimeout(storeMenuTimer)
+  isStoreMenuOpen.value = true
+}
+
+function scheduleCloseStoreMenu() {
+  if (storeMenuTimer) clearTimeout(storeMenuTimer)
+  storeMenuTimer = window.setTimeout(() => {
+    isStoreMenuOpen.value = false
+  }, 120)
+}
+
+function toggleStoreMenu() {
+  if (storeMenuTimer) clearTimeout(storeMenuTimer)
+  isStoreMenuOpen.value = !isStoreMenuOpen.value
+}
+
 onMounted(() => ui.init())
+
+onBeforeUnmount(() => {
+  if (storeMenuTimer) clearTimeout(storeMenuTimer)
+})
 </script>
 
 
@@ -247,5 +291,28 @@ onMounted(() => ui.init())
 /* make sure panel itself stays RTL */
 .mega-panel {
   direction: rtl;
+}
+
+.mega-title {
+  @apply text-base font-bold mb-3 text-base-content;
+}
+
+.mega-list {
+  @apply space-y-2 text-sm leading-relaxed;
+}
+
+.mega-link {
+  @apply block px-2 py-1.5 rounded-lg transition-colors duration-200 text-base-content/80;
+}
+
+.mega-link:hover,
+.mega-link:focus-visible {
+  @apply text-primary bg-primary/10; 
+}
+
+@media (max-width: 1023px) {
+  .mega-shell {
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+  }
 }
 </style>
