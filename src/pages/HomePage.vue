@@ -61,57 +61,6 @@
         </div>
       </section>
 
-      <!-- SERVICES -->
-      <section aria-labelledby="services" class="space-y-5">
-        <header class="flex items-center justify-between gap-4">
-          <div class="space-y-1">
-            <p class="text-xs text-primary font-semibold">سرویس‌های محبوب</p>
-            <div class="flex items-center gap-3">
-              <h2 id="services" class="text-2xl font-bold">خرید اشتراک سرویس‌ها</h2>
-              <span class="h-1 w-10 rounded-full bg-primary/70 hidden sm:inline-block"></span>
-            </div>
-            <p class="text-sm text-base-content/60">سرویس‌های اپل و اشتراک‌های پرطرفدار</p>
-          </div>
-        </header>
-
-        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <div v-if="servicesLoading" class="col-span-full text-center py-8 text-sm text-base-content/60">
-            در حال بارگذاری...
-          </div>
-          <div v-else-if="servicesError" class="col-span-full text-center py-8 text-error text-sm">
-            {{ servicesError }}
-          </div>
-          <div v-else-if="!serviceCards.length" class="col-span-full text-center py-8 text-sm text-base-content/60">
-            سرویسی برای نمایش وجود ندارد.
-          </div>
-          <RouterLink
-            v-else
-            v-for="card in serviceCards"
-            :key="card.slug"
-            :to="card.to"
-            class="group relative overflow-hidden rounded-3xl shadow-sm ring-1 ring-base-300/70 transition hover:-translate-y-1 hover:shadow-lg"
-            :style="{ background: card.bg }"
-          >
-            <div class="p-5 space-y-3 text-white/90">
-              <p class="text-lg font-bold flex items-center gap-2">
-                <span>{{ card.title }}</span>
-              </p>
-              <p class="text-sm leading-6 text-white/80 line-clamp-2">{{ card.desc }}</p>
-              <span class="inline-flex items-center gap-2 text-sm font-semibold text-white group-hover:translate-x-1 transition">
-                {{ card.action }}
-                <span class="text-lg">←</span>
-              </span>
-            </div>
-            <img
-              v-if="card.image"
-              :src="card.image"
-              :alt="card.title"
-              class="absolute left-2 bottom-2 w-20 h-20 object-contain opacity-70 pointer-events-none"
-            />
-          </RouterLink>
-        </div>
-      </section>
-
       <!-- TOP PRODUCTS -->
       <section aria-labelledby="top-products" class="space-y-5">
         <header class="flex items-center justify-between gap-4">
@@ -121,6 +70,7 @@
               <h2 id="top-products" class="text-2xl font-bold">پرفروش‌های این هفته</h2>
               <span class="h-1 w-10 rounded-full bg-primary/70 hidden sm:inline-block"></span>
             </div>
+            <p class="text-sm text-base-content/60">محبوب‌ترین اشتراک‌ها و اکانت‌ها</p>
           </div>
           <RouterLink
             to="/category/accounts"
@@ -148,13 +98,13 @@
       <section aria-labelledby="gift-cards" class="space-y-5">
         <header class="flex items-center justify-between gap-4">
           <div class="space-y-1">
-            <p class="text-xs text-primary font-semibold">گیفت کارت</p>
+            <p class="text-xs text-primary font-semibold">گیفت کارت‌های برگزیده</p>
             <div class="flex items-center gap-3">
-              <h2 id="gift-cards" class="text-2xl font-bold">خرید گیفت‌کارت‌ها</h2>
+              <h2 id="gift-cards" class="text-2xl font-bold">پرفروش‌ترین گیفت کارت‌ها</h2>
               <span class="h-1 w-10 rounded-full bg-primary/70 hidden sm:inline-block"></span>
             </div>
             <p class="text-sm text-base-content/60">
-              گیفت‌کارت‌های اپل، استیم، گوگل‌پلی و سرویس‌های محبوب
+              گیفت کارت‌های اپل، پلی‌استیشن، استیم و سرویس‌های محبوب
             </p>
           </div>
           <RouterLink
@@ -166,46 +116,62 @@
           </RouterLink>
         </header>
         <div class="rounded-[24px] bg-base-100/80 shadow-sm ring-1 ring-base-300/70 px-3 sm:px-4 py-4">
-          <ProductGrid :products="giftCards" />
+          <div v-if="productsLoading" class="text-center py-8 text-sm text-base-content/60">
+            در حال بارگذاری گیفت کارت‌ها...
+          </div>
+          <div v-else-if="!giftCards.length" class="text-center py-8 text-sm text-base-content/60">
+            گیفت کارتی برای نمایش وجود ندارد.
+          </div>
+          <ProductGrid v-else :products="giftCards" />
         </div>
       </section>
-
 
       <!-- BLOG -->
       <section aria-labelledby="blog" class="space-y-6">
         <div class="flex flex-col items-center text-center gap-2">
           <p class="text-xs text-primary font-semibold">وبلاگ پلاس</p>
-          <h2 id="blog" class="text-2xl font-bold">آخرین مطالب</h2>
-          <p class="text-sm text-base-content/60">آموزش‌ها و نکته‌های کاربردی برای سرویس‌های دیجیتال</p>
+          <h2 id="blog" class="text-2xl font-bold">آخرین مطالب بلاگ</h2>
+          <p class="text-sm text-base-content/60">آموزش‌ها، نکته‌ها و خبرهای دنیای دیجیتال</p>
           <div class="w-16 h-1 bg-primary/70 rounded-full"></div>
         </div>
 
-        <div class="grid gap-6 md:grid-cols-3">
-          <article
-            v-for="post in blogPosts"
-            :key="post.slug"
-            class="group relative bg-base-100 rounded-2xl overflow-hidden shadow-sm ring-1 ring-base-300/60 transition hover:-translate-y-1 hover:shadow-lg"
-          >
-            <div class="h-44 overflow-hidden">
-              <img
-                :src="post.image"
-                :alt="post.title"
-                class="w-full h-full object-cover transition duration-300 group-hover:scale-105"
-              />
-            </div>
-            <div class="px-5 py-4 space-y-2">
-              <h3 class="font-semibold text-base leading-7 line-clamp-2">{{ post.title }}</h3>
-              <div class="flex items-center justify-between text-xs text-base-content/60">
-                <span>{{ post.date }}</span>
-                <RouterLink
-                  :to="`/blog/${post.slug}`"
-                  class="text-primary font-medium hover:text-primary/80"
-                >
-                  مطالعه
-                </RouterLink>
+        <div class="rounded-[24px] bg-base-100/80 shadow-sm ring-1 ring-base-300/70 p-4">
+          <div v-if="blogLoading" class="text-center py-6 text-sm text-base-content/60">در حال بارگذاری مطالب...</div>
+          <div v-else-if="blogError" class="text-center py-6 text-error text-sm">{{ blogError }}</div>
+          <div v-else-if="!blogPosts.length" class="text-center py-6 text-sm text-base-content/60">مطلبی برای نمایش وجود ندارد.</div>
+
+          <div v-else class="grid gap-5 md:grid-cols-3">
+            <article
+              v-for="post in blogPosts"
+              :key="post.slug"
+              class="group relative bg-base-100 rounded-2xl overflow-hidden shadow-sm ring-1 ring-base-300/60 transition hover:-translate-y-1 hover:shadow-lg"
+            >
+              <div class="h-44 overflow-hidden bg-base-200">
+                <img
+                  :src="post.cover || 'https://placehold.co/800x450?text=Blog'"
+                  :alt="post.title"
+                  class="w-full h-full object-cover transition duration-300 group-hover:scale-105"
+                />
               </div>
-            </div>
-          </article>
+              <div class="px-5 py-4 space-y-3 text-right">
+                <div class="flex items-center justify-between gap-2 text-xs text-base-content/60">
+                  <span>{{ formatDate(post.date) }}</span>
+                  <span v-if="post.category" class="badge badge-ghost badge-sm">{{ post.category }}</span>
+                </div>
+                <h3 class="font-semibold text-base leading-7 line-clamp-2">{{ post.title }}</h3>
+                <p class="text-sm text-base-content/70 line-clamp-3">{{ post.excerpt }}</p>
+                <div class="flex justify-end">
+                  <RouterLink
+                    :to="`/blog/${post.slug}`"
+                    class="text-primary font-medium hover:text-primary/80 inline-flex items-center gap-1"
+                  >
+                    ادامه مطلب
+                    <span class="text-base">←</span>
+                  </RouterLink>
+                </div>
+              </div>
+            </article>
+          </div>
         </div>
       </section>
     </main>
@@ -213,45 +179,32 @@
 </template>
 
 <script setup lang="ts">
-import axios from 'axios'
 import { onMounted, computed, ref } from 'vue'
 import { storeToRefs } from 'pinia'
+import { listPosts } from '@/services/api'
+import type { BlogPost } from '@/services/types'
 import { useProductsStore } from '@/stores/products'
 import ProductGrid from '@/components/ProductGrid.vue'
 
-type BackendProduct = {
-  slug: string
-  title: string
-  description?: string | null
-  short_description?: string | null
-  image_url?: string | null
-}
-
-type ServiceCard = {
-  slug: string
-  title: string
-  desc: string
-  action: string
-  to: string
-  bg: string
-  image?: string | null
-}
-
 const store = useProductsStore()
-const { topWeeklyProducts, topWeeklyLoading, topWeeklyError } = storeToRefs(store)
+const { topWeeklyProducts, topWeeklyLoading, topWeeklyError, loading: productsLoading } = storeToRefs(store)
 
-onMounted(() => {
-  store.load()
-  store.fetchTopWeeklyProducts(8)
-  fetchServiceCards()
+const blogPosts = ref<BlogPost[]>([])
+const blogLoading = ref(false)
+const blogError = ref<string | null>(null)
+
+onMounted(async () => {
+  await store.load()
+  await store.fetchTopWeeklyProducts(8)
+  await fetchBlogPosts()
 })
 
 const giftCards = computed(() =>
   store.products
     .filter(
       (p: any) =>
-        p.categoryId === 'cat-gift' || // ✅ match mock category
-        p.categoryId === 'gift-cards' || // (optional: future API)
+        p.categoryId === 'cat-gift' ||
+        p.categoryId === 'gift-cards' ||
         p?.tags?.includes('gift-card') ||
         p?.tags?.includes('گیفت‌کارت') ||
         p?.tags?.includes('گیفت')
@@ -259,64 +212,31 @@ const giftCards = computed(() =>
     .slice(0, 8)
 )
 
-const gradients: Record<string, string> = {
-  'apple-tv-plus': 'radial-gradient(circle at top, #0f172a, #020617)',
-  'apple-music': 'linear-gradient(160deg, #065f46 0%, #042f2e 100%)',
-  'apple-arcade': 'linear-gradient(160deg, #1f2937 0%, #111827 100%)',
-  'icloud-plus': 'linear-gradient(160deg, #38bdf8 0%, #0ea5e9 100%)',
-  'apple-news-plus': 'linear-gradient(160deg, #f97316 0%, #ea580c 100%)',
-  'apple-fitness-plus': 'linear-gradient(160deg, #c026d3 0%, #701a75 100%)',
-}
-
-const defaultGradient = 'linear-gradient(135deg, #0f172a 0%, #111827 100%)'
-
-const serviceCards = ref<ServiceCard[]>([])
-const servicesLoading = ref(false)
-const servicesError = ref<string | null>(null)
-
-const mapToCard = (product: BackendProduct): ServiceCard => ({
-  slug: product.slug,
-  title: product.title,
-  desc: product.description ?? product.short_description ?? '',
-  action: product.short_description ?? 'خرید اشتراک',
-  to: `/product/${product.slug}`,
-  bg: gradients[product.slug] ?? defaultGradient,
-  image: product.image_url ?? undefined,
-})
-
-const fetchServiceCards = async () => {
-  servicesLoading.value = true
-  servicesError.value = null
+const fetchBlogPosts = async () => {
+  blogLoading.value = true
+  blogError.value = null
   try {
-    const { data } = await axios.get<BackendProduct[]>('http://localhost:5000/products/')
-    serviceCards.value = data.slice(0, 8).map(mapToCard)
-  } catch (error) {
-    servicesError.value = 'خطا در بارگذاری سرویس‌ها. لطفاً دوباره تلاش کنید.'
+    const posts = await listPosts()
+    blogPosts.value = [...posts]
+      .sort((a: any, b: any) => {
+        const ad = new Date(a.date || a.createdAt || 0).getTime()
+        const bd = new Date(b.date || b.createdAt || 0).getTime()
+        return bd - ad
+      })
+      .slice(0, 6)
+  } catch (error: any) {
+    blogError.value = error?.message || 'خطا در بارگذاری مطالب بلاگ'
   } finally {
-    servicesLoading.value = false
+    blogLoading.value = false
   }
 }
 
-const blogPosts = ref([
-  {
-    slug: 'icloud-common-issues',
-    title: 'آیکلود یک اپ؛ مشکلات رایج آیکلاد و راه حل رفع آن‌ها',
-    date: 'سه‌شنبه ۲۹ مهر ۱۴۰۴',
-    image: 'https://placehold.co/600x360?text=iCloud',
-  },
-  {
-    slug: 'apple-arcade-on-mac',
-    title: 'چگونه از اپل آرکید در مک‌بوک و آی مک استفاده کنیم؟',
-    date: 'جمعه ۲ آبان ۱۴۰۴',
-    image: 'https://placehold.co/600x360?text=Apple+Arcade',
-  },
-  {
-    slug: 'youtube-premium-iran',
-    title: 'بررسی مزایای YouTube Premium برای کاربران ایرانی',
-    date: 'دوشنبه ۵ آبان ۱۴۰۴',
-    image: 'https://placehold.co/600x360?text=YouTube',
-  },
-])
+function formatDate(val?: string) {
+  if (!val) return ''
+  const d = new Date(val)
+  if (isNaN(d.getTime())) return val
+  return d.toLocaleDateString('fa-IR')
+}
 
 const slides = ref([
   {
