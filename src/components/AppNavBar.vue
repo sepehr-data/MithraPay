@@ -1,6 +1,6 @@
 <template>
   <header class="sticky top-0 z-50 border-b border-base-200 bg-base-100/80 backdrop-blur">
-    <div class="navbar max-w-7xl mx-auto px-3 lg:px-6">
+    <div class="navbar max-w-6xl mx-auto px-4 lg:px-0">
       <!-- RIGHT / START -->
       <div class="navbar-start w-auto lg:w-1/3 gap-2">
         <!-- mobile menu -->
