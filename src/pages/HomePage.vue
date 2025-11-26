@@ -2,6 +2,8 @@
   <div class="bg-base-200/80 min-h-screen">
     <main class="max-w-6xl mx-auto px-4 lg:px-0 py-8 space-y-12">
 
+      <HeroAppleOneBanner />
+
       <!-- 4 BANNERS (2x2) -->
       <section aria-label="ویژگی ها" class="grid gap-4 sm:grid-cols-2">
         <RouterLink
@@ -185,6 +187,7 @@ import { listPosts } from '@/services/api'
 import type { BlogPost } from '@/services/types'
 import { useProductsStore } from '@/stores/products'
 import ProductGrid from '@/components/ProductGrid.vue'
+import HeroAppleOneBanner from '@/components/HeroAppleOneBanner.vue'
 
 const store = useProductsStore()
 const { topWeeklyProducts, topWeeklyLoading, topWeeklyError, loading: productsLoading } = storeToRefs(store)
