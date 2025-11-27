@@ -36,6 +36,13 @@ export async function getPost(slug: string): Promise<BlogPost | undefined> {
   return (postsJson as BlogPost[]).find(p => p.slug === slug)
 }
 
+export async function getTopWeeklyProducts(limit = 8): Promise<Product[] | { items: Product[] }> {
+  const res = await http.get('/products/top-weekly', {
+    params: { limit }
+  })
+  return res.data
+}
+
 export async function requestOtp(phone: string) {
   // adjust field name if backend uses "mobile" or "phone_number"
   const res = await http.post('/auth/request-otp', {
