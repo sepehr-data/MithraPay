@@ -2,50 +2,58 @@
   <div class="bg-base-200/80 min-h-screen">
     <main class="max-w-6xl mx-auto px-4 lg:px-0 py-8 space-y-12">
 
+      <!-- HERO -->
       <HeroAppleOneBanner />
 
       <!-- 4 BANNERS (2x2) -->
-      <section aria-label="ویژگی ها" class="grid gap-4 sm:grid-cols-2">
+      <section
+          aria-label="ویژگی ها"
+          class="grid gap-4 sm:grid-cols-2 justify-items-center"
+      >
         <RouterLink
-          v-for="banner in banners"
-          :key="banner.id"
-          :to="banner.to"
-          class="group relative block overflow-hidden rounded-[26px] bg-gradient-to-br from-base-100 to-base-100/80 shadow-sm ring-1 ring-base-300/60 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+            v-for="banner in banners"
+            :key="banner.id"
+            :to="banner.to"
+            class="group relative block w-full max-w-[550px] h-64 sm:h-72 lg:h-80 overflow-hidden rounded-[26px] bg-gradient-to-br from-base-100 to-base-100/80 shadow-sm ring-1 ring-base-300/60 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+
         >
           <img
-            :src="banner.image"
-            :alt="banner.alt"
-            class="w-full h-full object-cover"
+              :src="banner.image"
+              :alt="banner.alt"
+              class="w-full h-full object-cover"
           />
-          <div class="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 transition group-hover:opacity-70"></div>
+          <div
+              class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 transition group-hover:opacity-60"
+          ></div>
         </RouterLink>
       </section>
 
-      <!-- BANNER SLIDER -->
+      <!-- BANNER SLIDER (AUTOPLAY + SMOOTH FADE) -->
       <section aria-label="بنر اصلی" class="relative">
         <div
-          class="relative overflow-hidden rounded-[36px] bg-gradient-to-br from-base-100 to-base-100/60 border border-base-300/70 shadow-lg"
+            class="relative overflow-hidden rounded-[36px] bg-gradient-to-br from-base-100 to-base-100/60 border border-base-300/70 shadow-lg"
         >
           <RouterLink :to="slides[current].to" class="block">
-            <div class="bg-gradient-to-t from-base-300/50 to-transparent">
+            <Transition name="slider-fade" mode="out-in">
               <img
-                :src="slides[current].image"
-                :alt="slides[current].alt"
-                class="w-full h-[240px] md:h-[360px] object-cover"
+                  :key="slides[current].id"
+                  :src="slides[current].image"
+                  :alt="slides[current].alt"
+                  class="w-full h-[240px] md:h-[360px] object-cover"
               />
-            </div>
+            </Transition>
           </RouterLink>
 
           <!-- arrows -->
           <button
-            class="absolute top-1/2 -translate-y-1/2 right-5 w-10 h-10 rounded-full bg-base-100/90 shadow-md flex items-center justify-center text-lg text-base-content transition hover:bg-primary hover:text-primary-content"
-            @click="prev"
+              class="absolute top-1/2 -translate-y-1/2 right-5 w-10 h-10 rounded-full bg-base-100/90 shadow-md flex items-center justify-center text-lg text-base-content transition hover:bg-primary hover:text-primary-content"
+              @click="prev"
           >
             ←
           </button>
           <button
-            class="absolute top-1/2 -translate-y-1/2 left-5 w-10 h-10 rounded-full bg-base-100/90 shadow-md flex items-center justify-center text-lg text-base-content transition hover:bg-primary hover:text-primary-content"
-            @click="next"
+              class="absolute top-1/2 -translate-y-1/2 left-5 w-10 h-10 rounded-full bg-base-100/90 shadow-md flex items-center justify-center text-lg text-base-content transition hover:bg-primary hover:text-primary-content"
+              @click="next"
           >
             →
           </button>
@@ -53,11 +61,11 @@
           <!-- dots -->
           <div class="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-2">
             <button
-              v-for="(s, idx) in slides"
-              :key="s.id"
-              class="w-2.5 h-2.5 rounded-full transition-all duration-200"
-              :class="idx === current ? 'bg-primary scale-110' : 'bg-base-300 hover:bg-primary/70'"
-              @click="go(idx)"
+                v-for="(s, idx) in slides"
+                :key="s.id"
+                class="w-2.5 h-2.5 rounded-full transition-all duration-200"
+                :class="idx === current ? 'bg-primary scale-110' : 'bg-base-300 hover:bg-primary/70'"
+                @click="go(idx)"
             ></button>
           </div>
         </div>
@@ -75,8 +83,8 @@
             <p class="text-sm text-base-content/60">محبوب‌ترین اشتراک‌ها و اکانت‌ها</p>
           </div>
           <RouterLink
-            to="/category/accounts"
-            class="text-sm text-primary hover:text-primary/80 font-medium flex items-center gap-1"
+              to="/category/accounts"
+              class="text-sm text-primary hover:text-primary/80 font-medium flex items-center gap-1"
           >
             مشاهده همه
             <span class="text-base">←</span>
@@ -110,8 +118,8 @@
             </p>
           </div>
           <RouterLink
-            to="/category/gift-cards"
-            class="text-sm text-primary hover:text-primary/80 font-medium flex items-center gap-1"
+              to="/category/gift-cards"
+              class="text-sm text-primary hover:text-primary/80 font-medium flex items-center gap-1"
           >
             مشاهده همه گیفت‌کارت‌ها
             <span class="text-base">←</span>
@@ -128,6 +136,48 @@
         </div>
       </section>
 
+      <!-- USER REVIEWS -->
+      <section aria-labelledby="reviews" class="space-y-6">
+        <div class="flex flex-col items-center text-center gap-2">
+          <p class="text-xs text-primary font-semibold">نظر کاربران</p>
+          <h2 id="reviews" class="text-2xl font-bold">تجربه مشتریان میتراپی</h2>
+          <p class="text-sm text-base-content/60">چند تا از بازخوردهای واقعی کاربران</p>
+          <div class="w-16 h-1 bg-primary/70 rounded-full"></div>
+        </div>
+
+        <div class="grid gap-5 md:grid-cols-3">
+          <article
+              v-for="r in reviews"
+              :key="r.id"
+              class="bg-base-100 rounded-2xl shadow-sm ring-1 ring-base-300/70 p-5 flex flex-col gap-3"
+          >
+            <div class="flex items-center gap-3">
+              <div
+                  class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm"
+              >
+                {{ r.initials }}
+              </div>
+              <div>
+                <p class="text-sm font-semibold">{{ r.name }}</p>
+                <p class="text-[11px] text-base-content/60">{{ r.meta }}</p>
+              </div>
+            </div>
+            <p class="text-sm text-base-content/80 leading-relaxed line-clamp-4">
+              {{ r.text }}
+            </p>
+            <div class="mt-auto flex items-center justify-between pt-2 text-xs">
+              <div class="flex items-center gap-1 text-amber-400">
+                <span v-for="n in 5" :key="n">
+                  <span v-if="n <= r.stars">★</span>
+                  <span v-else class="text-base-content/20">★</span>
+                </span>
+              </div>
+              <span class="text-base-content/60">{{ r.date }}</span>
+            </div>
+          </article>
+        </div>
+      </section>
+
       <!-- BLOG -->
       <section aria-labelledby="blog" class="space-y-6">
         <div class="flex flex-col items-center text-center gap-2">
@@ -138,21 +188,27 @@
         </div>
 
         <div class="rounded-[24px] bg-base-100/80 shadow-sm ring-1 ring-base-300/70 p-4">
-          <div v-if="blogLoading" class="text-center py-6 text-sm text-base-content/60">در حال بارگذاری مطالب...</div>
-          <div v-else-if="blogError" class="text-center py-6 text-error text-sm">{{ blogError }}</div>
-          <div v-else-if="!blogPosts.length" class="text-center py-6 text-sm text-base-content/60">مطلبی برای نمایش وجود ندارد.</div>
+          <div v-if="blogLoading" class="text-center py-6 text-sm text-base-content/60">
+            در حال بارگذاری مطالب...
+          </div>
+          <div v-else-if="blogError" class="text-center py-6 text-error text-sm">
+            {{ blogError }}
+          </div>
+          <div v-else-if="!blogPosts.length" class="text-center py-6 text-sm text-base-content/60">
+            مطلبی برای نمایش وجود ندارد.
+          </div>
 
           <div v-else class="grid gap-5 md:grid-cols-3">
             <article
-              v-for="post in blogPosts"
-              :key="post.slug"
-              class="group relative bg-base-100 rounded-2xl overflow-hidden shadow-sm ring-1 ring-base-300/60 transition hover:-translate-y-1 hover:shadow-lg"
+                v-for="post in blogPosts"
+                :key="post.slug"
+                class="group relative bg-base-100 rounded-2xl overflow-hidden shadow-sm ring-1 ring-base-300/60 transition hover:-translate-y-1 hover:shadow-lg"
             >
               <div class="h-44 overflow-hidden bg-base-200">
                 <img
-                  :src="post.cover || 'https://placehold.co/800x450?text=Blog'"
-                  :alt="post.title"
-                  class="w-full h-full object-cover transition duration-300 group-hover:scale-105"
+                    :src="post.cover || 'https://placehold.co/800x450?text=Blog'"
+                    :alt="post.title"
+                    class="w-full h-full object-cover transition duration-300 group-hover:scale-105"
                 />
               </div>
               <div class="px-5 py-4 space-y-3 text-right">
@@ -164,8 +220,8 @@
                 <p class="text-sm text-base-content/70 line-clamp-3">{{ post.excerpt }}</p>
                 <div class="flex justify-end">
                   <RouterLink
-                    :to="`/blog/${post.slug}`"
-                    class="text-primary font-medium hover:text-primary/80 inline-flex items-center gap-1"
+                      :to="`/blog/${post.slug}`"
+                      class="text-primary font-medium hover:text-primary/80 inline-flex items-center gap-1"
                   >
                     ادامه مطلب
                     <span class="text-base">←</span>
@@ -176,12 +232,13 @@
           </div>
         </div>
       </section>
+
     </main>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, computed, ref } from 'vue'
+import { onMounted, onBeforeUnmount, computed, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { listPosts } from '@/services/api'
 import type { BlogPost } from '@/services/types'
@@ -189,58 +246,21 @@ import { useProductsStore } from '@/stores/products'
 import ProductGrid from '@/components/ProductGrid.vue'
 import HeroAppleOneBanner from '@/components/HeroAppleOneBanner.vue'
 
+/* PRODUCTS STORE */
 const store = useProductsStore()
-const { topWeeklyProducts, topWeeklyLoading, topWeeklyError, loading: productsLoading } = storeToRefs(store)
+const {
+  topWeeklyProducts,
+  topWeeklyLoading,
+  topWeeklyError,
+  loading: productsLoading,
+} = storeToRefs(store)
 
+/* BLOG STATE */
 const blogPosts = ref<BlogPost[]>([])
 const blogLoading = ref(false)
 const blogError = ref<string | null>(null)
 
-onMounted(async () => {
-  await store.load()
-  await store.fetchTopWeeklyProducts(8)
-  await fetchBlogPosts()
-})
-
-const giftCards = computed(() =>
-  store.products
-    .filter(
-      (p: any) =>
-        p.categoryId === 'cat-gift' ||
-        p.categoryId === 'gift-cards' ||
-        p?.tags?.includes('gift-card') ||
-        p?.tags?.includes('گیفت‌کارت') ||
-        p?.tags?.includes('گیفت')
-    )
-    .slice(0, 8)
-)
-
-const fetchBlogPosts = async () => {
-  blogLoading.value = true
-  blogError.value = null
-  try {
-    const posts = await listPosts()
-    blogPosts.value = [...posts]
-      .sort((a: any, b: any) => {
-        const ad = new Date(a.date || a.createdAt || 0).getTime()
-        const bd = new Date(b.date || b.createdAt || 0).getTime()
-        return bd - ad
-      })
-      .slice(0, 6)
-  } catch (error: any) {
-    blogError.value = error?.message || 'خطا در بارگذاری مطالب بلاگ'
-  } finally {
-    blogLoading.value = false
-  }
-}
-
-function formatDate(val?: string) {
-  if (!val) return ''
-  const d = new Date(val)
-  if (isNaN(d.getTime())) return val
-  return d.toLocaleDateString('fa-IR')
-}
-
+/* SLIDER STATE */
 const slides = ref([
   {
     id: 'ps-plus',
@@ -256,41 +276,168 @@ const slides = ref([
   },
 ])
 
+const current = ref(0)
+const AUTOPLAY_DELAY = 5000
+let autoplayTimer: ReturnType<typeof setInterval> | null = null
+
+function startAutoplay() {
+  if (autoplayTimer) return
+  autoplayTimer = setInterval(() => {
+    next(false)
+  }, AUTOPLAY_DELAY)
+}
+
+function stopAutoplay() {
+  if (autoplayTimer) {
+    clearInterval(autoplayTimer)
+    autoplayTimer = null
+  }
+}
+
+function restartAutoplay() {
+  stopAutoplay()
+  startAutoplay()
+}
+
+function next(reset = true) {
+  current.value = (current.value + 1) % slides.value.length
+  if (reset) restartAutoplay()
+}
+
+function prev() {
+  current.value = (current.value - 1 + slides.value.length) % slides.value.length
+  restartAutoplay()
+}
+
+function go(i: number) {
+  current.value = i
+  restartAutoplay()
+}
+
+/* GIFT CARDS */
+const giftCards = computed(() =>
+    store.products
+        .filter(
+            (p: any) =>
+                p.categoryId === 'cat-gift' ||
+                p.categoryId === 'gift-cards' ||
+                p?.tags?.includes('gift-card') ||
+                p?.tags?.includes('گیفت‌کارت') ||
+                p?.tags?.includes('گیفت')
+        )
+        .slice(0, 8)
+)
+
+/* BLOG FETCH */
+const fetchBlogPosts = async () => {
+  blogLoading.value = true
+  blogError.value = null
+  try {
+    const posts = await listPosts()
+    blogPosts.value = [...posts]
+        .sort((a: any, b: any) => {
+          const ad = new Date(a.date || a.createdAt || 0).getTime()
+          const bd = new Date(b.date || b.createdAt || 0).getTime()
+          return bd - ad
+        })
+        .slice(0, 6)
+  } catch (error: any) {
+    blogError.value = error?.message || 'خطا در بارگذاری مطالب بلاگ'
+  } finally {
+    blogLoading.value = false
+  }
+}
+
+function formatDate(val?: string) {
+  if (!val) return ''
+  const d = new Date(val)
+  if (isNaN(d.getTime())) return val
+  return d.toLocaleDateString('fa-IR')
+}
+
+/* USER REVIEWS (نمونه ثابت) */
+const reviews = ref([
+  {
+    id: 1,
+    name: 'مهدی ر.',
+    initials: 'م ر',
+    meta: 'خریدار اشتراک اپل موزیک',
+    text: 'سرعت تحویل و راهنمایی برای فعال‌سازی عالی بود. اولین خریدم از میتراپی بود و کاملاً راضی بودم.',
+    stars: 5,
+    date: '۲ روز پیش',
+  },
+  {
+    id: 2,
+    name: 'سارا ک.',
+    initials: 'س ک',
+    meta: 'خریدار گیفت‌کارت استیم',
+    text: 'قیمت‌ها نسبت به بازار خوب بود و کد بدون مشکل روی اکانتم فعال شد. پشتیبانی هم پاسخ‌گو بود.',
+    stars: 4,
+    date: '۱ هفته پیش',
+  },
+  {
+    id: 3,
+    name: 'امیر ح.',
+    initials: 'ا ح',
+    meta: 'خریدار اکانت iCloud+',
+    text: 'برای بکاپ گوشی‌هام به فضای بیشتر نیاز داشتم، خیلی سریع برام فعال شد و راهنمای قدم‌به‌قدم هم داشت.',
+    stars: 5,
+    date: '۱۰ روز پیش',
+  },
+])
+
+/* STATIC BANNERS */
 const banners = [
   {
-    id: 'apple-tv',
-    image: '/banners/slider3.webp',
-    alt: 'Apple TV+',
+    id: 'spotify',
+    image: '/banners/banner-spotify.jpg',
+    alt: 'Spotify',
     to: '/product/apple-tv',
   },
   {
     id: 'apple-music',
-    image: '/banners/slider4.webp',
+    image: '/banners/banner-apple-music.jpg',
     alt: 'Apple Music',
     to: '/product/apple-music-3m',
   },
   {
-    id: 'apple-arcade',
-    image: '/banners/slider5.webp',
-    alt: 'Apple Arcade',
+    id: 'youtube',
+    image: '/banners/banner-youtube.jpg',
+    alt: 'Youtube Premium',
     to: '/product/apple-arcade',
   },
   {
-    id: 'icloud-plus',
-    image: '/banners/slider6.webp',
-    alt: 'iCloud+',
+    id: 'xbox',
+    image: '/banners/banner-xbox.jpg',
+    alt: 'Xbot Game Pass',
     to: '/product/icloud',
   },
 ]
 
-const current = ref(0)
-function next() {
-  current.value = (current.value + 1) % slides.value.length
-}
-function prev() {
-  current.value = (current.value - 1 + slides.value.length) % slides.value.length
-}
-function go(i: number) {
-  current.value = i
-}
+/* LIFECYCLE */
+onMounted(async () => {
+  await store.load()
+  await store.fetchTopWeeklyProducts(8)
+  await fetchBlogPosts()
+  startAutoplay()
+})
+
+onBeforeUnmount(() => {
+  stopAutoplay()
+})
 </script>
+
+<style scoped>
+.slider-fade-enter-active,
+.slider-fade-leave-active {
+  transition: opacity 0.4s ease;
+}
+.slider-fade-enter-from,
+.slider-fade-leave-to {
+  opacity: 0;
+}
+.slider-fade-enter-to,
+.slider-fade-leave-from {
+  opacity: 1;
+}
+</style>
