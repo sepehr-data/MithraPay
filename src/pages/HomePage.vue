@@ -39,7 +39,7 @@
                   :key="slides[current].id"
                   :src="slides[current].image"
                   :alt="slides[current].alt"
-                  class="w-full h-[240px] md:h-[360px] object-cover"
+                  class="w-full h-[240px] md:h-[460px] object-cover"
               />
             </Transition>
           </RouterLink>
@@ -263,17 +263,25 @@ const blogError = ref<string | null>(null)
 /* SLIDER STATE */
 const slides = ref([
   {
-    id: 'ps-plus',
-    image: '/banners/slider2.webp',
-    alt: 'اکانت پلی‌استیشن پلاس قانونی',
+    id: 'chat-gpt',
+    image: '/banners/slider-chat-gpt.jpg',
+    alt: 'خرید اشتراک چت جیبیتی',
+    to: '/product/apple-music-3m',
+  },
+
+  {
+    id: 'grok',
+    image: '/banners/slider-grok.png',
+    alt: 'خرید اشتراک گراک',
     to: '/product/playstation-plus',
   },
   {
-    id: 'apple-music',
-    image: '/banners/slider1.webp',
-    alt: 'Apple Music',
+    id: 'gemini',
+    image: '/banners/slider-gemini.jpg',
+    alt: 'خرید اشتراک جیمینی',
     to: '/product/apple-music-3m',
   },
+
 ])
 
 const current = ref(0)
