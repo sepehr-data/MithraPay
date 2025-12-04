@@ -67,7 +67,7 @@
     "description": "گیفت‌کارت اپل ۲۵ دلاری.",
     "price": 1190000,
     "rating": 5,
-    "image": "https://placehold.co/800x600?text=Apple+Gift+Card",
+    "image": "/products/apple-gift-card.jpg",
     "categoryId": "cat-gift",
     "isDigital": true
   },
@@ -78,7 +78,7 @@
     "description": "گیفت‌کارت پلی‌استیشن ۲۰ دلاری.",
     "price": 999000,
     "rating": 4,
-    "image": "https://placehold.co/800x600?text=PSN+Gift",
+    "image": "/products/ps-gift-card.jpg",
     "categoryId": "cat-gift",
     "isDigital": true
   },

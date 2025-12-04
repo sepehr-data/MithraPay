@@ -1,6 +1,6 @@
 <template>
   <div class="card bg-base-100 shadow-md hover:shadow-lg transition">
-    <figure class="aspect-[4/3] overflow-hidden bg-base-200">
+    <figure class="aspect-square overflow-hidden bg-base-200">
       <img :src="product.image || 'https://placehold.co/600x400?text=Product'" :alt="product.title" class="object-cover w-full h-full" />
     </figure>
     <div class="card-body gap-2">
