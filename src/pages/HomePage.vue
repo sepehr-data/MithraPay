@@ -33,38 +33,42 @@
         <div
             class="relative overflow-hidden rounded-[36px] bg-gradient-to-br from-base-100 to-base-100/60 border border-base-300/70 shadow-lg"
         >
-          <RouterLink :to="slides[current].to" class="block">
-            <Transition name="slider-fade" mode="out-in">
+          <RouterLink :to="slides[current].to" class="block relative overflow-hidden">
+            <Transition name="slider-horizontal">
               <img
                   :key="slides[current].id"
                   :src="slides[current].image"
                   :alt="slides[current].alt"
-                  class="w-full h-[240px] md:h-[460px] object-cover"
+                  class="w-full h-[240px] md:h-[460px] object-cover block"
               />
             </Transition>
           </RouterLink>
 
           <!-- arrows -->
           <button
-              class="absolute top-1/2 -translate-y-1/2 right-5 w-10 h-10 rounded-full bg-base-100/90 shadow-md flex items-center justify-center text-lg text-base-content transition hover:bg-primary hover:text-primary-content"
+              class="absolute top-1/2 -translate-y-1/2 right-4 md:right-6 w-9 h-9 md:w-10 md:h-10 rounded-full bg-base-100/80 backdrop-blur-md shadow-lg flex items-center justify-center text-lg text-base-content/80 border border-base-300/70 transition transform hover:scale-110 hover:bg-primary hover:text-primary-content hover:border-primary/60"
               @click="prev"
           >
-            ←
+            ‹
           </button>
           <button
-              class="absolute top-1/2 -translate-y-1/2 left-5 w-10 h-10 rounded-full bg-base-100/90 shadow-md flex items-center justify-center text-lg text-base-content transition hover:bg-primary hover:text-primary-content"
+              class="absolute top-1/2 -translate-y-1/2 left-4 md:left-6 w-9 h-9 md:w-10 md:h-10 rounded-full bg-base-100/80 backdrop-blur-md shadow-lg flex items-center justify-center text-lg text-base-content/80 border border-base-300/70 transition transform hover:scale-110 hover:bg-primary hover:text-primary-content hover:border-primary/60"
               @click="next"
           >
-            →
+            ›
           </button>
 
           <!-- dots -->
-          <div class="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-2">
+          <div class="absolute bottom-4 md:bottom-5 left-1/2 -translate-x-1/2 flex gap-2.5">
             <button
                 v-for="(s, idx) in slides"
                 :key="s.id"
-                class="w-2.5 h-2.5 rounded-full transition-all duration-200"
-                :class="idx === current ? 'bg-primary scale-110' : 'bg-base-300 hover:bg-primary/70'"
+                class="h-2.5 rounded-full transition-all duration-200 border border-base-300/70"
+                :class="
+          idx === current
+            ? 'w-7 bg-primary shadow-md'
+            : 'w-2.5 bg-base-100/80 hover:bg-primary/70'
+        "
                 @click="go(idx)"
             ></button>
           </div>
@@ -264,7 +268,7 @@ const blogError = ref<string | null>(null)
 const slides = ref([
   {
     id: 'chat-gpt',
-    image: '/banners/slider-chat-gpt.jpg',
+    image: '/banners/slider-chat-gpt.png',
     alt: 'خرید اشتراک چت جیبیتی',
     to: '/product/apple-music-3m',
   },
@@ -277,7 +281,7 @@ const slides = ref([
   },
   {
     id: 'gemini',
-    image: '/banners/slider-gemini.jpg',
+    image: '/banners/slider-gemini.png',
     alt: 'خرید اشتراک جیمینی',
     to: '/product/apple-music-3m',
   },
@@ -436,6 +440,29 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
+.slider-horizontal-enter-active,
+.slider-horizontal-leave-active {
+  transition:
+      transform 380ms ease-in-out,
+      opacity 380ms ease-in-out;
+}
+
+.slider-horizontal-leave-active {
+  position: absolute;
+  inset: 0;
+}
+
+/* اسلاید جدید از راست وارد می‌شود */
+.slider-horizontal-enter-from {
+  transform: translateX(100%);
+  opacity: 0.9;
+}
+
+/* اسلاید قبلی به چپ خارج می‌شود */
+.slider-horizontal-leave-to {
+  transform: translateX(-100%);
+  opacity: 0.9;
+}
 .slider-fade-enter-active,
 .slider-fade-leave-active {
   transition: opacity 0.4s ease;

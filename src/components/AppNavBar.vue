@@ -56,7 +56,9 @@
       <!-- CENTER MENU -->
       <div class="navbar-center hidden lg:flex flex-1 justify-center relative">
         <ul class="menu menu-horizontal gap-1 text-sm font-semibold max-w-[540px] justify-center">
-          <li><RouterLink class="rounded-full px-4" to="/">صفحه اصلی</RouterLink></li>
+          <li>
+            <RouterLink class="rounded-full px-4 nav-pill" to="/">صفحه اصلی</RouterLink>
+          </li>
 
           <!-- STORE -->
           <li
@@ -65,7 +67,7 @@
               @mouseleave="scheduleCloseStoreMenu"
           >
             <button
-                class="flex items-center gap-1 rounded-full px-4"
+                class="flex items-center gap-1 rounded-full px-4 nav-pill"
                 type="button"
                 @click.prevent="toggleStoreMenu"
             >
@@ -157,37 +159,50 @@
               </div>
             </div>
           </li>
-
-          <li><RouterLink class="rounded-full px-4" to="/blog">وبلاگ</RouterLink></li>
-          <li><RouterLink class="rounded-full px-4" to="/support">ارتباط با ما</RouterLink></li>
-          <li><RouterLink class="rounded-full px-4" to="/about">درباره ما</RouterLink></li>
+          <li>
+            <RouterLink class="rounded-full px-4 nav-pill" to="/blog">وبلاگ</RouterLink>
+          </li>
+          <li>
+            <RouterLink class="rounded-full px-4 nav-pill" to="/support">ارتباط با ما</RouterLink>
+          </li>
+          <li>
+            <RouterLink class="rounded-full px-4 nav-pill" to="/about">درباره ما</RouterLink>
+          </li>
         </ul>
       </div>
 
       <!-- LEFT / END -->
       <div class="navbar-end gap-3 w-auto lg:w-auto justify-end flex-shrink-0">
-        <label
-            class="input input-bordered items-center gap-2 hidden lg:flex bg-base-100/80 rounded-full shadow-sm max-w-xs"
-        >
+        <div class="nav-search hidden lg:flex">
           <input
               type="text"
-              class="grow text-sm"
-              placeholder="جستجو..."
-              @keyup.enter="goSearch"
+              class="nav-search-input"
+              placeholder="جستجو ..."
               v-model="q"
+              @keyup.enter="goSearch"
           />
-          <!-- آیکون بدون کادر -->
-          <span class="inline-flex items-center justify-center">
-            <img src="@/assets/icons/search.png" alt="جستجو" class="w-4 h-4" />
-          </span>
-        </label>
 
-        <button class="btn btn-ghost btn-circle" @click="openCart" aria-label="cart">
+          <button
+              type="button"
+              class="nav-search-btn"
+              @click="goSearch"
+              aria-label="جستجو"
+          >
+            <img src="@/assets/icons/search.png" alt="جستجو" class="w-4 h-4" />
+          </button>
+        </div>
+
+        <button
+            class="btn btn-ghost btn-circle cart-btn"
+            @click="openCart"
+            aria-label="cart"
+        >
           <div class="indicator">
-            <img src="@/assets/icons/card.png">
+            <img src="@/assets/icons/card.png" alt="سبد" class="cart-icon-img" />
             <span v-if="cartCount" class="badge badge-sm indicator-item">{{ cartCount }}</span>
           </div>
         </button>
+
 
         <div class="hidden md:flex items-center gap-2 text-sm">
           <template v-if="isLoggedIn">
@@ -262,7 +277,7 @@ function goSearch() {
 }
 
 function goProfile() {
-  router.push({ name: 'profile' })  // /profile -> ProfilePage.vue
+  router.push({ name: 'profile' })
 }
 
 function openStoreMenu() {
@@ -289,18 +304,187 @@ onBeforeUnmount(() => {
 })
 </script>
 
-
 <style scoped>
+/* خود دکمه: رفتار دیفالت دِیزی‌یو‌آی، فقط هاورش رو خنثی می‌کنیم */
+.cart-btn {
+  background-color: transparent;
+  border-color: transparent;
+}
 
+.cart-btn:hover,
+.cart-btn:focus-visible {
+  background-color: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none;
+}
 
-/* hard reset borders INSIDE panel (daisyui likes to add some) */
+.cart-icon-img {
+  width: 1.4rem;
+  height: 1.4rem;
+  transition:
+      transform 0.2s ease,
+      filter 0.2s ease,
+      opacity 0.2s ease;
+  opacity: 0.9;
+}
+
+.cart-btn:hover .cart-icon-img,
+.cart-btn:focus-visible .cart-icon-img {
+  transform: translateY(-1px);
+  opacity: 1;
+  filter: invert(18%) sepia(80%) saturate(2100%) hue-rotate(340deg) brightness(90%) contrast(95%);
+}
+
+.nav-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.35rem;
+  width: 2.6rem;
+  padding: 0.3rem;
+  border-radius: 9999px;
+  background-color: hsla(var(--b1), 0.96);
+  border: 1px solid hsla(var(--bc), 0.18);
+  overflow: hidden;
+  transition:
+      width 0.28s ease,
+      background-color 0.22s ease,
+      border-color 0.22s ease,
+      box-shadow 0.22s ease,
+      transform 0.18s ease;
+}
+
+.nav-search:hover,
+.nav-search:focus-within {
+  width: 15rem;
+  background-color: hsla(var(--b1), 1);
+  border-color: hsla(var(--p), 0.8);
+  box-shadow: 0 12px 26px rgba(15, 23, 42, 0.16);
+  transform: translateY(-1px);
+}
+
+.nav-search-input {
+  flex: 1 1 auto;
+  border: none;
+  background: transparent;
+  outline: none;
+  color: hsl(var(--bc));
+  font-size: 0.86rem;
+  padding-inline-start: 0.3rem;
+  opacity: 0;
+  transform: translateX(8px);
+  transition:
+      opacity 0.22s ease,
+      transform 0.22s ease;
+}
+
+.nav-search:hover .nav-search-input,
+.nav-search:focus-within .nav-search-input {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.nav-search-input::placeholder {
+  color: hsla(var(--bc), 0.4);
+  transition: color 0.18s ease;
+}
+
+.nav-search:focus-within .nav-search-input::placeholder {
+  color: hsla(var(--bc), 0.25);
+}
+
+.nav-search-btn {
+  flex-shrink: 0;
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 9999px;
+  border: none;
+  outline: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: hsl(var(--p));
+  box-shadow: 0 8px 18px hsla(var(--p), 0.4);
+  cursor: pointer;
+  transition:
+      transform 0.18s ease,
+      box-shadow 0.18s ease,
+      background-color 0.18s ease;
+}
+
+.nav-search-btn:hover {
+  transform: translateY(-1px) scale(1.03);
+  box-shadow: 0 12px 26px hsla(var(--p), 0.5);
+}
+
+.nav-search-btn img {
+  transition: transform 0.18s ease, opacity 0.18s ease;
+  opacity: 0.9;
+}
+
+.nav-search-btn:hover img {
+  transform: translateX(-1px);
+  opacity: 1;
+}
+
+.nav-pill {
+  position: relative;
+  padding: 0.35rem 1rem;
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: hsl(var(--bc));
+  transition:
+      color 0.22s ease,
+      transform 0.22s ease;
+}
+
+.nav-pill::after {
+  content: "";
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  bottom: 0;
+  height: 2px;
+  border-radius: 9999px;
+  background: linear-gradient(
+      90deg,
+      rgba(59, 130, 246, 0.9),
+      rgba(56, 189, 248, 0.9)
+  );
+  transform: scaleX(0);
+  transform-origin: right center;
+  transition: transform 0.23s ease-out;
+}
+
+.nav-pill:hover {
+  color: hsl(var(--p));
+  transform: translateY(-1px);
+}
+
+.nav-pill:hover::after {
+  transform-origin: left center;
+  transform: scaleX(1);
+}
+
+.nav-pill.router-link-active,
+.nav-pill[aria-current="page"] {
+  color: hsl(var(--p));
+}
+
+.nav-pill.router-link-active::after,
+.nav-pill[aria-current="page"]::after {
+  transform-origin: left center;
+  transform: scaleX(1);
+}
+
 :deep(.mega-panel > .mega-col),
 :deep(.mega-panel > .mega-col *){
   border: 0 !important;
   box-shadow: none !important;
 }
 
-/* make sure panel itself stays RTL */
 .mega-panel {
   direction: rtl;
 }
