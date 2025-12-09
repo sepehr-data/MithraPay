@@ -15,22 +15,56 @@ module.exports = {
   daisyui: {
     themes: [
       {
-        accountplus: {
-          "primary": "#2563eb",
-          "secondary": "#7c3aed",
-          "accent": "#06b6d4",
-          "neutral": "#1f2937",
-          "base-100": "#0b1220",
-          "base-200": "#111827",
-          "base-300": "#0f172a",
-          "info": "#38bdf8",
-          "success": "#22c55e",
-          "warning": "#f59e0b",
-          "error": "#ef4444"
-        }
+          dreamycoffee: {
+              "base-100": "oklch(98% 0.003 247.858)",
+              "base-200": "oklch(93.1% 0.007 247.896)",
+              "base-300": "oklch(92% 0.013 255.508)",
+              "base-content": "oklch(20% 0.042 265.755)",
+
+              // brand colors
+              primary: "oklch(58.9% 0.182 23.100)",
+              "primary-content": "oklch(98% 0.001 106.423)",
+
+              secondary: "oklch(57% 0.245 27.325)",
+              "secondary-content": "oklch(97% 0.013 17.38)",
+
+              accent: "oklch(44% 0.03 256.802)",
+              "accent-content": "oklch(98% 0.002 247.839)",
+
+              neutral: "oklch(37% 0.044 257.287)",
+              "neutral-content": "oklch(98% 0.003 247.858)",
+
+              // state colors
+              info: "oklch(76.4% 0.110 221.723)",
+              "info-content": "oklch(97% 0.013 236.62)",
+
+              success: "oklch(71.4% 0.167 149.579)",
+              "success-content": "oklch(98% 0.031 120.757)",
+
+              warning: "oklch(76% 0.188 70.08)",
+              "warning-content": "oklch(98% 0.022 95.277)",
+
+              error: "oklch(56.8% 0.237 25.331)",
+              "error-content": "oklch(97% 0.013 17.38)",
+
+              // extra tokens (radius, depth, …)
+              "--radius-selector": "1rem",
+              "--radius-field": "2rem",
+              "--radius-box": "1rem",
+              "--size-selector": "0.25rem",
+              "--size-field": "0.25rem",
+              "--border": "1px",
+              "--depth": "1",
+              "--noise": "0",
+          },
       },
       "light",
-      "autumn"
+      "autumn",
+        "garden",
+        "emerald",
+        "pastel",
+        "fantasy",
+        "dreamycoffee"
     ]
   }
 }

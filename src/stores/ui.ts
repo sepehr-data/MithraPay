@@ -3,7 +3,7 @@ import { defineStore } from 'pinia'
 export const useUiStore = defineStore('ui', {
   state: () => ({
     // theme: (localStorage.getItem('theme') || 'accountplus') as string,
-      theme: (localStorage.getItem('theme') || 'autumn') as string,
+      theme: (localStorage.getItem('theme') || 'dreamycoffee') as string,
       isCartOpen: false
   }),
   actions: {

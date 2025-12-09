@@ -266,10 +266,11 @@ const blogError = ref<string | null>(null)
 
 /* SLIDER STATE */
 const slides = ref([
+
   {
-    id: 'chat-gpt',
-    image: '/banners/slider-chat-gpt.png',
-    alt: 'خرید اشتراک چت جیبیتی',
+    id: 'gemini',
+    image: '/banners/slider-gemini.jpg',
+    alt: 'خرید اشتراک جیمینی',
     to: '/product/apple-music-3m',
   },
 
@@ -279,10 +280,11 @@ const slides = ref([
     alt: 'خرید اشتراک گراک',
     to: '/product/playstation-plus',
   },
+
   {
-    id: 'gemini',
-    image: '/banners/slider-gemini.png',
-    alt: 'خرید اشتراک جیمینی',
+    id: 'chat-gpt',
+    image: '/banners/slider-chat-gpt.jpg',
+    alt: 'خرید اشتراک چت جیبیتی',
     to: '/product/apple-music-3m',
   },
 
