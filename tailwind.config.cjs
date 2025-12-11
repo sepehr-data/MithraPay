@@ -16,8 +16,8 @@ module.exports = {
     themes: [
       {
           dreamycoffee: {
-              "base-100": "oklch(98% 0.003 247.858)",
-              "base-200": "oklch(93.1% 0.007 247.896)",
+              "base-100": "oklch(96.7% 0.003 247.858)",
+              "base-200": "oklch(91.8% 0.007 247.896)",
               "base-300": "oklch(92% 0.013 255.508)",
               "base-content": "oklch(20% 0.042 265.755)",
 
@@ -35,7 +35,7 @@ module.exports = {
               "neutral-content": "oklch(98% 0.003 247.858)",
 
               // state colors
-              info: "oklch(76.4% 0.110 221.723)",
+              info: "oklch(63.9% 0.110 221.723)",
               "info-content": "oklch(97% 0.013 236.62)",
 
               success: "oklch(71.4% 0.167 149.579)",
@@ -47,7 +47,7 @@ module.exports = {
               error: "oklch(56.8% 0.237 25.331)",
               "error-content": "oklch(97% 0.013 17.38)",
 
-              // extra tokens (radius, depth, …)
+              // extra tokens
               "--radius-selector": "1rem",
               "--radius-field": "2rem",
               "--radius-box": "1rem",
@@ -63,8 +63,6 @@ module.exports = {
         "garden",
         "emerald",
         "pastel",
-        "fantasy",
-        "dreamycoffee"
     ]
   }
 }

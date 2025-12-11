@@ -26,7 +26,7 @@
         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-base-100/70 border border-base-200 shadow-sm">
           <span class="w-2 h-2 rounded-full bg-success animate-pulse"></span>
           <span class="text-[11px] text-base-content/70">
-            پشتیبانی فعال • جواب‌گویی در کمتر از ۲۴ ساعت
+            پشتیبانی فعال • جواب‌گویی در کمتر از ۸ ساعت
           </span>
         </div>
 
@@ -35,7 +35,7 @@
         </h2>
         <p class="max-w-2xl text-sm md:text-[15px] text-base-content/70">
           در مورد خرید، فعال‌سازی اشتراک، یا حتی قبل از ثبت سفارش سوالی دارید؟
-          فرم زیر را پر کنید تا تیم میتراپی به‌صورت اختصاصی راهنمایتان کند.
+          فرم زیر را پر کنید تا تیم سپهر باکس به‌صورت اختصاصی راهنمایتان کند.
         </p>
       </div>
 
@@ -54,15 +54,12 @@
                 <h3 class="text-lg md:text-xl font-bold">
                   فرم ارتباط با پشتیبانی
                 </h3>
-                <p class="text-xs text-base-content/60">
-                  اطلاعات تماس‌تان را کامل وارد کنید تا سریع‌تر پاسخ بگیرید.
-                </p>
               </div>
               <div
                   class="hidden sm:flex flex-col items-center justify-center px-2 py-1 rounded-xl bg-base-200/80 text-[11px] text-base-content/70"
               >
                 <span>میانگین پاسخ‌گویی</span>
-                <span class="font-semibold text-primary">کمتر از ۲۴ ساعت</span>
+                <span class="font-semibold text-primary">کمتر از ۸ ساعت</span>
               </div>
             </div>
 
@@ -107,18 +104,19 @@
                   />
                 </label>
               </div>
-              <!-- ✅ موضوع پیام (یک سطر کامل) -->
+
+              <!-- موضوع پیام -->
               <label class="form-control">
                 <div class="label">
-    <span class="label-text text-xs md:text-sm">
-      موضوع پیام
-    </span>
+                  <span class="label-text text-xs md:text-sm">
+                    موضوع پیام
+                  </span>
                   <span
                       v-if="errors.subject"
                       class="label-text-alt text-error text-[11px]"
                   >
-      {{ errors.subject }}
-    </span>
+                    {{ errors.subject }}
+                  </span>
                 </div>
 
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-[11px] md:text-xs">
@@ -160,15 +158,12 @@
                 </div>
               </label>
 
-              <!-- ✅ شماره تماس (زیر موضوع) -->
+              <!-- شماره سفارش (اختیاری) -->
               <label class="form-control">
                 <div class="label">
-    <span class="label-text text-xs md:text-sm">
-      شماره سفارش (اختیاری)
-    </span>
-                  <span class="label-text-alt text-[11px] text-base-content/50">
-      برای پیگیری سریع‌تر پیشنهاد می‌شود وارد کنید
-    </span>
+                  <span class="label-text text-xs md:text-sm">
+                    شماره سفارش (اختیاری)
+                  </span>
                 </div>
                 <input
                     v-model="form.phone"
@@ -177,7 +172,6 @@
                     placeholder="123XXXXXXX"
                 />
               </label>
-
 
               <!-- پیام -->
               <label class="form-control">
@@ -192,85 +186,12 @@
                 </div>
                 <textarea
                     v-model="form.message"
-                    class="textarea textarea-bordered min-h-[130px] md:min-h-[150px] text-sm"
+                    class="textarea textarea-bordered min-h-[130px] md:min-h-[130px] text-sm"
                     placeholder="لطفاً مشکل یا سوال خود را با جزئیات بنویسید."
                 ></textarea>
               </label>
 
-              <!-- کانال ترجیحی -->
-              <div class="grid grid-cols-1 md:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)] gap-4 items-center">
-                <div class="form-control">
-                  <div class="label">
-                    <span class="label-text text-xs md:text-sm">
-                      روش ترجیحی ارتباط
-                    </span>
-                  </div>
-                  <div class="join join-vertical md:join-horizontal w-full">
-                    <button
-                        type="button"
-                        class="btn btn-sm md:btn-xs lg:btn-sm join-item justify-center"
-                        :class="{
-                        'btn-primary btn-active':
-                          form.preferredChannel === 'email',
-                        'btn-ghost':
-                          form.preferredChannel !== 'email',
-                      }"
-                        @click="form.preferredChannel = 'email'"
-                    >
-                      ایمیل
-                    </button>
-                    <button
-                        type="button"
-                        class="btn btn-sm md:btn-xs lg:btn-sm join-item justify-center"
-                        :class="{
-                        'btn-primary btn-active':
-                          form.preferredChannel === 'phone',
-                        'btn-ghost':
-                          form.preferredChannel !== 'phone',
-                      }"
-                        @click="form.preferredChannel = 'phone'"
-                    >
-                      تماس تلفنی
-                    </button>
-                    <button
-                        type="button"
-                        class="btn btn-sm md:btn-xs lg:btn-sm join-item justify-center"
-                        :class="{
-                        'btn-primary btn-active':
-                          form.preferredChannel === 'whatsapp',
-                        'btn-ghost':
-                          form.preferredChannel !== 'whatsapp',
-                      }"
-                        @click="form.preferredChannel = 'whatsapp'"
-                    >
-                      واتساپ
-                    </button>
-                  </div>
-                </div>
-
-                <!-- چک‌باکس قوانین -->
-                <label
-                    class="flex items-start gap-2 text-[11px] md:text-xs cursor-pointer bg-base-200/60 rounded-xl px-3 py-2 border border-base-300/70"
-                >
-                  <input
-                      v-model="form.acceptPolicy"
-                      type="checkbox"
-                      class="checkbox checkbox-xs mt-0.5"
-                  />
-                  <span class="leading-relaxed text-base-content/70">
-                    تأیید می‌کنم
-                    <button
-                        type="button"
-                        class="link link-primary link-hover text-[11px]"
-                    >
-                      قوانین و حریم خصوصی سایت
-                    </button>
-                    را مطالعه کرده‌ام و با آن موافقم.
-                  </span>
-                </label>
-              </div>
-
-              <!-- دکمه + نکته -->
+              <!-- ردیف نهایی: چک‌باکس قوانین + دکمه ارسال -->
               <div
                   class="flex flex-col md:flex-row md:items-center gap-3 pt-2"
               >
@@ -290,31 +211,45 @@
                     <span>در حال ارسال...</span>
                   </span>
                 </button>
-
-                <p
-                    class="text-[11px] md:text-xs text-base-content/60 md:mr-auto"
+                <!-- چک‌باکس قوانین کنار دکمه -->
+                <label
+                    class="flex items-start gap-2 text-[11px] md:text-xs cursor-pointer bg-base-200/60 rounded-xl px-3 py-2 border border-base-300/70 md:mr-auto"
                 >
-                  در ساعات شلوغی، ممکن است پاسخ‌گویی کمی بیشتر طول بکشد؛ اما هیچ
-                  پیامی بی‌جواب نمی‌ماند ✨
-                </p>
+                  <input
+                      v-model="form.acceptPolicy"
+                      type="checkbox"
+                      class="checkbox checkbox-xs mt-0.5"
+                  />
+                  <span class="leading-relaxed text-base-content/70">
+                    تأیید می‌کنم
+                    <button
+                        type="button"
+                        class="link link-primary link-hover text-[11px]"
+                    >
+                      قوانین و حریم خصوصی سایت
+                    </button>
+                    را مطالعه کرده‌ام و با آن موافقم.
+                  </span>
+                </label>
+
               </div>
             </form>
           </div>
         </div>
 
         <!-- ستون اطلاعات تماس / هایلایت‌ها -->
-        <div class="space-y-4 lg:space-y-5">
-          <!-- کارت اصلی اطلاعات -->
+        <div class="space-y-4 lg:space-y-4">
+          <!-- کارت اصلی اطلاعات (کمی کامپکت‌تر) -->
           <div
               class="card bg-base-100/95 border border-base-200 shadow-lg shadow-base-300/30"
           >
-            <div class="card-body space-y-4">
+            <div class="card-body space-y-3 py-4">
               <h3 class="card-title text-base md:text-lg justify-between">
                 راه‌های ارتباط مستقیم
                 <span
                     class="badge badge-success badge-outline text-[10px] md:text-[11px]"
                 >
-                  پاسخ از ۹ صبح تا ۹ شب
+                  پشتیبانی ۲۴ ساعته
                 </span>
               </h3>
 
@@ -333,7 +268,7 @@
                         href="mailto:support@mithrapay.ir"
                         class="link link-hover text-xs md:text-sm ltr:!text-left"
                     >
-                      support@mithrapay.ir
+                      support@sepehrbox.ir
                     </a>
                   </div>
                 </div>
@@ -349,7 +284,7 @@
                       تماس تلفنی
                     </span>
                     <span class="text-xs md:text-sm ltr:!text-left">
-                      021-xxxxxxx
+                      021xxxxxxx
                     </span>
                   </div>
                 </div>
@@ -365,20 +300,20 @@
                       پشتیبانی واتساپ
                     </span>
                     <span class="text-xs md:text-sm ltr:!text-left">
-                      09xx xxx xxxx
+                      09xxxxxxxxx
                     </span>
                   </div>
                 </div>
               </div>
 
-              <div class="divider my-3"></div>
+              <div class="divider my-2"></div>
 
               <div
                   class="grid grid-cols-2 gap-3 text-[11px] md:text-xs text-base-content/70"
               >
                 <div class="space-y-1">
                   <p class="font-semibold text-sm">ساعات پاسخ‌گویی</p>
-                  <p>هر روز ۹ صبح تا ۹ شب</p>
+                  <p>هر روز، ۲۴ ساعته</p>
                 </div>
                 <div class="space-y-1">
                   <p class="font-semibold text-sm">وضعیت فعلی پشتیبانی</p>
@@ -391,16 +326,16 @@
                 </div>
               </div>
 
-              <div class="alert alert-info mt-2 text-[11px] md:text-xs">
+              <div class="alert alert-info mt-1 text-[11px] md:text-xs">
                 <span>
                   برای پیگیری سفارش، لطفاً «شماره سفارش» را حتماً در متن پیام
-                  بنویسید تا سریع‌تر پیدا و بررسی شود.
+                  بنویسید تا سریع‌تر بررسی شود.
                 </span>
               </div>
             </div>
           </div>
 
-          <!-- کارت نکته / FAQ کوچک -->
+          <!-- کارت نکته / FAQ کوچک (برگشت داده شد) -->
           <div
               class="card bg-gradient-to-l from-primary/10 via-base-100 to-base-100 border border-primary/20"
           >
@@ -417,39 +352,7 @@
             </div>
           </div>
 
-          <!-- آمار اعتماد (اختیاری، دکوریِ خوب) -->
-          <div class="grid grid-cols-3 gap-3 text-center text-[11px] md:text-xs">
-            <div
-                class="rounded-2xl bg-base-100/90 border border-base-200 px-2.5 py-3 flex flex-col gap-1"
-            >
-              <span class="text-sm md:text-base font-bold text-primary">
-                +۲۵۰۰
-              </span>
-              <span class="text-base-content/60">
-                سفارش موفق
-              </span>
-            </div>
-            <div
-                class="rounded-2xl bg-base-100/90 border border-base-200 px-2.5 py-3 flex flex-col gap-1"
-            >
-              <span class="text-sm md:text-base font-bold text-primary">
-                ۷ روز
-              </span>
-              <span class="text-base-content/60">
-                پشتیبانی در هفته
-              </span>
-            </div>
-            <div
-                class="rounded-2xl bg-base-100/90 border border-base-200 px-2.5 py-3 flex flex-col gap-1"
-            >
-              <span class="text-sm md:text-base font-bold text-primary">
-                ⭐ ۴.۹
-              </span>
-              <span class="text-base-content/60">
-                رضایت مشتریان
-              </span>
-            </div>
-          </div>
+          <!-- گرید آمار اعتماد هنوز حذف است (طبق درخواست قبلی) -->
         </div>
       </div>
     </div>
@@ -473,7 +376,6 @@ interface ContactForm {
   subject: SubjectType;
   message: string;
   phone: string;
-  preferredChannel: "email" | "phone" | "whatsapp";
   acceptPolicy: boolean;
 }
 
@@ -490,7 +392,6 @@ const form = reactive<ContactForm>({
   subject: "",
   message: "",
   phone: "",
-  preferredChannel: "email",
   acceptPolicy: false,
 });
 
@@ -519,7 +420,6 @@ const resetForm = () => {
   form.subject = "";
   form.message = "";
   form.phone = "";
-  form.preferredChannel = "email";
   form.acceptPolicy = false;
 };
 
@@ -540,7 +440,7 @@ const handleSubmit = async () => {
     // دمو: شبیه‌سازی درخواست
     await new Promise((resolve) => setTimeout(resolve, 900));
 
-    alert("پیام شما با موفقیت ارسال شد؛ ممنون از اعتمادتون به میتراپی 🌱");
+    alert("پیام شما با موفقیت ارسال شد؛ ممنون از اعتمادتون به سپهر باکس 🌱");
     resetForm();
   } catch (error) {
     alert("در ارسال پیام خطایی رخ داد؛ لطفاً دوباره تلاش کنید.");

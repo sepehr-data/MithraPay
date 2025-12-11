@@ -78,86 +78,121 @@
             </button>
 
             <!-- MEGA MENU (مثل قبل، وسط، پهن) -->
-            <div
-                v-show="isStoreMenuOpen"
-                class="absolute left-1/2 top-full lg:-translate-x-[60%] -translate-x-1/2 pt-4 z-40 w-screen max-w-6xl px-4"
-                @mouseenter="openStoreMenu"
-                @mouseleave="scheduleCloseStoreMenu"
-            >
-
+            <Transition name="mega-slide">
               <div
-                  class="mega-shell w-full lg:w-[88vw] xl:w-[82vw] mx-auto
-                       rounded-2xl bg-base-100 shadow-2xl border border-base-200/80
-                       px-5 sm:px-6 lg:px-8 py-6 flex flex-col gap-6"
+                  v-if="isStoreMenuOpen"
+                  class="absolute left-1/2 top-full z-40 w-screen max-w-6xl px-4 pt-3
+           -translate-x-1/2 lg:-translate-x-[60%]"
+                  @mouseenter="openStoreMenu"
+                  @mouseleave="scheduleCloseStoreMenu"
               >
-                <div class="flex flex-col gap-4 text-right lg:flex-row lg:items-start lg:gap-8">
-                  <!-- promo box -->
-                  <div
-                      class="lg:w-[240px] rounded-2xl bg-base-200/80 border border-base-200 flex flex-col justify-between p-5 text-right shadow-sm"
-                  >
-                    <div>
-                      <p class="text-sm text-base-content/70 mb-2">اکانت‌ها، گیفت‌کارت و لوازم</p>
-                      <h3 class="text-lg font-bold mb-3 leading-7">خرید آسان، تحویل سریع</h3>
-                      <p class="text-xs text-base-content/60 leading-6">
-                        پشتیبانی حرفه‌ای، ارسال سریع و چیدمان دقیق محصولات محبوب شما.
-                      </p>
-                    </div>
-                    <RouterLink to="/shop" class="btn btn-sm btn-primary mt-5 rounded-full">
-                      مشاهده اکانت‌ها
-                    </RouterLink>
-                  </div>
+                <div
+                    class="w-full lg:w-[88vw] xl:w-[82vw] mx-auto
+             rounded-xl bg-base-100 border border-base-200 shadow-lg
+             px-4 sm:px-5 lg:px-6 py-4
+             flex flex-col gap-4"
+                >
+                  <div class="flex flex-col gap-4 text-right lg:flex-row lg:items-start lg:gap-6">
+                    <!-- باکس ساده معرفی -->
+                    <!-- باکس ساده معرفی (آپدیت‌شده) -->
+                    <div
+                        class="lg:w-[230px] relative overflow-hidden
+         rounded-xl bg-gradient-to-b from-primary/10 via-base-100 to-base-100
+         border border-primary/20 shadow-md
+         p-4 flex flex-col justify-between"
+                    >
+                      <!-- افکت دکوراتیو نئونی نرم -->
+                      <div
+                          class="pointer-events-none absolute -left-10 -top-10 w-24 h-24 bg-primary/20 blur-3xl opacity-60"
+                      ></div>
+                      <div
+                          class="pointer-events-none absolute -right-8 bottom-[-24px] w-24 h-24 bg-secondary/10 blur-3xl opacity-70"
+                      ></div>
 
-                  <!-- columns -->
-                  <div class="mega-panel grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 flex-1 text-right">
-                    <!-- col 1 -->
-                    <div class="mega-col">
-                      <h3 class="mega-title">اشتراک های پریمیوم اپل</h3>
-                      <ul class="mega-list">
-                        <li><RouterLink class="mega-link" to="/product/apple-one">اشتراک اپل وان</RouterLink></li>
-                        <li><RouterLink class="mega-link" to="/product/apple-music">اپل موزیک</RouterLink></li>
-                        <li><RouterLink class="mega-link" to="/product/icloud">فضای آیکلاد</RouterLink></li>
-                        <li><RouterLink class="mega-link" to="/product/apple-tv">اپل تی‌وی پلاس</RouterLink></li>
-                      </ul>
-                    </div>
+                      <div class="relative space-y-2">
+                        <p class="text-[11px] text-base-content/60">
+                          اشتراک، اکانت و گیفت‌کارت دیجیتال
+                        </p>
+                        <h3 class="text-base font-semibold text-base-content">
+                          همه چیز برای خرید بی‌دردسر
+                        </h3>
+                        <p class="text-xs text-base-content/70 leading-5">
+                          تو سپهر باکس فقط سرویس مورد نظرت رو انتخاب کن؛
+                          بقیه‌ش با ماست؛ پرداخت راحت، تحویل سریع اشتراک و پشتیبانی که واقعاً جواب می‌ده.
+                        </p>
+                      </div>
 
-                    <!-- col 2 -->
-                    <div class="mega-col">
-                      <h3 class="mega-title">اشتراک های کاربردی</h3>
-                      <ul class="mega-list">
-                        <li><RouterLink class="mega-link" to="/category/accounts">یوتیوب پریمیوم</RouterLink></li>
-                        <li><RouterLink class="mega-link" to="/category/accounts">اسپاتیفای</RouterLink></li>
-                        <li><RouterLink class="mega-link" to="/category/accounts">تلگرام پریمیوم</RouterLink></li>
-                        <li><RouterLink class="mega-link" to="/category/accounts">کانوا</RouterLink></li>
-                      </ul>
-                    </div>
-
-                    <!-- col 3 -->
-                    <div class="mega-col">
-                      <h3 class="mega-title">گیفت کارت</h3>
-                      <ul class="mega-list">
-                        <li><RouterLink class="mega-link" to="/category/gift-cards">گیفت کارت اپل</RouterLink></li>
-                        <li><RouterLink class="mega-link" to="/category/gift-cards">گیفت کارت پلی‌استیشن</RouterLink></li>
-                        <li><RouterLink class="mega-link" to="/category/gift-cards">گیفت کارت آمازون</RouterLink></li>
-                        <li><RouterLink class="mega-link" to="/category/gift-cards">گیفت کارت استیم</RouterLink></li>
-                      </ul>
+                      <RouterLink
+                          to="/shop"
+                          class="relative btn btn-sm btn-primary mt-4 rounded-full w-full justify-center"
+                      >
+                        مشاهده محصولات
+                      </RouterLink>
                     </div>
 
-                    <!-- col 4 -->
-                    <div class="mega-col">
-                      <h3 class="mega-title">خدمات</h3>
-                      <ul class="mega-list">
-                        <li><RouterLink class="mega-link" to="/support">ساخت اپل آیدی</RouterLink></li>
-                        <li><RouterLink class="mega-link" to="/support">فعالسازی اشتراک</RouterLink></li>
-                        <li><RouterLink class="mega-link" to="/support">پشتیبانی</RouterLink></li>
-                        <li><a class="mega-link" href="#">مشاوره خرید</a></li>
-                      </ul>
-                    </div>
 
-                    <!-- (جای یه ستون خالی/آیتم‌های بعدی) -->
+                    <!-- ستون‌ها -->
+                    <div
+                        class="grid flex-1 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4
+                 gap-4 text-right"
+                    >
+                      <!-- col 1 -->
+                      <div class="space-y-2">
+                        <h3 class="text-xs font-semibold text-base-content/80 border-b border-base-200 pb-1.5">
+                          اشتراک‌های پریمیوم اپل
+                        </h3>
+                        <ul class="space-y-1">
+                          <li><RouterLink class="mega-link" to="/product/apple-one">اشتراک اپل وان</RouterLink></li>
+                          <li><RouterLink class="mega-link" to="/product/apple-music">اپل موزیک</RouterLink></li>
+                          <li><RouterLink class="mega-link" to="/product/icloud">فضای آیکلاد</RouterLink></li>
+                          <li><RouterLink class="mega-link" to="/product/apple-tv">اپل تی‌وی پلاس</RouterLink></li>
+                        </ul>
+                      </div>
+
+                      <!-- col 2 -->
+                      <div class="space-y-2">
+                        <h3 class="text-xs font-semibold text-base-content/80 border-b border-base-200 pb-1.5">
+                          اشتراک‌های کاربردی
+                        </h3>
+                        <ul class="space-y-1">
+                          <li><RouterLink class="mega-link" to="/category/accounts">یوتیوب پریمیوم</RouterLink></li>
+                          <li><RouterLink class="mega-link" to="/category/accounts">اسپاتیفای</RouterLink></li>
+                          <li><RouterLink class="mega-link" to="/category/accounts">تلگرام پریمیوم</RouterLink></li>
+                          <li><RouterLink class="mega-link" to="/category/accounts">کانوا</RouterLink></li>
+                        </ul>
+                      </div>
+
+                      <!-- col 3 -->
+                      <div class="space-y-2">
+                        <h3 class="text-xs font-semibold text-base-content/80 border-b border-base-200 pb-1.5">
+                          گیفت کارت
+                        </h3>
+                        <ul class="space-y-1">
+                          <li><RouterLink class="mega-link" to="/category/gift-cards">گیفت کارت اپل</RouterLink></li>
+                          <li><RouterLink class="mega-link" to="/category/gift-cards">گیفت کارت پلی‌استیشن</RouterLink></li>
+                          <li><RouterLink class="mega-link" to="/category/gift-cards">گیفت کارت آمازون</RouterLink></li>
+                          <li><RouterLink class="mega-link" to="/category/gift-cards">گیفت کارت استیم</RouterLink></li>
+                        </ul>
+                      </div>
+
+                      <!-- col 4 -->
+                      <div class="space-y-2">
+                        <h3 class="text-xs font-semibold text-base-content/80 border-b border-base-200 pb-1.5">
+                          خدمات و پشتیبانی
+                        </h3>
+                        <ul class="space-y-1">
+                          <li><RouterLink class="mega-link" to="/support">ساخت اپل آیدی</RouterLink></li>
+                          <li><RouterLink class="mega-link" to="/support">فعالسازی اشتراک</RouterLink></li>
+                          <li><RouterLink class="mega-link" to="/support">پشتیبانی</RouterLink></li>
+                          <li><a class="mega-link" href="#">مشاوره خرید</a></li>
+                        </ul>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            </Transition>
+
           </li>
           <li>
             <RouterLink class="rounded-full px-4 nav-pill" to="/blog">وبلاگ</RouterLink>
@@ -511,4 +546,5 @@ onBeforeUnmount(() => {
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
   }
 }
+
 </style>
