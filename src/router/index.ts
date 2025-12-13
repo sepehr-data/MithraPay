@@ -9,6 +9,8 @@ import AdminOrders from '@/pages/admin/AdminOrders.vue'
 
 // 👇 NEW
 import { useAuthStore } from '@/stores/auth'
+import AdminTickets from "@/pages/admin/AdminTickets.vue";
+import AdminSetting from "@/pages/admin/AdminSetting.vue";
 
 const routes: RouteRecordRaw[] = [
   { path: '/', name: 'home', component: () => import('@/pages/HomePage.vue') },
@@ -43,12 +45,14 @@ const routes: RouteRecordRaw[] = [
     component: AdminLayout,
     children: [
       { path: '', component: AdminDashboard },
+      { path: 'tickets', component: AdminTickets},
       { path: 'products', component: AdminProducts },
       { path: 'products/new', component: AdminProductForm },
       { path: 'products/:id', component: AdminProductForm },
       { path: 'banners', component: AdminBanners },
       { path: 'users', component: AdminUsers },
       { path: 'orders', component: AdminOrders },
+      { path: 'setting', component: AdminSetting },
 
       { path: 'blogs', component: () => import('@/pages/admin/AdminBlogs.vue') },
       { path: 'blogs/new', component: () => import('@/pages/admin/AdminBlogForm.vue') },
