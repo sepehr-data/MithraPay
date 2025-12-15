@@ -139,7 +139,6 @@
             <input
                 v-model="form.categoryId"
                 class="input input-bordered input-sm"
-                placeholder="مثلا: icloud"
             />
           </label>
 
@@ -148,7 +147,7 @@
             <input
                 v-model="form.image"
                 class="input input-bordered input-sm ltr text-left"
-                placeholder="مثلا: /images/product.png"
+                placeholder=" /images/product.png"
             />
           </label>
         </div>

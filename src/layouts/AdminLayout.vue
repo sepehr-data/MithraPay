@@ -44,11 +44,13 @@
           "
         >
           <div class="flex items-center gap-2">
-            <span
-                class="text-base-content/50 text-lg group-[.router-link-active]:text-primary"
+            <!-- آیکون حروفی مینیمال به جای ایموجی -->
+            <div
+                class="h-7 w-7 rounded-2xl bg-base-200/80 flex items-center justify-center text-[11px] text-base-content/70
+                       group-[.router-link-active]:bg-primary/10 group-[.router-link-active]:text-primary"
             >
-              {{ item.icon }}
-            </span>
+              {{ item.short }}
+            </div>
             <span>{{ item.label }}</span>
           </div>
           <span
@@ -60,17 +62,17 @@
         </RouterLink>
       </nav>
 
-      <!-- bottom button: رفتن به سایت -->
       <div
-          class="px-4 pb-4 pt-2 border-t border-base-200/80 flex justify-end"
+          class="px-4 pb-4 pt-3 flex justify-center"
       >
         <RouterLink
             to="/"
-            class="btn btn-outline btn-xs sm:btn-sm rounded-full"
+            class="btn btn-outline btn-sm rounded-full w-full max-w-[11rem] justify-center"
         >
           رفتن به سایت
         </RouterLink>
       </div>
+
     </aside>
 
     <!-- main -->
@@ -119,9 +121,13 @@
               @click="showSide = false"
           >
             <span class="flex items-center gap-2">
-              <span class="text-base-content/50 text-lg">
-                {{ item.icon }}
-              </span>
+              <!-- نسخه موبایل همان آیکون حروفی -->
+              <div
+                  class="h-7 w-7 rounded-2xl bg-base-200/80 flex items-center justify-center text-[11px] text-base-content/70
+                         group-[.router-link-active]:bg-primary/10 group-[.router-link-active]:text-primary"
+              >
+                {{ item.short }}
+              </div>
               {{ item.label }}
             </span>
             <span
@@ -153,7 +159,6 @@
   </div>
 </template>
 
-
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
@@ -164,19 +169,19 @@ const showSide = ref(false)
 interface MenuItem {
   label: string
   to: string
-  icon?: string
+  short: string
   badge?: string
 }
 
 const menu: MenuItem[] = [
-  { label: 'داشبورد', to: '/admin', icon: '📊' },
-  { label: 'کاربران', to: '/admin/users', icon: '👥' },
-  { label: 'سفارش‌ها', to: '/admin/orders', icon: '🧾' },
-  { label: 'تیکت‌ها', to: '/admin/tickets', icon: '🎫' },
-  { label: 'محصولات', to: '/admin/products', icon: '🛒' },
-  { label: 'بنرها', to: '/admin/banners', icon: '🖼️' },
-  { label: 'مقالات', to: '/admin/blogs', icon: '✏️' },
-  { label: 'تنظیمات', to: '/admin/setting', icon: '🛠️' },
+  { label: 'داشبورد', to: '/admin', short: 'DB' },
+  { label: 'کاربران', to: '/admin/users', short: 'US' },
+  { label: 'سفارشات', to: '/admin/orders', short: 'OR' },
+  { label: 'تیکت‌ها', to: '/admin/tickets', short: 'TK' },
+  { label: 'محصولات', to: '/admin/products', short: 'PR' },
+  { label: 'بنرها', to: '/admin/banners', short: 'BN' },
+  { label: 'مقالات', to: '/admin/blogs', short: 'BL' },
+  { label: 'تنظیمات', to: '/admin/setting', short: 'ST' },
 ]
 
 const isActive = (path: string) => {
@@ -185,9 +190,6 @@ const isActive = (path: string) => {
 }
 
 const adminName = ref('') // این رو بعد از لاگین از بک‌اند پر کن
-
-// مثال: بعد از گرفتن اطلاعات از API
-// adminName.value = response.data.name
 
 const adminInitials = computed(() => {
   if (!adminName.value) return 'A'

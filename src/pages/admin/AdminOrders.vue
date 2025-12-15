@@ -21,31 +21,27 @@
           </p>
         </div>
 
-        <!-- باکس‌های آماری کنار هم -->
+        <!-- باکس‌های آماری زیر هم -->
         <div
-            class="flex flex-row flex-wrap justify-end gap-2 text-[11px] sm:text-xs"
+            class="flex flex-col items-end gap-2 text-[11px] sm:text-xs"
         >
           <div
               class="inline-flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-primary-content/10 border border-primary-content/20"
           >
-            <span
-                class="w-1.5 h-1.5 rounded-full bg-primary-content/80"
-            ></span>
+            <span class="w-1.5 h-1.5 rounded-full bg-primary-content/80"></span>
             <span>تعداد کل سفارشات:</span>
             <span class="font-bold text-sm">
-              {{ totalOrders }}
-            </span>
+      {{ totalOrders }}
+    </span>
           </div>
           <div
               class="inline-flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-primary-content/10 border border-primary-content/20"
           >
-            <span
-                class="w-1.5 h-1.5 rounded-full bg-primary-content/80"
-            ></span>
+            <span class="w-1.5 h-1.5 rounded-full bg-primary-content/80"></span>
             <span>در این لیست:</span>
             <span class="font-bold text-sm">
-              {{ filteredCount }}
-            </span>
+      {{ filteredCount }}
+    </span>
           </div>
         </div>
       </div>
@@ -259,7 +255,7 @@ type FilterKey = 'all' | 'paid' | 'pending'
 
 const filterOptions: { key: FilterKey; label: string }[] = [
   { key: 'all', label: 'همه سفارشات' },
-  { key: 'paid', label: 'فقط سفارشات پرداخت‌شده' },
+  { key: 'paid', label: 'سفارشات پرداخت‌شده' },
   { key: 'pending', label: 'سفارشات در انتظار / دیگر وضعیت‌ها' },
 ]
 
