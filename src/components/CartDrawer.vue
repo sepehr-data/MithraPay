@@ -4,7 +4,7 @@
     <transition name="fade">
       <div
           v-if="ui.isCartOpen"
-          class="fixed inset-0 z-[99998] bg-black/45"
+          class="fixed inset-0 z-[99998] bg-black/35"
           @click="ui.closeCart()"
       />
     </transition>
@@ -12,165 +12,177 @@
     <!-- Drawer -->
     <aside
         class="fixed inset-y-0 left-0 z-[99999]
-             w-[88vw] max-w-[360px]
-             bg-base-100 border-r border-base-300 shadow-2xl
-             transform transition-transform duration-300"
+             w-[84vw] max-w-[320px]
+             bg-base-100 border-r border-base-200
+             shadow-2xl
+             transform transition-transform duration-250 ease-out"
         :class="ui.isCartOpen ? 'translate-x-0' : '-translate-x-full'"
         dir="rtl"
         @click.stop
     >
       <div class="h-full flex flex-col">
         <!-- Header -->
-        <div class="px-4 pt-4 pb-3 border-b border-base-200">
+        <header class="px-4 py-4 border-b border-base-200">
           <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <div
-                  class="h-11 w-11 rounded-3xl border border-base-200 bg-base-100 shadow-sm
-                       flex items-center justify-center"
-              >
-                <span class="text-lg">🛒</span>
-              </div>
-
-              <div>
-                <div class="font-black leading-5">سبد خرید</div>
-                <div class="text-xs opacity-70 mt-1">{{ cart.items.length }} آیتم</div>
+            <div class="min-w-0">
+              <div class="text-sm font-semibold">سبد خرید</div>
+              <div class="text-xs text-base-content/60 mt-1">
+                {{ cart.items.length }} آیتم
               </div>
             </div>
 
-            <button class="btn btn-ghost btn-sm rounded-2xl" @click="ui.closeCart()">✕</button>
+            <button
+                class="btn btn-ghost btn-sm rounded-xl"
+                @click="ui.closeCart()"
+                aria-label="close"
+                type="button"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M18 6 6 18M6 6l12 12" />
+              </svg>
+            </button>
           </div>
-        </div>
+        </header>
 
         <!-- Content -->
-        <div class="flex-1 overflow-y-auto px-4 py-4 pb-[168px]">
+        <main class="flex-1 overflow-y-auto px-4 py-3 cart-scroll">
           <!-- Empty -->
           <div
               v-if="cart.items.length === 0"
-              class="rounded-3xl border border-base-200 bg-base-100 p-5"
+              class="rounded-2xl border border-base-200 p-4"
           >
             <div class="flex items-start gap-3">
-              <div class="h-12 w-12 rounded-3xl bg-base-200 flex items-center justify-center">
-                <span class="text-xl">🧺</span>
+              <div class="h-10 w-10 rounded-xl border border-base-200 bg-base-200/40 grid place-items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M6 6h15l-1.5 9h-12L6 6Z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M6 6 5 3H2" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M9 20a1 1 0 1 0 0-2 1 1 0 0 0 0 2ZM17 20a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" />
+                </svg>
               </div>
 
               <div class="flex-1">
-                <div class="font-black mb-1">سبدت خالیه</div>
-                <div class="text-sm opacity-70">یه محصول اضافه کن تا اینجا پر بشه.</div>
+                <div class="text-sm font-semibold">سبد خرید خالی است</div>
+                <div class="text-xs text-base-content/60 mt-1 leading-5">
+                  برای ادامه یک محصول اضافه کنید.
+                </div>
 
-                <button class="btn btn-primary w-full rounded-2xl mt-4" @click="ui.closeCart()">
+                <button
+                    class="btn btn-primary w-full rounded-xl mt-4"
+                    @click="ui.closeCart()"
+                    type="button"
+                >
                   شروع خرید
                 </button>
               </div>
             </div>
           </div>
 
-          <!-- Items -->
-          <div v-else class="space-y-3">
-            <div
-                v-for="line in cart.detailed"
-                :key="line.productId"
-                class="rounded-3xl border border-base-200 bg-base-100 p-3 shadow-sm
-                     hover:shadow-md hover:border-base-300 transition-all"
-            >
-              <div class="flex gap-3">
-                <img
-                    :src="line.product.image || 'https://placehold.co/160x160'"
-                    class="h-20 w-20 rounded-3xl object-cover border border-base-200"
-                    alt=""
-                />
+          <!-- Items list (minimal) -->
+          <div v-else>
+            <div class="divide-y divide-base-200">
+              <div
+                  v-for="line in cart.detailed"
+                  :key="line.productId"
+                  class="py-3"
+              >
+                <div class="flex gap-3">
+                  <img
+                      :src="line.product.image || 'https://placehold.co/160x160'"
+                      class="h-14 w-14 rounded-xl object-cover border border-base-200"
+                      alt=""
+                  />
 
-                <div class="flex-1 min-w-0">
-                  <!-- title + remove -->
-                  <div class="flex items-start justify-between gap-2">
-                    <div class="min-w-0">
-                      <div class="font-black truncate">{{ line.product.title }}</div>
-                      <div class="text-xs opacity-70 mt-1">
-                        {{ money(line.product.price) }}
-                        <span class="opacity-60"> تومان</span>
-                        <span class="opacity-60"> / واحد</span>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-start justify-between gap-2">
+                      <div class="min-w-0">
+                        <div class="text-sm font-semibold truncate">
+                          {{ line.product.title }}
+                        </div>
+
+                        <div class="mt-1 text-xs text-base-content/60">
+                          {{ money(line.product.price) }}
+                          <span class="opacity-60">تومان</span>
+                        </div>
+                      </div>
+
+                      <button
+                          class="icon-btn"
+                          @click="cart.remove(line.productId)"
+                          aria-label="remove"
+                          title="حذف"
+                          type="button"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M4 7h16" />
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M10 11v6" />
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M14 11v6" />
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M6 7l1 14h10l1-14" />
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M9 7V4h6v3" />
+                        </svg>
+                      </button>
+                    </div>
+
+                    <div class="mt-2 flex items-end justify-between gap-3">
+                      <div class="qty-wrap">
+                        <QuantityInput
+                            v-model="(line as any).qty"
+                            @update:model-value="cart.setQty(line.productId, $event)"
+                        />
+                      </div>
+
+                      <div class="text-left">
+                        <div class="text-[10px] text-base-content/50">جمع</div>
+                        <div class="text-sm font-semibold whitespace-nowrap">
+                          {{ money(line.lineTotal) }}
+                          <span class="text-[10px] font-normal text-base-content/60">تومان</span>
+                        </div>
                       </div>
                     </div>
-
-                    <!-- remove (کوچیک‌تر + هاور قرمز) -->
-                    <button
-                        class="remove-emoji"
-                        @click="cart.remove(line.productId)"
-                        title="حذف"
-                        aria-label="remove"
-                    >
-                      🗑️
-                    </button>
-                  </div>
-
-                  <!-- qty (با مارجین/پدینگ به سمت چپ) -->
-                  <div class="mt-3 flex items-center justify-start">
-                    <div class="qty-pill mr-3 pl-2">
-                      <QuantityInput
-                          v-model="(line as any).qty"
-                          @update:model-value="cart.setQty(line.productId, $event)"
-                      />
-                    </div>
-                  </div>
-
-                  <!-- line total (چینش جدا و تمیز) -->
-                  <div class="mt-2 flex items-baseline justify-end gap-1">
-                    <div class="text-[11px] opacity-60 ml-2">قیمت</div>
-                    <div class="font-black whitespace-nowrap">
-                      {{ money(line.lineTotal) }}
-                    </div>
-                    <div class="text-[11px] opacity-70">تومان</div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <!-- Clear cart button -->
-            <button class="clear-cart" @click="clearAll()">
-              <span class="text-lg">🧹</span>
-              خالی کردن کل سبد
+            <!-- ✅ Clear cart button (زیر محصولات) -->
+            <button
+                class="btn btn-ghost w-full rounded-xl border border-base-200 mt-3"
+                @click="clearAll()"
+                type="button"
+            >
+              خالی کردن سبد
             </button>
           </div>
-        </div>
+        </main>
 
-        <!-- Bottom checkout (مثل نمونه‌ای که دادی) -->
-        <div class="sticky bottom-0 border-t border-base-200 bg-base-100">
+        <!-- Footer -->
+        <footer class="border-t border-base-200 bg-base-100">
           <div class="p-4">
-            <div class="rounded-3xl border border-base-200 bg-base-100 shadow-sm p-3">
-              <div class="flex items-center justify-between">
-                <div>
-                  <div class="text-xs opacity-70">جمع کل</div>
-                  <div class="flex items-baseline gap-1">
-                    <div class="text-lg font-black">{{ money(cart.total) }}</div>
-                    <div class="text-[11px] opacity-70">تومان</div>
-                  </div>
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-[11px] text-base-content/60">جمع کل</div>
+                <div class="text-base font-semibold mt-1">
+                  {{ money(cart.total) }}
+                  <span class="text-[11px] font-normal text-base-content/60">تومان</span>
                 </div>
-
-                <div class="text-left">
-                  <div class="text-xs opacity-70">آیتم‌ها</div>
-                  <div class="font-black">{{ cart.items.length }}</div>
-                </div>
-              </div>
-
-              <div class="grid grid-cols-2 gap-2 mt-3">
-
-                <RouterLink
-                    to="/checkout"
-                    class="btn btn-primary rounded-2xl"
-                    :class="cart.items.length === 0 ? 'btn-disabled' : ''"
-                    @click="cart.items.length === 0 ? $event.preventDefault() : ui.closeCart()"
-                >
-                  پرداخت
-                </RouterLink>
-                <button class="btn btn-ghost rounded-2xl" @click="ui.closeCart()">
-                  ادامه مرور
-                </button>
-
-
               </div>
             </div>
-          </div>
-        </div>
 
+            <div class="grid grid-cols-2 gap-2 mt-3">
+              <RouterLink
+                  to="/checkout"
+                  class="btn btn-primary rounded-xl"
+                  :class="cart.items.length === 0 ? 'btn-disabled' : ''"
+                  @click="cart.items.length === 0 ? $event.preventDefault() : ui.closeCart()"
+              >
+                پرداخت
+              </RouterLink>
+
+              <button class="btn btn-ghost rounded-xl" @click="ui.closeCart()" type="button">
+                ادامه
+              </button>
+            </div>
+          </div>
+        </footer>
       </div>
     </aside>
   </Teleport>
@@ -186,7 +198,6 @@ import QuantityInput from './QuantityInput.vue'
 const ui = useUiStore()
 const cart = useCartStore()
 
-// عددِ قیمت بدون "تومان" (برای جلوگیری از تکرار)
 const money = (n: number) => String(formatToman(n)).replace(/تومان/g, '').trim()
 
 const onKey = (e: KeyboardEvent) => {
@@ -215,54 +226,52 @@ const clearAll = () => {
 </script>
 
 <style scoped>
-.fade-enter-active, .fade-leave-active { transition: opacity .18s ease; }
-.fade-enter-from, .fade-leave-to { opacity: 0; }
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.18s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
 
-/* remove: کوچیک‌تر + هاور قرمز (بدون کادر) */
-.remove-emoji{
+.cart-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.18) transparent;
+}
+.cart-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+.cart-scroll::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.14);
+  border-radius: 999px;
+}
+.cart-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.20);
+}
+
+.icon-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
   background: transparent;
-  border: none;
-  padding: 0;
-  line-height: 1;
-  font-size: 16px;
-  cursor: pointer;
-  opacity: .85;
-  transition: transform .15s ease, filter .15s ease, opacity .15s ease;
+  display: grid;
+  place-items: center;
+  opacity: 0.9;
+  transition: transform 0.12s ease, border-color 0.12s ease, opacity 0.12s ease;
 }
-.remove-emoji:hover{
-  opacity: 1;
-  transform: scale(1.06);
-  filter: saturate(4) hue-rotate(310deg) drop-shadow(0 0 6px rgba(239,68,68,.35));
-}
-
-/* qty capsule */
-.qty-pill{
-  border: 1px solid rgba(0,0,0,.10);
-  background: rgba(255,255,255,.9);
-  border-radius: 18px;
-  padding: 6px 8px;
-  box-shadow: 0 6px 18px rgba(0,0,0,.06);
-  transform: translateY(6px);
-  max-width: 150px;
-}
-
-/* clear cart */
-.clear-cart{
-  width: 100%;
-  height: 44px;
-  border-radius: 18px;
-  border: 1px dashed rgba(239,68,68,.55);
-  background: rgba(239,68,68,.06);
-  color: rgba(185,28,28,1);
-  font-weight: 950;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  transition: transform .12s ease, background .12s ease;
-}
-.clear-cart:hover{
+.icon-btn:hover {
   transform: translateY(-1px);
-  background: rgba(239,68,68,.10);
+  opacity: 1;
+  border-color: rgba(239, 68, 68, 0.30);
+}
+
+.qty-wrap {
+  border: 1px solid rgba(0, 0, 0, 0.10);
+  border-radius: 14px;
+  padding: 6px 8px;
+  background: rgba(255, 255, 255, 0.9);
+  max-width: 150px;
 }
 </style>

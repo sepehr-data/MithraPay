@@ -5,17 +5,30 @@
     "module": "ESNext",
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "skipLibCheck": true,
-    "moduleResolution": "Bundler",
+
+    "moduleResolution": "Node",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "esModuleInterop": true,
     "noEmit": true,
     "jsx": "preserve",
     "strict": true,
+
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
-    }
+      "@": ["src"],
+      "@/*": ["src/*"],
+      "~": ["src"],
+      "~/*": ["src/*"]
+    },
+
+    "types": ["vite/client"]
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue", "env.d.ts"]
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.d.ts",
+    "src/**/*.tsx",
+    "src/**/*.vue",
+    "env.d.ts"
+  ]
 }

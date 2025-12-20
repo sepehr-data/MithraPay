@@ -6,6 +6,7 @@ import AdminProductForm from '@/pages/admin/AdminProductForm.vue'
 import AdminBanners from '@/pages/admin/AdminBanners.vue'
 import AdminUsers from '@/pages/admin/AdminUsers.vue'
 import AdminOrders from '@/pages/admin/AdminOrders.vue'
+import AdminBannerForm from "@/pages/admin/AdminBannerForm.vue";
 
 // 👇 NEW
 import { useAuthStore } from '@/stores/auth'
@@ -39,8 +40,7 @@ const routes: RouteRecordRaw[] = [
 
   { path: '/search', name: 'search', component: () => import('@/pages/SearchPage.vue') },
   { path: '/auth/login', name: 'login', component: () => import('@/pages/LoginPage.vue'), meta: { auth: true }},
-  { path: '/auth/register', name: 'register', component: () => import('@/pages/RegisterPage.vue'), meta: { auth: true }},
-  {
+    {
     path: '/admin',
     component: AdminLayout,
     children: [
@@ -50,6 +50,8 @@ const routes: RouteRecordRaw[] = [
       { path: 'products/new', component: AdminProductForm },
       { path: 'products/:id', component: AdminProductForm },
       { path: 'banners', component: AdminBanners },
+      { path: 'banners/new', name: 'admin-banner-create', component: AdminBannerForm },
+      { path: 'banners/:id', name: 'admin-banner-edit', component: AdminBannerForm, props: true },
       { path: 'users', component: AdminUsers },
       { path: 'orders', component: AdminOrders },
       { path: 'setting', component: AdminSetting },

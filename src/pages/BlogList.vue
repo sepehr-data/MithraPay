@@ -11,11 +11,11 @@
           <div class="text-right space-y-3">
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-base-200/70 border border-base-300 w-fit mr-auto">
               <span class="w-1.5 h-1.5 rounded-full bg-success"></span>
-              <span class="text-[11px] text-base-content/70">MithraPay Blog</span>
+              <span class="text-[11px] text-base-content/70">SepehrBox Blog</span>
             </div>
 
             <h1 class="text-2xl md:text-3xl font-extrabold leading-relaxed">
-              بلاگ میتراپی
+              بلاگ سپهرباکس
             </h1>
             <p class="text-sm md:text-base text-base-content/70 leading-7">
               آموزش‌ها، راهنماها و خبرهای دنیای سرویس‌های دیجیتال؛
