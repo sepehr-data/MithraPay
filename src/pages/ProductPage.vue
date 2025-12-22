@@ -1,8 +1,8 @@
 <template>
-  <div class="product-page space-y-10">
+  <div class="mx-auto max-w-6xl px-4 lg:px-0 py-6 space-y-8" dir="rtl">
     <Breadcrumbs
-      class="mt-2"
-      :crumbs="[
+        class="mt-2"
+        :crumbs="[
         { title: 'محصولات', to: '/category/accounts' },
         { title: product?.title || '...' }
       ]"
@@ -10,115 +10,200 @@
 
     <div v-if="!product" class="skeleton h-72 w-full rounded-2xl"></div>
 
-    <div v-else class="content-wrapper">
-      <div class="header-card">
-        <div class="header-media">
-          <img
-            :src="product.image || 'https://placehold.co/900x550'"
-            class="hero-image"
-            :alt="product.title"
-          />
-        </div>
-        <div class="header-details">
-          <p class="overline">{{ product.tags?.join(' • ') || 'پیشنهاد ویژه' }}</p>
-          <h1 class="title">{{ product.title }}</h1>
-          <p class="subtitle">{{ product.description }}</p>
-
-          <div class="meta-row">
-            <RatingStars :value="product.rating || 4.5" />
-            <PriceTag :price="product.price" :compareAt="product.compareAt" />
-          </div>
-
-          <div class="badge-row" v-if="product.isDigital">
-            <span class="pill">تحویل دیجیتال • فوری</span>
+    <div v-else class="space-y-6">
+      <!-- HERO (Minimal) -->
+      <section class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        <div class="lg:col-span-7">
+          <div class="rounded-2xl border border-base-300 bg-base-100 overflow-hidden">
+            <img
+                :src="product.image || 'https://placehold.co/900x550'"
+                class="w-full h-[240px] sm:h-[320px] object-cover"
+                :alt="product.title"
+                loading="lazy"
+            />
           </div>
         </div>
-      </div>
 
-      <div class="main-grid">
-        <section class="primary-column">
-          <div class="card">
-            <div class="section-header">
+        <div class="lg:col-span-5">
+          <div class="rounded-2xl border border-base-300 bg-base-100 p-5 sm:p-6 h-full">
+            <div class="flex flex-wrap gap-2">
+              <span v-if="product.isDigital" class="badge badge-outline">تحویل دیجیتال</span>
+              <span class="badge badge-outline" v-if="selectedOffer?.region">ریجن: {{ selectedOffer.region }}</span>
+              <span class="badge badge-outline" v-if="selectedOffer?.duration">مدت: {{ selectedOffer.duration }}</span>
+              <span class="badge badge-outline" v-if="selectedOffer?.instant">فوری</span>
+            </div>
+
+            <h1 class="mt-3 text-xl sm:text-2xl font-extrabold leading-8">
+              {{ product.title }}
+            </h1>
+
+            <p class="mt-2 text-sm text-base-content/70 leading-7">
+              {{ product.description }}
+            </p>
+
+            <div class="mt-4 flex items-center justify-between gap-3">
+              <RatingStars :value="product.rating || 4.5" />
+              <PriceTag :price="displayPrice" :compareAt="displayCompareAt" />
+            </div>
+
+            <div v-if="product.tags?.length" class="mt-4 flex flex-wrap gap-2">
+              <span v-for="t in product.tags" :key="t" class="badge badge-ghost">
+                {{ t }}
+              </span>
+            </div>
+
+            <div class="mt-5 grid grid-cols-2 gap-2">
+              <div class="rounded-xl border border-base-300 bg-base-100 p-3">
+                <p class="text-xs text-base-content/60">تحویل</p>
+                <p class="text-sm font-semibold mt-1">
+                  {{ selectedOffer?.deliveryTime || 'کمتر از چند ساعت' }}
+                </p>
+              </div>
+
+              <div class="rounded-xl border border-base-300 bg-base-100 p-3">
+                <p class="text-xs text-base-content/60">پشتیبانی</p>
+                <p class="text-sm font-semibold mt-1">
+                  {{ selectedOffer?.support || 'پشتیبانی پاسخگو' }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- MAIN -->
+      <section class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        <!-- Left / main -->
+        <div class="lg:col-span-8 space-y-4">
+          <!-- Plans -->
+          <div class="rounded-2xl border border-base-300 bg-base-100 p-5 sm:p-6">
+            <div class="flex items-start justify-between gap-3">
               <div>
-                <h2 class="section-title">انتخاب پیشنهاد خرید</h2>
-                <p class="section-subtitle">پکیج دلخواه خود را انتخاب کنید. لیست زیر به صورت واکنش‌گرا چیدمان می‌شود.</p>
+                <h2 class="text-lg font-bold">انتخاب پیشنهاد خرید</h2>
+                <p class="text-sm text-base-content/60 mt-1">
+                  پلن موردنظرت رو انتخاب کن؛ قیمت و سایدبار به‌صورت خودکار آپدیت می‌شه.
+                </p>
               </div>
             </div>
 
-            <div class="purchase-grid">
+            <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
               <button
-                v-for="(item, index) in purchaseOptions"
-                :key="index"
-                class="option-card"
-                type="button"
-                :aria-pressed="index === selectedIndex"
-                @click="selectedIndex = index"
+                  v-for="(item, index) in purchaseOptions"
+                  :key="index"
+                  type="button"
+                  class="plan-card"
+                  :class="{ 'plan-card--active': index === selectedIndex }"
+                  :aria-pressed="index === selectedIndex"
+                  @click="selectedIndex = index"
               >
-                <div class="option-top">
-                  <div>
-                    <p class="option-title">{{ item.title || product.title }}</p>
-                    <p class="option-desc">{{ item.description || 'موجود برای خرید فوری' }}</p>
+                <div class="flex items-start justify-between gap-3">
+                  <div class="min-w-0">
+                    <p class="font-semibold truncate">{{ item.title || product.title }}</p>
+                    <p class="text-xs text-base-content/60 mt-1 line-clamp-2">
+                      {{ item.description || 'موجود برای خرید فوری' }}
+                    </p>
                   </div>
-                  <span class="option-badge" v-if="index === selectedIndex">انتخاب شده</span>
+
+                  <span class="radio" :class="{ 'radio--on': index === selectedIndex }" aria-hidden="true"></span>
                 </div>
-                <div class="option-bottom">
-                  <div class="option-price">
-                    <PriceTag :price="item.price || product.price" :compareAt="item.compareAt || product.compareAt" />
+
+                <div class="mt-3 flex items-end justify-between gap-3">
+                  <PriceTag :price="item.price || product.price" :compareAt="item.compareAt || product.compareAt" />
+
+                  <div class="flex flex-wrap gap-1 justify-end">
+                    <span v-if="item.region" class="pill">ریجن: {{ item.region }}</span>
+                    <span v-if="item.duration" class="pill">مدت: {{ item.duration }}</span>
+                    <span v-if="item.instant" class="pill pill-ok">فوری</span>
                   </div>
-                  <span class="option-meta">{{ item.region || item.tag || 'بدون محدودیت منطقه‌ای' }}</span>
                 </div>
               </button>
             </div>
           </div>
 
-          <div class="card">
-            <h2 class="section-title">توضیحات</h2>
-            <p class="body-text">{{ product.description }}</p>
+          <!-- Description -->
+          <div class="rounded-2xl border border-base-300 bg-base-100 p-5 sm:p-6">
+            <div class="flex items-center justify-between gap-2">
+              <h2 class="text-lg font-bold">توضیحات</h2>
+              <span v-if="product.isDigital" class="badge badge-outline">Digital</span>
+            </div>
+            <p class="mt-3 text-sm text-base-content/70 leading-7">
+              {{ product.description }}
+            </p>
+
+            <div class="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div class="rounded-xl border border-base-300 p-3">
+                <p class="text-xs text-base-content/60">روش تحویل</p>
+                <p class="text-sm font-semibold mt-1">{{ selectedOffer?.deliveryMethod || 'پنل / ایمیل' }}</p>
+              </div>
+              <div class="rounded-xl border border-base-300 p-3">
+                <p class="text-xs text-base-content/60">گارانتی</p>
+                <p class="text-sm font-semibold mt-1">{{ selectedOffer?.warranty || 'طبق شرایط پلن' }}</p>
+              </div>
+            </div>
           </div>
 
-          <div class="card" v-if="product.faq?.length">
-            <h2 class="section-title">سوالات متداول</h2>
-            <div class="faq-list">
-              <details v-for="(faq, i) in product.faq" :key="i" class="faq-item">
-                <summary class="faq-question">
-                  <span>{{ faq.question }}</span>
-                  <span class="chevron">⌄</span>
+          <!-- FAQ -->
+          <div v-if="product.faq?.length" class="rounded-2xl border border-base-300 bg-base-100 p-5 sm:p-6">
+            <h2 class="text-lg font-bold">سوالات متداول</h2>
+
+            <div class="mt-3 space-y-2">
+              <details v-for="(faq, i) in product.faq" :key="i" class="faq">
+                <summary class="faq__q">
+                  <span class="font-semibold">{{ faq.question }}</span>
+                  <span class="faq__chev">⌄</span>
                 </summary>
-                <p class="faq-answer">{{ faq.answer }}</p>
+                <p class="faq__a">{{ faq.answer }}</p>
               </details>
             </div>
           </div>
 
-          <div class="card trust-card">
-            <div class="trust-item" v-for="trust in trustItems" :key="trust.title">
-              <span class="trust-icon">{{ trust.icon }}</span>
-              <div>
-                <p class="trust-title">{{ trust.title }}</p>
-                <p class="trust-subtitle">{{ trust.subtitle }}</p>
+          <!-- Trust -->
+          <div class="rounded-2xl border border-base-300 bg-base-100 p-5 sm:p-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div v-for="t in trustItems" :key="t.title" class="flex items-start gap-3 rounded-xl border border-base-300 p-4">
+                <span class="text-xl">{{ t.icon }}</span>
+                <div>
+                  <p class="font-semibold">{{ t.title }}</p>
+                  <p class="text-sm text-base-content/60 mt-1 leading-6">{{ t.subtitle }}</p>
+                </div>
               </div>
             </div>
           </div>
-        </section>
+        </div>
 
-        <aside class="sidebar">
-          <div class="card sticky-card">
-            <div class="sidebar-header">
-              <p class="sidebar-label">سفارش شما</p>
-              <h3 class="sidebar-title">{{ product.title }}</h3>
+        <!-- Right / sidebar -->
+        <aside class="lg:col-span-4">
+          <div class="rounded-2xl border border-base-300 bg-base-100 p-5 sm:p-6 sticky top-5">
+            <p class="text-xs text-base-content/60">سفارش شما</p>
+            <h3 class="mt-1 font-bold leading-7">
+              {{ selectedTitle }}
+            </h3>
+            <p v-if="selectedSubline" class="text-sm text-base-content/60 mt-1">
+              {{ selectedSubline }}
+            </p>
+
+            <div class="mt-4">
+              <PriceTag :price="displayPrice" :compareAt="displayCompareAt" />
             </div>
-            <div class="sidebar-price">
-              <PriceTag :price="product.price" :compareAt="product.compareAt" />
+
+            <div class="mt-4 flex flex-wrap gap-2">
+              <span v-if="selectedOffer?.region" class="badge badge-ghost">ریجن: {{ selectedOffer.region }}</span>
+              <span v-if="selectedOffer?.duration" class="badge badge-ghost">مدت: {{ selectedOffer.duration }}</span>
+              <span v-if="selectedOffer?.instant" class="badge badge-ghost">تحویل فوری</span>
             </div>
-            <div class="sidebar-actions">
+
+            <div class="mt-5 space-y-3">
               <QuantityInput v-model="qty" />
               <button class="btn btn-primary w-full" @click="add">افزودن به سبد</button>
+              <button class="btn btn-ghost w-full" @click="scrollToPlans">تغییر پلن</button>
             </div>
-            <div class="sidebar-note" v-if="product.isDigital">
-              <p>تحویل این محصول دیجیتال است (از طریق پنل/ایمیل).</p>
+
+            <div v-if="product.isDigital" class="mt-4 rounded-xl border border-base-300 bg-base-200/40 p-3 text-sm text-base-content/70 leading-6">
+              تحویل این محصول دیجیتال است و پس از پرداخت ارسال می‌شود.
             </div>
           </div>
         </aside>
-      </div>
+      </section>
     </div>
   </div>
 </template>
@@ -136,15 +221,16 @@ import QuantityInput from '@/components/QuantityInput.vue'
 const route = useRoute()
 const store = useProductsStore()
 const cart = useCartStore()
+
 const qty = ref(1)
 const product = ref<any>(null)
 const selectedIndex = ref(0)
 
 const trustItems = [
-  { icon: '⚡', title: 'تحویل آنی کد', subtitle: 'بدون معطلی و در لحظه' },
-  { icon: '✅', title: '۱۰۰٪ قانونی و اورجینال', subtitle: 'خرید مطمئن و معتبر' },
-  { icon: '🛡️', title: 'ضمانت پرداخت امن', subtitle: 'پرداخت امن از طریق درگاه معتبر' },
-  { icon: '💬', title: 'پشتیبانی ۲۴/۷', subtitle: 'پاسخگویی سریع در تمام ساعات' }
+  { icon: '⚡', title: 'تحویل سریع', subtitle: 'بدون معطلی و دقیق' },
+  { icon: '✅', title: 'اورجینال', subtitle: 'اکانت/اشتراک معتبر' },
+  { icon: '🛡️', title: 'پرداخت امن', subtitle: 'درگاه معتبر و مطمئن' },
+  { icon: '💬', title: 'پشتیبانی', subtitle: 'پاسخگویی سریع' }
 ]
 
 const purchaseOptions = computed(() => {
@@ -153,326 +239,133 @@ const purchaseOptions = computed(() => {
   return product.value ? [product.value] : []
 })
 
+const selectedOffer = computed(() => purchaseOptions.value?.[selectedIndex.value] ?? product.value)
+
+const selectedTitle = computed(() => (selectedOffer.value?.title || product.value?.title || '').trim())
+
+const selectedSubline = computed(() => {
+  const o = selectedOffer.value
+  const bits = [o?.region, o?.duration].filter(Boolean)
+  return bits.length ? bits.join(' • ') : ''
+})
+
+const displayPrice = computed(() => selectedOffer.value?.price ?? product.value?.price)
+const displayCompareAt = computed(() => selectedOffer.value?.compareAt ?? product.value?.compareAt)
+
 onMounted(async () => {
   product.value = await store.find(route.params.slug as string)
 })
 
 function add() {
   if (!product.value) return
-  cart.add(product.value.id, qty.value)
+  const id = selectedOffer.value?.id ?? product.value.id
+  cart.add(id, qty.value)
+}
+
+function scrollToPlans() {
+  // اسکرول نرم به بخش پلن‌ها (مینیمال)
+  const el = document.querySelector('.plan-card')?.parentElement
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
 </script>
 
 <style scoped>
-.product-page {
-  background: linear-gradient(180deg, #f8fafc 0%, #f3f4f6 100%);
-  padding-inline: min(5vw, 2.5rem);
-  padding-bottom: 4rem;
-}
-
-.content-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-.header-card {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.25rem;
-  background: #fff;
-  border-radius: 24px;
-  padding: 1.5rem;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.05);
-}
-
-@media (min-width: 1024px) {
-  .header-card {
-    grid-template-columns: 1.2fr 1fr;
-    align-items: center;
-  }
-}
-
-.header-media {
-  border-radius: 18px;
-  overflow: hidden;
-  background: linear-gradient(135deg, #0f172a, #1d4ed8);
-}
-
-.hero-image {
-  display: block;
-  width: 100%;
-  height: auto;
-  object-fit: cover;
-}
-
-.header-details {
-  display: grid;
-  gap: 0.75rem;
-}
-
-.overline {
-  color: #6b7280;
-  font-size: 0.95rem;
-  font-weight: 600;
-}
-
-.title {
-  font-size: clamp(1.8rem, 2.4vw, 2.4rem);
-  font-weight: 800;
-  color: #0f172a;
-}
-
-.subtitle {
-  color: #4b5563;
-  line-height: 1.7;
-}
-
-.meta-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  align-items: center;
-}
-
-.badge-row {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.pill {
-  padding: 0.35rem 0.9rem;
-  background: #eef2ff;
-  color: #4338ca;
-  border-radius: 999px;
-  font-weight: 700;
-  font-size: 0.9rem;
-}
-
-.main-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.5rem;
-}
-
-@media (min-width: 1024px) {
-  .main-grid {
-    grid-template-columns: minmax(0, 1.7fr) minmax(320px, 0.85fr);
-    align-items: start;
-  }
-}
-
-.primary-column {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.card {
-  background: #fff;
-  border-radius: 20px;
-  padding: 1.25rem;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
-}
-
-.section-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  margin-bottom: 1rem;
-  gap: 0.75rem;
-}
-
-.section-title {
-  font-size: 1.2rem;
-  font-weight: 800;
-  color: #0f172a;
-}
-
-.section-subtitle {
-  color: #6b7280;
-  margin-top: 0.25rem;
-  line-height: 1.6;
-}
-
-.purchase-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 0.75rem;
-  width: 100%;
-}
-
-.option-card {
-  width: 100%;
+/* کارت پلن‌ها: مینیمال و شیک */
+.plan-card {
   text-align: start;
-  background: #f8fafc;
-  border: 1px solid #e5e7eb;
-  border-radius: 16px;
-  padding: 1rem 1.1rem;
-  display: grid;
-  gap: 0.75rem;
-  transition: all 0.2s ease;
+  width: 100%;
+  border-radius: 1rem;
+  border: 1px solid hsl(var(--b3, 0 0% 86%));
+  background: hsl(var(--b1));
+  padding: 1rem;
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+.plan-card:hover {
+  transform: translateY(-1px);
+  border-color: hsla(var(--bc), 0.22);
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.06);
+}
+.plan-card--active {
+  border-color: hsla(var(--p), 0.55);
+  box-shadow: 0 12px 30px rgba(79, 70, 229, 0.10);
 }
 
-.option-card:hover {
-  border-color: #cbd5e1;
-  transform: translateY(-2px);
-  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
-}
-
-.option-card[aria-pressed='true'] {
-  border-color: #4f46e5;
-  background: #eef2ff;
-  box-shadow: 0 16px 32px rgba(79, 70, 229, 0.12);
-}
-
-.option-top,
-.option-bottom {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.option-title {
-  font-weight: 700;
-  color: #0f172a;
-}
-
-.option-desc {
-  color: #6b7280;
-  margin-top: 0.2rem;
-  font-size: 0.95rem;
-}
-
-.option-badge {
-  padding: 0.25rem 0.65rem;
-  background: #4f46e5;
-  color: #fff;
+.radio {
+  width: 18px;
+  height: 18px;
   border-radius: 999px;
-  font-size: 0.85rem;
+  border: 2px solid hsla(var(--bc), 0.22);
+  position: relative;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.radio::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border-radius: 999px;
+  background: hsl(var(--p));
+  transform: scale(0);
+  transition: transform 140ms ease;
+}
+.radio--on {
+  border-color: hsla(var(--p), 0.55);
+}
+.radio--on::after {
+  transform: scale(1);
+}
+
+/* چیپ‌های کوچک مینیمال */
+.pill {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.18rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid hsla(var(--bc), 0.14);
+  background: hsla(var(--b2), 0.7);
+  color: hsla(var(--bc), 0.7);
   white-space: nowrap;
 }
-
-.option-meta {
-  color: #475569;
-  font-weight: 600;
+.pill-ok {
+  border-color: rgba(34, 197, 94, 0.25);
+  background: rgba(34, 197, 94, 0.08);
+  color: rgba(21, 128, 61, 0.95);
 }
 
-.body-text {
-  color: #4b5563;
-  line-height: 1.8;
+/* FAQ مینیمال */
+.faq {
+  border: 1px solid hsla(var(--bc), 0.12);
+  border-radius: 0.9rem;
+  padding: 0.85rem 1rem;
+  background: hsla(var(--b2), 0.35);
 }
-
-.faq-list {
-  display: grid;
-  gap: 0.75rem;
+.faq[open] {
+  background: hsla(var(--b2), 0.55);
 }
-
-.faq-item {
-  border: 1px solid #e5e7eb;
-  border-radius: 14px;
-  padding: 0.75rem 1rem;
-  background: #f9fafb;
-}
-
-.faq-question {
+.faq__q {
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-weight: 700;
-  color: #0f172a;
-}
-
-.faq-answer {
-  margin-top: 0.6rem;
-  color: #4b5563;
-  line-height: 1.6;
-}
-
-.chevron {
-  font-size: 1.1rem;
-  color: #94a3b8;
-}
-
-.trust-card {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 1rem;
+  list-style: none;
 }
-
-.trust-item {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 0.5rem;
-  border-radius: 12px;
-  background: #f8fafc;
+.faq__q::-webkit-details-marker {
+  display: none;
 }
-
-.trust-icon {
-  font-size: 1.4rem;
+.faq__a {
+  margin-top: 0.65rem;
+  color: hsla(var(--bc), 0.7);
+  line-height: 1.9;
+  font-size: 0.92rem;
 }
-
-.trust-title {
-  font-weight: 800;
-  color: #0f172a;
+.faq__chev {
+  opacity: 0.5;
 }
-
-.trust-subtitle {
-  color: #6b7280;
-  font-size: 0.95rem;
-}
-
-.sidebar {
-  position: relative;
-}
-
-.sticky-card {
-  position: sticky;
-  top: 1.25rem;
-  display: grid;
-  gap: 1rem;
-}
-
-.sidebar-label {
-  color: #6b7280;
-  font-weight: 700;
-}
-
-.sidebar-title {
-  font-size: 1.3rem;
-  font-weight: 800;
-  color: #0f172a;
-}
-
-.sidebar-price {
-  border-bottom: 1px solid #e5e7eb;
-  padding-bottom: 0.75rem;
-}
-
-.sidebar-actions {
-  display: grid;
-  gap: 0.75rem;
-}
-
-.sidebar-note {
-  background: #eef2ff;
-  color: #4338ca;
-  padding: 0.85rem 1rem;
-  border-radius: 12px;
-  line-height: 1.6;
-}
-
-@media (max-width: 639px) {
-  .header-card,
-  .card {
-    padding: 1rem;
-  }
-
-  .purchase-grid {
-    grid-template-columns: 1fr;
-  }
+.line-clamp-2{
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
 }
 </style>

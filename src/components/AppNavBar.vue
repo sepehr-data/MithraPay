@@ -1,6 +1,6 @@
 <template>
-  <header class="sticky top-0 z-50 border-b border-base-200 bg-base-100/80 backdrop-blur">
-    <div class="navbar max-w-6xl mx-auto px-4 lg:px-0 lg:translate-x-24">
+  <header id="app-navbar" class="sticky top-0 z-50 border-b border-base-200 bg-base-100/80 backdrop-blur">
+  <div class="navbar max-w-6xl mx-auto px-4 lg:px-0 lg:translate-x-24">
       <!-- RIGHT / START -->
       <div class="navbar-start w-auto flex items-center gap-2 lg:w-auto">
         <!-- mobile menu -->
@@ -158,8 +158,8 @@
 
       <!-- LEFT / END -->
       <div class="navbar-end gap-3 w-auto lg:w-auto justify-end flex-shrink-0">
-        <div class="nav-search hidden lg:flex">
-          <input
+        <div class="nav-search hidden lg:flex" ref="navSearchRef">
+        <input
               type="text"
               class="nav-search-input"
               placeholder="جستجو ..."
@@ -277,7 +277,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, onBeforeUnmount } from 'vue'
+import { ref, onMounted, computed, onBeforeUnmount, watch, nextTick } from 'vue'
 import mithraLogo from '@/assets/logo3.png'
 import { useUiStore } from '@/stores/ui'
 import { useCartStore } from '@/stores/cart'
@@ -291,6 +291,7 @@ const router = useRouter()
 
 const drawerOpen = ref(false)
 const q = ref('')
+
 const isStoreMenuOpen = ref(false)
 let storeMenuTimer: number | undefined
 
@@ -298,7 +299,18 @@ let storeMenuTimer: number | undefined
 const isUserMenuOpen = ref(false)
 const userMenuRef = ref<HTMLElement | null>(null)
 
-const cartCount = computed(() => cart.count)
+// ✅ Search open/close tracking (برای پاک شدن بعد از بسته شدن)
+const navSearchRef = ref<HTMLElement | null>(null)
+const isSearchOpen = ref(false)
+let searchCheckTimer: number | undefined
+let searchClearTimer: number | undefined
+
+// ✅ چون cart.count تو تایپ استور وجود نداره، از items محاسبه می‌کنیم
+const cartCount = computed(() => {
+  const items: any[] = (cart as any).items || []
+  return items.reduce((sum, it) => sum + Number(it.quantity ?? it.qty ?? 1), 0)
+})
+
 const isLoggedIn = computed(() => auth.isAuthenticated)
 
 const userDisplayName = computed(() => {
@@ -309,32 +321,27 @@ const userDisplayName = computed(() => {
 
 const openCart = () => ui.openCart()
 
-function goSearch() {
-  if (!q.value) return
-  router.push({ name: 'search', query: { q: q.value } })
-}
+/* ====== Search ======
+   شرط جدید: پاک شدن q بعد از هر بار باز/بسته شدن سرچ‌بار (ترنزیشن)
+*/
+async function goSearch() {
+  const term = String(q.value || '').trim()
+  if (!term) return
 
-function goProfile() {
-  router.push({ name: 'profile' })
-}
-
-function goOrders() {
-  router.push('/orders')
-}
-
-function goFavorites() {
-  router.push('/favorites')
-}
-
-function logout() {
-  const anyAuth = auth as any
-  if (typeof anyAuth.logout === 'function') {
-    anyAuth.logout()
-  } else {
-    localStorage.removeItem('token')
-    localStorage.removeItem('auth')
+  try {
+    if (router.currentRoute.value.name === 'search') {
+      await router.replace({ name: 'search', query: { q: term } })
+    } else {
+      await router.push({ name: 'search', query: { q: term } })
+    }
+  } catch (e) {
+    // ignore navigation errors
+  } finally {
+    // ✅ برای اینکه سرچ‌بار واقعاً بسته شه (تا watcher پاک کنه)، فوکوس داخلش رو blur می‌کنیم
+    const wrap = navSearchRef.value
+    const active = document.activeElement as HTMLElement | null
+    if (wrap && active && wrap.contains(active)) active.blur()
   }
-  router.push({ name: 'login' })
 }
 
 /* ====== User menu open/close (click) ====== */
@@ -358,19 +365,26 @@ function onKeyDown(e: KeyboardEvent) {
 // wrappers: بعد از کلیک، منو بسته شود
 function goProfileFromMenu() {
   closeUserMenu()
-  goProfile()
+  router.push({ name: 'profile' })
 }
 function goOrdersFromMenu() {
   closeUserMenu()
-  goOrders()
+  router.push('/orders')
 }
 function goFavoritesFromMenu() {
   closeUserMenu()
-  goFavorites()
+  router.push('/favorites')
 }
 function logoutFromMenu() {
   closeUserMenu()
-  logout()
+  const anyAuth = auth as any
+  if (typeof anyAuth.logout === 'function') {
+    anyAuth.logout()
+  } else {
+    localStorage.removeItem('token')
+    localStorage.removeItem('auth')
+  }
+  router.push({ name: 'login' })
 }
 
 /* ====== Store mega menu ====== */
@@ -389,16 +403,84 @@ function toggleStoreMenu() {
   isStoreMenuOpen.value = !isStoreMenuOpen.value
 }
 
-onMounted(() => {
+/* ====== Nav search open/close detector ====== */
+function openSearchBar() {
+  if (searchCheckTimer) clearTimeout(searchCheckTimer)
+  isSearchOpen.value = true
+}
+
+function scheduleCloseSearchBar() {
+  if (searchCheckTimer) clearTimeout(searchCheckTimer)
+
+  // کمی صبر می‌کنیم تا جابه‌جایی فوکوس بین input و دکمه باعث بسته شدن اشتباهی نشه
+  searchCheckTimer = window.setTimeout(() => {
+    const el = navSearchRef.value
+    if (!el) {
+      isSearchOpen.value = false
+      return
+    }
+
+    const active = document.activeElement as HTMLElement | null
+    const focusedInside = !!active && el.contains(active)
+    const hovered = el.matches(':hover')
+
+    // اگر هنوز hover یا focus داخلش هست، بسته نکن
+    if (focusedInside || hovered) return
+
+    isSearchOpen.value = false
+  }, 80)
+}
+
+// ✅ بعد از بسته شدن (پایان ترنزیشن)، q پاک شود
+watch(isSearchOpen, (open) => {
+  if (searchClearTimer) clearTimeout(searchClearTimer)
+
+  if (!open) {
+    // ترنزیشن width شما 0.28s است؛ کمی بیشتر برای اطمینان
+    searchClearTimer = window.setTimeout(() => {
+      if (!isSearchOpen.value) q.value = ''
+    }, 320)
+  }
+})
+
+function bindNavSearchEvents() {
+  const el = navSearchRef.value
+  if (!el) return
+
+  el.addEventListener('mouseenter', openSearchBar)
+  el.addEventListener('mouseleave', scheduleCloseSearchBar)
+  el.addEventListener('focusin', openSearchBar)
+  el.addEventListener('focusout', scheduleCloseSearchBar)
+}
+
+function unbindNavSearchEvents() {
+  const el = navSearchRef.value
+  if (!el) return
+
+  el.removeEventListener('mouseenter', openSearchBar)
+  el.removeEventListener('mouseleave', scheduleCloseSearchBar)
+  el.removeEventListener('focusin', openSearchBar)
+  el.removeEventListener('focusout', scheduleCloseSearchBar)
+}
+
+onMounted(async () => {
   ui.init()
   document.addEventListener('click', onDocClick)
   document.addEventListener('keydown', onKeyDown)
+
+  await nextTick()
+  bindNavSearchEvents()
 })
 
 onBeforeUnmount(() => {
   if (storeMenuTimer) clearTimeout(storeMenuTimer)
+  if (searchCheckTimer) clearTimeout(searchCheckTimer)
+  if (searchClearTimer) clearTimeout(searchClearTimer)
+
   document.removeEventListener('click', onDocClick)
   document.removeEventListener('keydown', onKeyDown)
+
+  unbindNavSearchEvents()
 })
 </script>
 
