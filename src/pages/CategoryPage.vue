@@ -1,331 +1,579 @@
 <template>
-  <div class="category-page space-y-10 lg:space-y-12">
-    <!-- Header / Hero -->
-    <section class="space-y-4">
-      <Breadcrumbs :crumbs="[{ title: 'دسته‌بندی' }, { title: catTitle }]" />
+  <div class="category-page">
+    <div class="mx-auto w-full max-w-7xl px-3 sm:px-4 lg:px-6 py-6 sm:py-8 space-y-8 lg:space-y-10">
+      <!-- Hero -->
+      <section class="space-y-3">
+        <Breadcrumbs :crumbs="[{ title: 'دسته‌بندی' }, { title: catTitle }]" />
 
-      <div
-          class="rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white p-6 lg:p-8 shadow-lg"
-      >
-        <p class="text-sm text-slate-200/80">خانه / گیفت کارت / {{ catTitle }}</p>
-
-        <div class="mt-3 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div class="space-y-2">
-            <h1 class="text-2xl lg:text-3xl font-bold">{{ catTitle }}</h1>
-            <p class="text-sm lg:text-base text-slate-200">
-              خرید مطمئن و سریع با تحویل آنی و پشتیبانی دائمی؛ انتخاب مناسب برای کاربران ایرانی.
-            </p>
+        <div class="relative overflow-hidden rounded-3xl border border-base-300 bg-base-100 shadow-sm">
+          <div aria-hidden="true" class="pointer-events-none absolute -inset-20 opacity-80">
+            <div class="absolute right-0 top-0 h-72 w-72 rounded-full bg-primary/20 blur-3xl"></div>
+            <div class="absolute left-0 bottom-0 h-72 w-72 rounded-full bg-secondary/15 blur-3xl"></div>
           </div>
 
-          <div class="flex items-center gap-3 text-amber-400">
-            <div class="flex gap-1 text-lg" aria-hidden="true">
-              <span>★</span><span>★</span><span>★</span><span>★</span><span class="text-amber-200">★</span>
+          <div class="relative p-5 sm:p-6 lg:p-7">
+            <div class="flex items-center gap-3">
+              <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">
+                {{ catTitle }}
+              </h1>
             </div>
-            <span class="text-slate-200 text-sm">({{ filtered.length }} محصول)</span>
+
+            <div class="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <p
+                  class="text-sm sm:text-base text-base-content/70 leading-relaxed
+                       line-clamp-2 min-h-[40px] sm:min-h-[48px] sm:flex-1"
+              >
+                خرید مطمئن و سریع با تحویل آنی و پشتیبانی دائمی؛ انتخاب مناسب برای کاربران ایرانی.
+              </p>
+
+              <RouterLink
+                  :to="heroCta.to"
+                  class="btn btn-primary btn-sm rounded-2xl h-[40px] sm:h-[48px] px-5 shrink-0 sm:ms-6"
+              >
+                {{ heroCta.label }}
+                <span class="text-base">←</span>
+              </RouterLink>
+            </div>
+
+            <div class="mt-3 flex flex-wrap gap-2">
+              <span class="badge badge-outline border-primary/30 text-primary">تحویل آنی</span>
+              <span class="badge badge-outline border-primary/30 text-primary">قیمت به‌روز</span>
+              <span class="badge badge-outline border-primary/30 text-primary">پشتیبانی ۲۴/۷</span>
+            </div>
+          </div>
+
+          <div class="h-1 w-full bg-gradient-to-r from-primary via-secondary to-primary opacity-80"></div>
+        </div>
+      </section>
+
+      <!-- Products Panel -->
+      <section class="rounded-3xl border border-base-300 bg-base-100 shadow-sm overflow-visible">
+        <div class="flex items-center justify-between gap-3 border-b border-base-300 px-4 py-3 sm:px-5">
+          <div class="min-w-0">
+            <p class="text-xs uppercase tracking-widest text-base-content/50">جستجو و انتخاب</p>
+            <div class="flex items-center gap-3">
+              <h3 class="text-lg font-extrabold">{{ catTitle }}ی موجود </h3>
+              <span class="hidden sm:inline h-1 w-10 rounded-full bg-primary/70"></span>
+              <span class="hidden sm:inline text-sm text-base-content/60">({{ filtered.length }} محصول)</span>
+            </div>
           </div>
         </div>
-      </div>
-    </section>
 
-    <!-- ✅ FIRST + FULL WIDTH: Products -->
-    <section class="rounded-2xl bg-white shadow-md border border-slate-100 overflow-hidden">
-      <div class="flex items-center justify-between border-b border-slate-100 px-4 py-3 lg:px-6">
-        <div>
-          <p class="text-xs uppercase text-slate-500 tracking-widest">جستجو و انتخاب</p>
-          <h3 class="text-lg font-semibold text-slate-800">محصولات موجود {{ catTitle }}</h3>
-        </div>
-        <div class="hidden text-sm text-slate-500 lg:block">{{ filtered.length }} محصول</div>
-      </div>
+        <div class="p-4 sm:p-5 lg:p-6 space-y-4 min-w-0">
+          <div class="tools-row">
+            <div class="rounded-2xl border border-base-300 bg-base-100/70 p-3 backdrop-blur">
+              <SortBar v-model="sort" :total="filtered.length" />
+            </div>
 
-      <div class="grid gap-0 lg:grid-cols-[320px,1fr]">
-        <div class="border-b border-slate-100 bg-slate-50/60 p-4 lg:border-b-0 lg:border-e lg:p-6">
-          <div class="sticky top-4 space-y-4">
-            <h4 class="text-sm font-semibold text-slate-700">فیلترهای پیشرفته</h4>
-            <FiltersSidebar v-model:onlyDigital="onlyDigital" v-model:onlyDiscount="onlyDiscount" />
+            <div ref="filterWrap" class="relative">
+              <button
+                  ref="filterBtn"
+                  type="button"
+                  class="btn btn-primary btn-sm rounded-2xl"
+                  @click.stop="toggleInlineFilters"
+              >
+                فیلترهای پیشرفته
+                <span class="text-base">≡</span>
+              </button>
+
+              <Transition name="drop-panel">
+                <div
+                    v-if="filtersOpen"
+                    ref="filterPanel"
+                    class="filters-dropdown"
+                    :class="[
+                    dropdownSide === 'left' ? 'fd-left' : 'fd-right',
+                    dropdownUp ? 'fd-up' : 'fd-down',
+                  ]"
+                    :style="filtersDropdownStyle"
+                    @click.stop
+                >
+                  <div class="p-4 sm:p-5 space-y-3 bg-base-100">
+                    <div class="rounded-3xl border border-base-300 bg-base-100 p-4">
+                      <FiltersSidebar
+                          v-model:onlyDigital="draftOnlyDigital"
+                          v-model:onlyDiscount="draftOnlyDiscount"
+                      />
+                    </div>
+
+                    <div class="grid gap-2 sm:grid-cols-2">
+                      <button class="btn btn-ghost btn-sm rounded-2xl" @click="resetFilters">
+                        پاک کردن
+                      </button>
+                      <button class="btn btn-primary btn-sm rounded-2xl" @click="applyFilters">
+                        اعمال
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </Transition>
+            </div>
           </div>
-        </div>
 
-        <div class="p-4 lg:p-6 space-y-4">
-          <SortBar v-model="sort" :total="filtered.length" />
-          <ProductGrid :products="paged" />
+          <div class="products-grid">
+            <ProductCard v-for="p in paged" :key="p.id" :product="p" class="product-card--main" />
+          </div>
+
           <div class="mt-4 flex justify-center">
             <Pagination :page="page" :pages="pages" @update:page="page = $event" />
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- Details & Guide -->
-    <section class="rounded-2xl border border-slate-100 bg-white p-6 shadow-md space-y-4">
-      <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <h3 class="text-lg font-semibold text-slate-900">جزئیات و راهنما</h3>
-        <p class="text-sm text-slate-500">اطلاعات تکمیلی برای خرید و استفاده از {{ catTitle }}</p>
-      </div>
+      <!-- Activation Guide -->
+      <section class="rounded-3xl border border-base-300 bg-base-100 shadow-sm p-4 sm:p-6 space-y-4">
+        <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h3 class="text-lg font-extrabold">راهنمای فعال‌سازی</h3>
+          </div>
+        </div>
 
-      <div class="space-y-3 divide-y divide-slate-100">
-        <details class="info-accordion" open>
-          <summary>توضیحات محصول</summary>
-          <p>
-            خرید محصولات دیجیتال به شما امکان دسترسی سریع به سرویس‌ها و اشتراک‌ها را می‌دهد. کدها و اطلاعات ارائه‌شده
-            مطابق توضیحات محصول قابل استفاده هستند.
-          </p>
-        </details>
+        <div class="rounded-2xl border border-base-300 bg-base-200/40 p-4 sm:p-5">
+          <ul class="steps steps-vertical sm:steps-horizontal w-full">
+            <li class="step step-primary">
+              انتخاب محصول
+              <span class="block text-[11px] text-base-content/60 mt-1">سرویس/اکانت موردنظر را انتخاب کنید</span>
+            </li>
+            <li class="step step-primary">
+              پرداخت
+              <span class="block text-[11px] text-base-content/60 mt-1">اطلاعات را بررسی و خرید را نهایی کنید</span>
+            </li>
+            <li class="step step-primary">
+              دریافت کد/اطلاعات
+              <span class="block text-[11px] text-base-content/60 mt-1">پس از پرداخت، مشخصات نمایش داده می‌شود</span>
+            </li>
+            <li class="step step-primary">
+              فعال‌سازی
+              <span class="block text-[11px] text-base-content/60 mt-1">طبق آموزش سرویس، کد را وارد و فعال کنید</span>
+            </li>
+            <li class="step">
+              پشتیبانی
+              <span class="block text-[11px] text-base-content/60 mt-1">در صورت خطا، سریع با پشتیبانی تماس بگیرید</span>
+            </li>
+          </ul>
+        </div>
+      </section>
 
-        <details class="info-accordion">
-          <summary>نحوه استفاده</summary>
-          <p>
-            پس از دریافت کد یا اطلاعات، طبق راهنمای محصول اقدام کنید. در صورت نیاز، قبل از فعال‌سازی تنظیمات لازم را انجام دهید
-            تا خطای ریجن یا محدودیت‌ها رخ ندهد.
-          </p>
-        </details>
-
-        <details class="info-accordion">
-          <summary>سؤالات متداول</summary>
-          <p>
-            در صورت بروز خطا، با پشتیبانی در تماس باشید تا راهنمایی لازم ارائه شود. موجودی و وضعیت محصول در لحظه خرید قابل مشاهده است
-            و امکان استرداد پس از نمایش کد/اطلاعات ممکن است محدود باشد.
-          </p>
-        </details>
-
-        <details class="info-accordion">
-          <summary>قوانین و شرایط</summary>
-          <p>
-            استفاده از کد/اطلاعات صرفاً برای حساب‌های شخصی مجاز است. مسئولیت انتخاب ریجن صحیح بر عهده کاربر بوده و تمامی خریدها مطابق
-            قوانین تجارت الکترونیک ایران انجام می‌شود.
-          </p>
-        </details>
-      </div>
-    </section>
-
-    <!-- ✅ After Details: Why section (as requested) -->
-    <section class="space-y-6">
-      <div class="rounded-2xl bg-white p-6 shadow-md border border-slate-100 space-y-4">
-        <div class="flex flex-col gap-2">
-          <p class="text-xs font-medium uppercase tracking-widest text-primary-600">ویژه اپل</p>
-          <h2 class="text-xl font-bold text-slate-800">چرا {{ catTitle }} از میتراپی؟</h2>
-          <p class="text-sm text-slate-600 leading-relaxed">
-            بیشترین تنوع موجودی، قیمت منصفانه و تحویل سریع باعث شده کاربران ایرانی برای خرید گیفت کارت‌های اپل سراغ ما بیایند. تمامی کدها قانونی و قابل فعال‌سازی در لحظه هستند.
+      <!-- Why -->
+      <section class="rounded-3xl border border-base-300 bg-base-100 shadow-sm p-4 sm:p-6 space-y-5">
+        <div class="space-y-2">
+          <p class="text-xs font-extrabold text-primary">چرا ما؟</p>
+          <div class="flex items-center gap-3">
+            <h2 class="text-xl font-extrabold">چرا {{ catTitle }} از میتراپی؟</h2>
+            <span class="hidden sm:inline h-1 w-10 rounded-full bg-primary/70"></span>
+          </div>
+          <p class="text-sm text-base-content/70 leading-relaxed max-w-3xl">
+            بیشترین تنوع موجودی، قیمت منصفانه و تحویل سریع باعث شده کاربران ایرانی برای خرید سرویس‌های محبوب سراغ ما بیایند.
           </p>
         </div>
 
         <ul class="grid gap-3 sm:grid-cols-2">
-          <li class="flex items-start gap-3 rounded-xl border border-slate-100 p-3">
-            <span class="text-emerald-500 text-lg">✔</span>
+          <li class="why-card">
+            <span class="why-ic">⚡</span>
             <div>
-              <p class="text-sm font-semibold text-slate-800">تحویل آنی</p>
-              <p class="text-xs text-slate-600">کد پس از پرداخت بلافاصله نمایش داده می‌شود.</p>
+              <p class="why-title">تحویل آنی</p>
+              <p class="why-copy">کد پس از پرداخت بلافاصله نمایش داده می‌شود.</p>
             </div>
           </li>
 
-          <li class="flex items-start gap-3 rounded-xl border border-slate-100 p-3">
-            <span class="text-emerald-500 text-lg">✔</span>
+          <li class="why-card">
+            <span class="why-ic">🧠</span>
             <div>
-              <p class="text-sm font-semibold text-slate-800">پشتیبانی تخصصی</p>
-              <p class="text-xs text-slate-600">راهنمایی فعال‌سازی و رفع خطاها به صورت ۲۴/۷.</p>
-            </div>
-          </li>
-
-          <li class="flex items-start gap-3 rounded-xl border border-slate-100 p-3">
-            <span class="text-emerald-500 text-lg">✔</span>
-            <div>
-              <p class="text-sm font-semibold text-slate-800">تنوع ریجن</p>
-              <p class="text-xs text-slate-600">آمریکا، ترکیه، امارات و دیگر ریجن‌ها با موجودی کامل.</p>
-            </div>
-          </li>
-
-          <li class="flex items-start gap-3 rounded-xl border border-slate-100 p-3">
-            <span class="text-emerald-500 text-lg">✔</span>
-            <div>
-              <p class="text-sm font-semibold text-slate-800">قیمت رقابتی</p>
-              <p class="text-xs text-slate-600">قیمت‌ها به‌روز و همراه با تخفیف دوره‌ای.</p>
+              <p class="why-title">پشتیبانی تخصصی</p>
+              <p class="why-copy">راهنمایی فعال‌سازی و رفع خطاها به صورت ۲۴/۷.</p>
             </div>
           </li>
         </ul>
-      </div>
 
-      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <div class="feature-tile">
-          <div class="feature-icon">🔒</div>
-          <div>
-            <p class="feature-title">پرداخت امن</p>
-            <p class="feature-copy">تسویه درگاه بانکی معتبر با رمز پویا.</p>
-          </div>
-        </div>
-
-        <div class="feature-tile">
-          <div class="feature-icon">⚡</div>
-          <div>
-            <p class="feature-title">فعال‌سازی سریع</p>
-            <p class="feature-copy">آموزش قدم‌به‌قدم برای ورود کد.</p>
-          </div>
-        </div>
-
-        <div class="feature-tile">
-          <div class="feature-icon">🎁</div>
-          <div>
-            <p class="feature-title">هدیه ایده‌آل</p>
-            <p class="feature-copy">مناسب گیمرها و کاربران اپل موزیک.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ✅ FAQ at the end -->
-    <section class="rounded-2xl border border-slate-100 bg-white p-6 shadow-md space-y-4">
-      <div class="flex items-center justify-between">
-        <h3 class="text-lg font-semibold text-slate-900">سؤالات متداول کاربران</h3>
-        <span class="text-xs text-slate-500">پاسخ سریع به دغدغه‌های شما</span>
-      </div>
-
-      <div class="space-y-3">
-        <details class="faq-item" open>
-          <summary>
-            آیا کدها تاریخ انقضا دارند؟
-            <span class="chevron">⌄</span>
-          </summary>
-          <p>
-            تمامی کدها معتبر و بدون تاریخ انقضای کوتاه‌مدت هستند. پیشنهاد می‌شود پس از خرید از آن استفاده کنید تا مطمئن شوید روی حساب شما شارژ شده است.
-          </p>
-        </details>
-
-        <details class="faq-item">
-          <summary>
-            در صورت خطا در ریجن چه کنم؟
-            <span class="chevron">⌄</span>
-          </summary>
-          <p>
-            در صورت دریافت پیام خطای ریجن، با پشتیبانی تماس بگیرید تا مناسب‌ترین ریجن برای شما ارسال شود یا راهنمای تغییر ریجن دریافت کنید.
-          </p>
-        </details>
-
-        <details class="faq-item">
-          <summary>
-            آیا می‌توانم برای شخص دیگری هدیه بخرم؟
-            <span class="chevron">⌄</span>
-          </summary>
-          <p>
-            بله، کافی است کد دریافتی را برای فرد مورد نظر ارسال کنید. کد پس از فعال‌سازی روی حساب گیرنده اعمال می‌شود.
-          </p>
-        </details>
-      </div>
-    </section>
-
-    <!-- Badges -->
-    <section
-        class="rounded-2xl bg-slate-50 border border-slate-100 p-4 lg:p-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between shadow-inner"
-    >
-      <div class="flex items-center gap-2 text-slate-700">
-        <span class="badge-icon">✅</span>
-        <span class="text-sm font-semibold">100% قانونی و اورجینال</span>
-      </div>
-      <div class="flex items-center gap-2 text-slate-700">
-        <span class="badge-icon">⚡</span>
-        <span class="text-sm font-semibold">تحویل آنی کد</span>
-      </div>
-      <div class="flex items-center gap-2 text-slate-700">
-        <span class="badge-icon">🛡</span>
-        <span class="text-sm font-semibold">پشتیبانی ۲۴/۷</span>
-      </div>
-      <div class="flex items-center gap-2 text-slate-700">
-        <span class="badge-icon">💳</span>
-        <span class="text-sm font-semibold">پرداخت امن بانکی</span>
-      </div>
-    </section>
-
-    <!-- Similar products -->
-    <section class="space-y-4">
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-xs uppercase tracking-widest text-slate-500">محصولات مشابه</p>
-          <h3 class="text-lg font-semibold text-slate-900">گزینه‌های دیگری که ممکن است بپسندید</h3>
-        </div>
-        <span class="text-xs text-slate-500">نمایش {{ Math.min(filtered.length, 4) }} مورد</span>
-      </div>
-
-      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div
-            v-for="item in filtered.slice(0, 4)"
-            :key="item.id"
-            class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm flex flex-col gap-3"
-        >
-          <div class="flex items-start justify-between">
-            <div class="space-y-1">
-              <h4 class="text-sm font-semibold text-slate-900">{{ item.title }}</h4>
-              <p class="text-xs text-slate-500">{{ item.isDigital ? 'محصول دیجیتال' : 'تحویل فیزیکی' }}</p>
-            </div>
-
-            <span
-                class="rounded-full bg-emerald-50 px-2 py-1 text-[11px] font-semibold text-emerald-600"
-                v-if="item.compareAt && item.compareAt > item.price"
-            >
-              تخفیف
-            </span>
-          </div>
-
-          <p class="text-sm text-slate-700 line-clamp-2">
-            {{ item.description || 'محصول مناسب برای خرید اپلیکیشن و اشتراک.' }}
-          </p>
-
-          <div class="mt-auto flex items-center justify-between">
+        <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div class="tile">
+            <div class="tile-ic">🔒</div>
             <div>
-              <p class="text-base font-bold text-slate-900">{{ item.price.toLocaleString() }} تومان</p>
-              <p class="text-[11px] text-slate-500">
-                {{ item.compareAt ? 'قیمت قبل: ' + item.compareAt.toLocaleString() + ' تومان' : 'بهترین قیمت بازار' }}
-              </p>
+              <p class="tile-title">پرداخت امن</p>
+              <p class="tile-copy">تسویه درگاه بانکی معتبر با رمز پویا.</p>
             </div>
-            <button type="button" class="secondary-btn">مشاهده</button>
+          </div>
+
+          <div class="tile">
+            <div class="tile-ic">🌍</div>
+            <div>
+              <p class="tile-title">تنوع ریجن</p>
+              <p class="tile-copy">گزینه‌های مختلف و راهنمای انتخاب مناسب.</p>
+            </div>
+          </div>
+
+          <div class="tile">
+            <div class="tile-ic">🏷️</div>
+            <div>
+              <p class="tile-title">قیمت رقابتی</p>
+              <p class="tile-copy">قیمت‌ها به‌روز و همراه با تخفیف دوره‌ای.</p>
+            </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+
+      <!-- FAQ -->
+      <section class="rounded-3xl border border-base-300 bg-base-100 shadow-sm p-4 sm:p-6 space-y-4">
+        <div class="flex items-center justify-between">
+          <div class="space-y-1">
+            <h3 class="text-lg font-extrabold">سؤالات متداول کاربران</h3>
+          </div>
+          <span class="badge badge-primary badge-outline">FAQ</span>
+        </div>
+
+        <div class="grid gap-3">
+          <div class="collapse collapse-plus faqx">
+            <input type="radio" name="faq" checked />
+            <div class="collapse-title faqx-title">آیا کدها تاریخ انقضا دارند؟</div>
+            <div class="collapse-content faqx-body">
+              تمامی کدها معتبر هستند. پیشنهاد می‌شود پس از خرید سریعاً استفاده کنید.
+            </div>
+          </div>
+
+          <div class="collapse collapse-plus faqx">
+            <input type="radio" name="faq" />
+            <div class="collapse-title faqx-title">در صورت خطا در ریجن چه کنم؟</div>
+            <div class="collapse-content faqx-body">
+              با پشتیبانی تماس بگیرید تا ریجن مناسب را انتخاب کنید یا راهنمای تغییر ریجن دریافت کنید.
+            </div>
+          </div>
+
+          <div class="collapse collapse-plus faqx">
+            <input type="radio" name="faq" />
+            <div class="collapse-title faqx-title">آیا می‌توانم برای شخص دیگری هدیه بخرم؟</div>
+            <div class="collapse-content faqx-body">
+              بله، کافی است کد یا اطلاعات را برای فرد موردنظر ارسال کنید.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Similar products -->
+      <section class="space-y-3">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-xs uppercase tracking-widest text-base-content/50">محصولات مشابه</p>
+            <div class="flex items-center gap-3">
+              <h3 class="text-lg font-extrabold">گزینه‌های دیگری که ممکن است بپسندید</h3>
+              <span class="hidden sm:inline h-1 w-10 rounded-full bg-primary/70"></span>
+            </div>
+          </div>
+          <span class="text-xs text-base-content/60">نمایش {{ similarProducts.length }} مورد</span>
+        </div>
+
+        <div class="similar-row-shell">
+          <button
+              type="button"
+              class="similar-nav"
+              :disabled="simLock || similarProducts.length <= similarWindow"
+              @click="similarPrev"
+              aria-label="قبلی"
+          >
+            ‹
+          </button>
+
+          <TransitionGroup
+              tag="div"
+              name="sim-swap"
+              class="similar-row"
+              :class="simDir === 'next' ? 'dir-next' : 'dir-prev'"
+              :style="{ '--sim-cols': String(similarWindow) }"
+          >
+            <div
+                v-for="(p, i) in visibleSimilar"
+                :key="`${p.__k}__slot_${i}`"
+                class="similar-item"
+            >
+              <ProductCard :product="p" class="product-card--similar" />
+            </div>
+          </TransitionGroup>
+
+          <button
+              type="button"
+              class="similar-nav"
+              :disabled="simLock || similarProducts.length <= similarWindow"
+              @click="similarNext"
+              aria-label="بعدی"
+          >
+            ›
+          </button>
+        </div>
+      </section>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, computed, watch } from 'vue'
+import { onMounted, onBeforeUnmount, ref, computed, watch, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import { useProductsStore } from '@/stores/products'
+
 import Breadcrumbs from '@/components/Breadcrumbs.vue'
 import FiltersSidebar from '@/components/FiltersSidebar.vue'
-import ProductGrid from '@/components/ProductGrid.vue'
 import SortBar from '@/components/SortBar.vue'
 import Pagination from '@/components/Pagination.vue'
+import ProductCard from '@/components/ProductCard.vue'
 
 const route = useRoute()
 const store = useProductsStore()
 
 const sort = ref('bestselling')
-const onlyDigital = ref(false)
-const onlyDiscount = ref(false)
+
+const appliedOnlyDigital = ref(false)
+const appliedOnlyDiscount = ref(false)
+
+const draftOnlyDigital = ref(false)
+const draftOnlyDiscount = ref(false)
+
 const page = ref(1)
 const perPage = 12
 
-const load = () => {
-  store.load(route.params.slug as string)
-  page.value = 1
+const filtersOpen = ref(false)
+
+const filterWrap = ref<HTMLElement | null>(null)
+const filterBtn = ref<HTMLElement | null>(null)
+const filterPanel = ref<HTMLElement | null>(null)
+
+const dropdownSide = ref<'right' | 'left'>('right')
+const dropdownUp = ref(false)
+const filtersDropdownStyle = ref<Record<string, string>>({})
+
+const catalog = ref<any[]>([])
+const catalogReady = ref(false)
+
+const similarIndex = ref(0)
+const similarWindow = ref(5)
+const simDir = ref<'next' | 'prev'>('next')
+
+const simLock = ref(false)
+const SIM_ANIM_MS = 280
+function lockSimilar() {
+  simLock.value = true
+  window.setTimeout(() => (simLock.value = false), SIM_ANIM_MS)
 }
 
-onMounted(load)
-watch(() => route.params.slug, load)
+function keyOf(p: any) {
+  return String(p?.id ?? p?._id ?? p?.sku ?? p?.slug ?? p?.code ?? JSON.stringify(p))
+}
+function normalize(v: any) {
+  return String(v ?? '').trim().toLowerCase()
+}
+function belongsTo(slug: 'accounts' | 'gift-cards', p: any) {
+  const target = normalize(slug)
+  const candidates = [
+    p?.categoryId,
+    p?.category_id,
+    p?.categorySlug,
+    p?.category_slug,
+    p?.category,
+    p?.categoryName,
+    p?.category_name,
+    p?.category?.id,
+    p?.category?.slug,
+    p?.category?.key,
+    p?.category?.code,
+    p?.category?.name,
+  ].map(normalize)
 
-// برای اینکه با تغییر فیلتر/سورت، صفحه روی 1 برگرده و خالی نشه
-watch([sort, onlyDigital, onlyDiscount], () => {
+  if (candidates.includes(target)) return true
+
+  const tags = Array.isArray(p?.tags) ? p.tags.map(normalize) : []
+  if (slug === 'accounts') return tags.some((t) => t.includes('account') || t.includes('اکانت'))
+  if (slug === 'gift-cards') return tags.some((t) => t.includes('gift') || t.includes('گیفت') || t.includes('gift-card'))
+  return false
+}
+
+async function ensureCatalog() {
+  if (catalogReady.value) return
+  const s: any = store
+
+  if (Array.isArray(s.allProducts) && s.allProducts.length) {
+    catalog.value = s.allProducts
+    catalogReady.value = true
+    return
+  }
+  if (Array.isArray(s.catalog) && s.catalog.length) {
+    catalog.value = s.catalog
+    catalogReady.value = true
+    return
+  }
+  if (Array.isArray(s.all) && s.all.length) {
+    catalog.value = s.all
+    catalogReady.value = true
+    return
+  }
+
+  if (typeof s.loadAll === 'function') {
+    await Promise.resolve(s.loadAll())
+    if (Array.isArray(s.allProducts) && s.allProducts.length) {
+      catalog.value = s.allProducts
+      catalogReady.value = true
+      return
+    }
+    if (Array.isArray(s.catalog) && s.catalog.length) {
+      catalog.value = s.catalog
+      catalogReady.value = true
+      return
+    }
+    if (Array.isArray(s.all) && s.all.length) {
+      catalog.value = s.all
+      catalogReady.value = true
+      return
+    }
+  }
+
+  const currentSlug = route.params.slug as string
+  const map = new Map<string, any>()
+  store.products.forEach((p: any) => map.set(keyOf(p), p))
+
+  const slugsToTry: Array<'accounts' | 'gift-cards'> = ['accounts', 'gift-cards']
+  for (const slug of slugsToTry) {
+    if (slug === currentSlug) continue
+    await Promise.resolve(store.load(slug))
+    store.products.forEach((p: any) => map.set(keyOf(p), p))
+  }
+
+  await Promise.resolve(store.load(currentSlug))
+  store.products.forEach((p: any) => map.set(keyOf(p), p))
+
+  catalog.value = Array.from(map.values())
+  catalogReady.value = true
+}
+
+function positionFiltersDropdown() {
+  if (!filterBtn.value || !filterPanel.value) return
+
+  const btnRect = filterBtn.value.getBoundingClientRect()
+  const panelEl = filterPanel.value
+
+  const vw = window.innerWidth
+  const vh = window.innerHeight
+  const margin = 8
+  const gap = 10
+
+  const panelW = panelEl.offsetWidth
+  const panelH = panelEl.offsetHeight
+
+  let left = btnRect.right - panelW
+  let side: 'right' | 'left' = 'right'
+
+  if (left < margin) {
+    left = btnRect.left
+    side = 'left'
+  }
+  left = Math.max(margin, Math.min(left, vw - panelW - margin))
+
+  let top = btnRect.bottom + gap
+  let up = false
+  if (top + panelH > vh - margin && btnRect.top - gap - panelH > margin) {
+    top = btnRect.top - gap - panelH
+    up = true
+  } else {
+    top = Math.max(margin, Math.min(top, vh - panelH - margin))
+  }
+
+  dropdownSide.value = side
+  dropdownUp.value = up
+  filtersDropdownStyle.value = { left: `${left}px`, top: `${top}px` }
+}
+
+function toggleInlineFilters() {
+  if (!filtersOpen.value) {
+    draftOnlyDigital.value = appliedOnlyDigital.value
+    draftOnlyDiscount.value = appliedOnlyDiscount.value
+  }
+  filtersOpen.value = !filtersOpen.value
+}
+function resetFilters() {
+  draftOnlyDigital.value = false
+  draftOnlyDiscount.value = false
+  appliedOnlyDigital.value = false
+  appliedOnlyDiscount.value = false
   page.value = 1
+}
+function applyFilters() {
+  appliedOnlyDigital.value = draftOnlyDigital.value
+  appliedOnlyDiscount.value = draftOnlyDiscount.value
+  page.value = 1
+  filtersOpen.value = false
+}
+
+function onDocClick(e: MouseEvent) {
+  if (!filtersOpen.value) return
+  const t = e.target as Node
+  if (filterWrap.value && !filterWrap.value.contains(t)) filtersOpen.value = false
+}
+function onKeyDown(e: KeyboardEvent) {
+  if (e.key === 'Escape') filtersOpen.value = false
+}
+function onViewportChange() {
+  if (!filtersOpen.value) return
+  positionFiltersDropdown()
+}
+
+const load = async () => {
+  await Promise.resolve(store.load(route.params.slug as string))
+
+  page.value = 1
+  filtersOpen.value = false
+
+  draftOnlyDigital.value = appliedOnlyDigital.value
+  draftOnlyDiscount.value = appliedOnlyDiscount.value
+
+  similarIndex.value = 0
+  simDir.value = 'next'
+
+  void ensureCatalog()
+
+  await nextTick()
+  measureSimilarWindow()
+}
+
+onMounted(() => {
+  void load()
+})
+
+watch(
+    () => route.params.slug,
+    () => void load()
+)
+
+watch([sort, appliedOnlyDigital, appliedOnlyDiscount], () => {
+  page.value = 1
+})
+
+watch(filtersOpen, async (isOpen) => {
+  if (isOpen) {
+    await nextTick()
+    positionFiltersDropdown()
+    window.addEventListener('resize', onViewportChange, { passive: true })
+    window.addEventListener('scroll', onViewportChange, true)
+  } else {
+    window.removeEventListener('resize', onViewportChange as any)
+    window.removeEventListener('scroll', onViewportChange as any, true)
+  }
 })
 
 const catTitle = computed(() => {
   const slug = route.params.slug as string
   if (slug === 'accounts') return 'اکانت‌ها'
-  if (slug === 'gift-cards') return 'گیفت‌کارت'
+  if (slug === 'gift-cards') return 'گیفت‌کارت‌ها'
   return 'محصولات'
+})
+
+const heroCta = computed(() => {
+  const slug = route.params.slug as string
+  if (slug === 'accounts') return { label: 'مشاهده گیفت‌کارت‌ها', to: '/category/gift-cards' }
+  if (slug === 'gift-cards') return { label: 'مشاهده اکانت‌ها', to: '/category/accounts' }
+  return { label: 'مشاهده گیفت‌کارت‌ها', to: '/category/gift-cards' }
 })
 
 const filtered = computed(() => {
   let items = store.products.slice()
-  if (onlyDigital.value) items = items.filter(p => p.isDigital)
-  if (onlyDiscount.value) items = items.filter(p => p.compareAt && p.compareAt > p.price)
-  if (sort.value === 'price-asc') items.sort((a, b) => a.price - b.price)
-  if (sort.value === 'price-desc') items.sort((a, b) => b.price - a.price)
+  if (appliedOnlyDigital.value) items = items.filter((p: any) => p.isDigital)
+  if (appliedOnlyDiscount.value) items = items.filter((p: any) => p.compareAt && p.compareAt > p.price)
+  if (sort.value === 'price-asc') items.sort((a: any, b: any) => a.price - b.price)
+  if (sort.value === 'price-desc') items.sort((a: any, b: any) => b.price - a.price)
   return items
 })
 
@@ -334,78 +582,363 @@ const paged = computed(() => {
   const start = (page.value - 1) * perPage
   return filtered.value.slice(start, start + perPage)
 })
+
+const similarProducts = computed(() => {
+  const slug = route.params.slug as 'accounts' | 'gift-cards' | string
+  const source = (catalog.value.length ? catalog.value : store.products).slice()
+  const map = new Map<string, any>()
+  source.forEach((p: any) => map.set(keyOf(p), p))
+  const uniq = Array.from(map.values())
+
+  return (slug === 'accounts'
+          ? uniq.filter((p: any) => !belongsTo('accounts', p))
+          : slug === 'gift-cards'
+              ? uniq.filter((p: any) => !belongsTo('gift-cards', p))
+              : uniq
+  ).map((p: any) => ({ ...p, __k: keyOf(p) }))
+})
+
+const visibleSimilar = computed(() => {
+  const start = similarIndex.value
+  const end = start + similarWindow.value
+  return similarProducts.value.slice(start, end)
+})
+
+function measureSimilarWindow() {
+  const w = window.innerWidth
+  if (w < 640) similarWindow.value = 1
+  else if (w < 768) similarWindow.value = 2
+  else if (w < 1024) similarWindow.value = 3
+  else if (w < 1280) similarWindow.value = 4
+  else similarWindow.value = 5
+
+  const maxStart = Math.max(0, similarProducts.value.length - similarWindow.value)
+  similarIndex.value = Math.min(similarIndex.value, maxStart)
+}
+
+function similarPrev() {
+  if (simLock.value) return
+  if (similarProducts.value.length <= similarWindow.value) return
+  lockSimilar()
+
+  simDir.value = 'prev'
+  const maxStart = Math.max(0, similarProducts.value.length - similarWindow.value)
+  similarIndex.value = similarIndex.value <= 0 ? maxStart : Math.max(0, similarIndex.value - 1)
+}
+function similarNext() {
+  if (simLock.value) return
+  if (similarProducts.value.length <= similarWindow.value) return
+  lockSimilar()
+
+  simDir.value = 'next'
+  const maxStart = Math.max(0, similarProducts.value.length - similarWindow.value)
+  similarIndex.value = similarIndex.value >= maxStart ? 0 : Math.min(maxStart, similarIndex.value + 1)
+}
+
+watch(
+    () => similarProducts.value.length,
+    async () => {
+      await nextTick()
+      measureSimilarWindow()
+      const maxStart = Math.max(0, similarProducts.value.length - similarWindow.value)
+      similarIndex.value = Math.min(similarIndex.value, maxStart)
+    }
+)
+
+onMounted(() => {
+  void ensureCatalog()
+
+  document.addEventListener('click', onDocClick)
+  window.addEventListener('keydown', onKeyDown)
+
+  measureSimilarWindow()
+  window.addEventListener('resize', measureSimilarWindow, { passive: true })
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', onDocClick)
+  window.removeEventListener('keydown', onKeyDown)
+
+  window.removeEventListener('resize', onViewportChange as any)
+  window.removeEventListener('scroll', onViewportChange as any, true)
+
+  window.removeEventListener('resize', measureSimilarWindow as any)
+})
 </script>
 
 <style scoped>
+.category-page { direction: rtl; }
+
 .category-page {
-  direction: rtl;
+  background:
+      radial-gradient(800px 500px at 20% 0%, rgba(255, 255, 255, 0.10), transparent 60%),
+      radial-gradient(900px 650px at 80% 20%, rgba(255, 255, 255, 0.08), transparent 65%);
 }
 
-.primary-btn {
-  @apply w-full rounded-xl bg-slate-900 px-4 py-3 text-white font-semibold transition hover:bg-slate-800 active:scale-[0.99];
+/* Toolbar */
+.tools-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+@media (max-width: 640px) {
+  .tools-row { flex-direction: column; align-items: stretch; }
 }
 
-.secondary-btn {
-  @apply rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50;
+/* Dropdown transition */
+.drop-panel-enter-active,
+.drop-panel-leave-active { transition: opacity 160ms ease, transform 160ms ease; }
+.drop-panel-enter-from,
+.drop-panel-leave-to { opacity: 0; transform: translateY(-8px); }
+
+/* Dropdown */
+.filters-dropdown {
+  position: fixed;
+  z-index: 9999;
+  width: min(520px, calc(100vw - 16px));
+  border-radius: 24px;
+  border: 1px solid hsl(var(--b3));
+  background: hsl(var(--b1));
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  backdrop-filter: none;
+}
+.filters-dropdown.fd-right { transform-origin: top right; }
+.filters-dropdown.fd-left { transform-origin: top left; }
+.filters-dropdown.fd-up { transform-origin: bottom center; }
+
+/* Products grid */
+.products-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+@media (min-width: 640px) { .products-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 768px) { .products-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 1024px) { .products-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+
+/* =========================
+   Similar (one row slider)
+   ========================= */
+.similar-row-shell {
+  display: grid;
+  grid-template-columns: 40px 1fr 40px;
+  gap: 10px;
+  align-items: center;
 }
 
-.chip-btn {
-  @apply w-full rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50;
+.similar-row {
+  --sim-cols: 5;
+  --sim-gap: 12px;
+
+  --sim-card-h: 330px;
+  --sim-img-h: 155px;
+
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(var(--sim-cols), minmax(0, 1fr));
+  gap: var(--sim-gap);
+
+  overflow: hidden;
+  border-radius: 22px;
+
+  height: var(--sim-card-h);
+  align-items: stretch;
+  min-width: 0;
+
+  contain: layout paint;
+}
+@media (max-width: 640px) {
+  .similar-row { --sim-card-h: 310px; --sim-img-h: 150px; }
+}
+@media (min-width: 1024px) {
+  .similar-row { --sim-card-h: 340px; --sim-img-h: 160px; }
 }
 
-.chip-btn--active {
-  @apply border-slate-900 bg-slate-900 text-white shadow-sm;
+.similar-item {
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 22px;
+  will-change: transform, opacity;
 }
 
-.feature-tile {
-  @apply flex gap-3 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm;
+.sim-swap-leave-active {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: calc((100% - (var(--sim-cols) - 1) * var(--sim-gap)) / var(--sim-cols));
 }
 
-.feature-icon {
-  @apply flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900/5 text-lg;
+/* nav buttons */
+.similar-nav {
+  height: 44px;
+  width: 40px;
+  border-radius: 14px;
+  border: 1px solid hsl(var(--b3));
+  background: hsl(var(--b1));
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.1);
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform 140ms ease, opacity 140ms ease;
+}
+.similar-nav:hover { transform: translateY(-1px); }
+.similar-nav:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+@media (max-width: 640px) {
+  .similar-row-shell { grid-template-columns: 36px 1fr 36px; }
+  .similar-nav { width: 36px; border-radius: 12px; }
 }
 
-.feature-title {
-  @apply text-sm font-semibold text-slate-900;
+/* TransitionGroup */
+.sim-swap-move { transition: transform 280ms ease; }
+.sim-swap-enter-active { transition: transform 280ms ease, opacity 200ms ease; }
+.sim-swap-leave-active { transition: transform 240ms ease, opacity 170ms ease; }
+
+.dir-next .sim-swap-enter-from { opacity: 0; transform: translateX(14px); }
+.dir-next .sim-swap-leave-to   { opacity: 0; transform: translateX(-14px); }
+
+.dir-prev .sim-swap-enter-from { opacity: 0; transform: translateX(-14px); }
+.dir-prev .sim-swap-leave-to   { opacity: 0; transform: translateX(14px); }
+
+/* =========================
+   ✅ Similar FIX (Scoped to Similar فقط)
+   ========================= */
+.similar-row-shell :deep(.product-card--similar),
+.similar-row-shell :deep(.product-card--similar .card) {
+  height: 100%;
+  overflow: hidden;
+  border-radius: 22px;
 }
 
-.feature-copy {
-  @apply text-xs text-slate-600;
+/* ظرف تصویر: ارتفاع ثابت + کلیپ */
+.similar-row-shell :deep(.product-card--similar figure),
+.similar-row-shell :deep(.product-card--similar .card figure),
+.similar-row-shell :deep(.product-card--similar .card > figure) {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
+
+  height: var(--sim-img-h) !important;
+  min-height: var(--sim-img-h) !important;
+  max-height: var(--sim-img-h) !important;
+
+  overflow: hidden !important;
+  position: relative !important;
+  line-height: 0 !important;
+
+  flex: 0 0 auto !important;
+  border-radius: 18px !important;
 }
 
-.info-accordion {
-  @apply space-y-2 py-2;
+/* ✅ wrapper های رایج (بدون span چون span = badge تخفیف) */
+.similar-row-shell :deep(.product-card--similar figure > div),
+.similar-row-shell :deep(.product-card--similar figure > picture),
+.similar-row-shell :deep(.product-card--similar figure > a) {
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+  overflow: hidden !important;
 }
 
-.info-accordion summary {
-  @apply cursor-pointer text-sm font-semibold text-slate-800 flex items-center justify-between;
+/* ✅ خود badge تخفیف: به هیچ وجه کش نیاد */
+.similar-row-shell :deep(.product-card--similar figure > span.absolute) {
+  width: auto !important;
+  height: auto !important;
+  display: inline-flex !important;
 }
 
-.info-accordion p {
-  @apply text-sm text-slate-600 leading-relaxed mt-2;
+/* تصویر: کامل فیت و بدون بیرون‌زدگی */
+.similar-row-shell :deep(.product-card--similar img),
+.similar-row-shell :deep(.product-card--similar figure img),
+.similar-row-shell :deep(.product-card--similar .card figure img) {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  object-fit: cover !important;
+  object-position: center !important;
 }
 
-.faq-item {
-  @apply rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md;
+/* اگر تصویر مستقیم داخل کارت بود */
+.similar-row-shell :deep(.product-card--similar .card > img) {
+  width: 100% !important;
+  height: var(--sim-img-h) !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  border-radius: 18px !important;
+  overflow: hidden !important;
 }
 
-.faq-item summary {
-  @apply flex cursor-pointer items-center justify-between gap-3 text-sm font-semibold text-slate-900;
+/* بدنه کارت: سالم */
+.similar-row-shell :deep(.product-card--similar .card-body) {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 12px !important;
 }
 
-.faq-item[open] .chevron {
-  transform: rotate(180deg);
+/* عنوان دو خطه */
+.similar-row-shell :deep(.product-card--similar .card-title) {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  line-height: 1.25 !important;
+  min-height: calc(1.25em * 2);
 }
 
-.faq-item p {
-  @apply mt-2 text-sm leading-relaxed text-slate-600;
+.similar-row-shell :deep(.product-card--similar .card-actions) { margin-top: auto; }
+
+/* فوکوس لینک فقط داخل پیشنهادات */
+.similar-row-shell :deep(a:focus),
+.similar-row-shell :deep(a:focus-visible) {
+  outline: none !important;
 }
 
-.chevron {
-  @apply text-lg text-slate-400 transition;
-}
+/* Why / tiles / faq (unchanged) */
+.why-card { @apply flex gap-3 rounded-3xl border border-base-300 bg-base-100 p-4 shadow-sm hover:shadow-md transition; }
+.why-ic { @apply flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/10 text-primary; }
+.why-title { @apply text-sm font-extrabold; }
+.why-copy { @apply text-xs text-base-content/70 mt-0.5; }
 
-.badge-icon {
-  @apply flex h-7 w-7 items-center justify-center rounded-full bg-white shadow-sm border border-slate-200 text-sm;
+.tile { @apply flex gap-3 rounded-3xl border border-base-300 bg-base-100 p-4 shadow-sm hover:shadow-md transition; }
+.tile-ic { @apply flex h-10 w-10 items-center justify-center rounded-2xl bg-secondary/10 text-secondary; }
+.tile-title { @apply text-sm font-extrabold; }
+.tile-copy { @apply text-xs text-base-content/70 mt-0.5; }
+
+.faqx { @apply border border-base-300 bg-base-100 rounded-3xl overflow-hidden shadow-sm; }
+.faqx:hover { @apply shadow-md; }
+.faqx-title { @apply text-sm font-extrabold; }
+.faqx-body { @apply text-sm text-base-content/70 leading-relaxed; }
+
+/* Main product cards */
+:deep(.product-card--main .card) { border-radius: 26px; }
+:deep(.product-card--main .card-body) { padding: 14px !important; }
+:deep(.product-card--main .card-title) {
+  font-size: 15px !important;
+  line-height: 1.3 !important;
+  font-weight: 950 !important;
+}
+:deep(.product-card--main .badge) { font-size: 11.5px !important; padding: 3px 10px !important; }
+:deep(.product-card--main figure) { overflow: hidden; max-height: 220px; }
+:deep(.product-card--main figure img) { height: 220px; width: 100%; object-fit: cover; }
+:deep(.product-card--main .btn) { border-radius: 16px !important; }
+:deep(.product-card--main .btn.btn-sm),
+:deep(.product-card--main .btn-sm) {
+  height: 40px !important;
+  min-height: 40px !important;
+  font-size: 12.5px !important;
+  padding: 0 14px !important;
 }
 </style>

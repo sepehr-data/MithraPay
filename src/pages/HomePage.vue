@@ -104,7 +104,7 @@
           <div v-else-if="!topWeeklyProducts.length" class="text-center py-8 text-sm text-base-content/60">
             در حال حاضر محصول پرفروشی ثبت نشده است.
           </div>
-          <ProductGrid v-else :products="topWeeklyProducts" />
+          <ProductCarousel v-else :products="topWeeklyProducts" />
         </div>
       </section>
 
@@ -136,7 +136,9 @@
           <div v-else-if="!giftCards.length" class="text-center py-8 text-sm text-base-content/60">
             گیفت کارتی برای نمایش وجود ندارد.
           </div>
-          <ProductGrid v-else :products="giftCards" />
+          <div dir="rtl">
+            <ProductCarousel :products="giftCards" />
+          </div>
         </div>
       </section>
 
@@ -145,7 +147,7 @@
         <div class="flex flex-col items-center text-center gap-2">
           <p class="text-xs text-primary font-semibold">نظر کاربران</p>
           <h2 id="reviews" class="text-2xl font-bold">تجربه مشتریان میتراپی</h2>
-          <p class="text-sm text-base-content/60">چند تا از بازخوردهای واقعی کاربران</p>
+          <p class="text-sm text-base-content/60">چند بازخورد واقعی کاربران</p>
           <div class="w-16 h-1 bg-primary/70 rounded-full"></div>
         </div>
 
@@ -249,6 +251,7 @@ import type { BlogPost } from '@/services/types'
 import { useProductsStore } from '@/stores/products'
 import ProductGrid from '@/components/ProductGrid.vue'
 import HeroAppleOneBanner from '@/components/HeroAppleOneBanner.vue'
+import ProductCarousel from '@/components/ProductCarousel.vue'
 
 /* PRODUCTS STORE */
 const store = useProductsStore()

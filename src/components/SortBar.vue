@@ -1,6 +1,5 @@
 <template>
   <div class="flex items-center justify-between mb-4">
-    <div class="text-sm opacity-80">تعداد: {{ total }}</div>
     <div class="flex items-center gap-2">
       <span class="text-sm">مرتب‌سازی:</span>
       <select v-model="model" class="select select-bordered select-sm w-44">

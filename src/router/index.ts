@@ -72,18 +72,25 @@ const router = createRouter({
   }
 })
 
-// 👇 GLOBAL GUARD
+//should be removed, lack of security
+const DEV_BYPASS_AUTH = import.meta.env.VITE_DEV_BYPASS_AUTH === 'true'
+console.log('BYPASS?', DEV_BYPASS_AUTH)
+
+// GLOBAL GUARD
 router.beforeEach((to, from, next) => {
-  const auth = useAuthStore()
+    if (DEV_BYPASS_AUTH) return next()
 
-  if (to.meta.requiresAuth && !auth.isAuthenticated) {
-    return next({
-      name: 'login',
-      query: { redirect: to.fullPath }
-    })
-  }
+    const auth = useAuthStore()
 
-  next()
+    if (to.meta.requiresAuth && !auth.isAuthenticated) {
+        return next({
+            name: 'login',
+            query: { redirect: to.fullPath }
+        })
+    }
+
+    next()
 })
+
 
 export default router
