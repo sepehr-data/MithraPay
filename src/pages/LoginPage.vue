@@ -44,9 +44,9 @@
                 :src="loginIllustration"
                 alt="login illustration"
                 class="w-full max-w-sm mx-auto lg:mx-0 select-none pointer-events-none
-               object-contain max-h-56
-               drop-shadow-[0_18px_40px_rgba(0,0,0,0.25)]
-               opacity-95"
+                     object-contain max-h-56
+                     drop-shadow-[0_18px_40px_rgba(0,0,0,0.25)]
+                     opacity-95"
             />
           </div>
         </div>
@@ -72,8 +72,10 @@
               class="flex items-center gap-2 px-3 py-2 rounded-2xl border"
               :class="step === 1 ? 'border-primary/40 bg-primary/5' : 'border-base-300 bg-base-200/50'"
           >
-            <span class="w-6 h-6 rounded-full grid place-items-center text-xs font-bold"
-                  :class="step === 1 ? 'bg-primary text-primary-content' : 'bg-base-300 text-base-content/70'">1</span>
+            <span
+                class="w-6 h-6 rounded-full grid place-items-center text-xs font-bold"
+                :class="step === 1 ? 'bg-primary text-primary-content' : 'bg-base-300 text-base-content/70'"
+            >1</span>
             <span class="text-xs font-semibold">شماره</span>
           </div>
 
@@ -83,8 +85,10 @@
               class="flex items-center gap-2 px-3 py-2 rounded-2xl border"
               :class="step === 2 ? 'border-primary/40 bg-primary/5' : 'border-base-300 bg-base-200/50'"
           >
-            <span class="w-6 h-6 rounded-full grid place-items-center text-xs font-bold"
-                  :class="step === 2 ? 'bg-primary text-primary-content' : 'bg-base-300 text-base-content/70'">2</span>
+            <span
+                class="w-6 h-6 rounded-full grid place-items-center text-xs font-bold"
+                :class="step === 2 ? 'bg-primary text-primary-content' : 'bg-base-300 text-base-content/70'"
+            >2</span>
             <span class="text-xs font-semibold">کد</span>
           </div>
         </div>
@@ -164,7 +168,7 @@
 
               <button
                   class="link link-hover"
-                  :disabled="resendSeconds > 0"
+                  :disabled="resendSeconds > 0 || loading"
                   @click="sendCode"
               >
                 <span v-if="resendSeconds > 0">
@@ -182,29 +186,30 @@
         </p>
       </div>
     </div>
+
     <AdminKnockModal v-model:open="isOpen" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, nextTick } from 'vue'
-import { useRouter } from 'vue-router'
-import authBg from '@/assets/auth-bg.png'
-import loginIllustration from '@/assets/branding-bg.png'
-import { requestOtp, verifyOtp } from '@/services/api'
-import { useAuthStore } from '@/stores/auth'
-import { useToast } from 'vue-toastification'
-import AdminKnockModal from "@/components/AdminKnockModal.vue";
-import { useAdminKnock } from "@/composables/useAdminKnock";
+import { ref, computed, nextTick, onBeforeUnmount } from "vue"
+import { useRouter } from "vue-router"
+import authBg from "@/assets/auth-bg.png"
+import loginIllustration from "@/assets/branding-bg.png"
+import { requestOtp, verifyOtp } from "@/services/api"
+import { useAuthStore } from "@/stores/auth"
+import { useToast } from "vue-toastification"
+import AdminKnockModal from "@/components/AdminKnockModal.vue"
+import { useAdminKnock } from "@/composables/useAdminKnock"
 
-const { isOpen } = useAdminKnock();
+const { isOpen } = useAdminKnock()
 const toast = useToast()
 const auth = useAuthStore()
 const router = useRouter()
 
 const step = ref<1 | 2>(1)
-const phone = ref('')
-const otp = ref<string[]>(['', '', '', '', '', ''])
+const phone = ref("")
+const otp = ref<string[]>(["", "", "", "", "", ""])
 const loading = ref(false)
 const verifying = ref(false)
 const resendSeconds = ref(0)
@@ -212,7 +217,7 @@ const otpInputs = ref<HTMLInputElement[]>([] as any)
 
 const isPhoneValid = computed(() => /^09\d{9}$/.test(phone.value))
 const prettyPhone = computed(() =>
-    phone.value.replace(/(\d{4})(\d{3})(\d{4})/, '$1-$2-$3')
+    phone.value.replace(/(\d{4})(\d{3})(\d{4})/, "$1-$2-$3")
 )
 
 let resendTimer: number | null = null
@@ -229,83 +234,106 @@ function startResendTimer() {
   }, 1000)
 }
 
+onBeforeUnmount(() => {
+  if (resendTimer) window.clearInterval(resendTimer)
+})
+
+function normalizeErrMessage(err: any) {
+  // اگر axios interceptor داشته باشی ممکنه مستقیم data رو reject کنه
+  return (
+      err?.message ||
+      err?.msg ||
+      err?.detail ||
+      err?.error ||
+      err?.response?.data?.message ||
+      err?.response?.data?.error ||
+      "خطای نامشخص"
+  )
+}
+
 async function sendCode() {
-  if (!isPhoneValid.value) return
+  if (!isPhoneValid.value || loading.value) return
   loading.value = true
 
   try {
+    // API expects: { phone }
     await requestOtp(phone.value)
+
     step.value = 2
     startResendTimer()
 
     await nextTick()
-    otp.value = ['', '', '', '', '', '']
+    otp.value = ["", "", "", "", "", ""]
     otpInputs.value?.[0]?.focus()
-    toast.success('کد تایید ارسال شد')
+
+    toast.success("کد تایید ارسال شد")
   } catch (err: any) {
     console.error(err)
-    toast.error(err?.response?.data?.message || 'خطا در ارسال کد تأیید')
+    toast.error(normalizeErrMessage(err) || "خطا در ارسال کد تأیید")
   } finally {
     loading.value = false
   }
 }
 
 function onOtpInput(idx: number) {
-  const v = otp.value[idx] || ''
-  otp.value[idx] = v.replace(/\D/g, '').slice(0, 1)
+  const v = otp.value[idx] || ""
+  otp.value[idx] = v.replace(/\D/g, "").slice(0, 1)
   if (otp.value[idx] && idx < 5) otpInputs.value?.[idx + 1]?.focus()
 }
 
 function onBackspace(idx: number) {
   if (otp.value[idx]) {
-    otp.value[idx] = ''
+    otp.value[idx] = ""
     return
   }
   if (idx > 0) {
     otpInputs.value?.[idx - 1]?.focus()
-    otp.value[idx - 1] = ''
+    otp.value[idx - 1] = ""
   }
 }
 
-// 👇 paste full code مثل "123456"
 function onOtpPaste(e: ClipboardEvent) {
-  const text = (e.clipboardData?.getData('text') || '').replace(/\D/g, '').slice(0, 6)
+  const text = (e.clipboardData?.getData("text") || "")
+      .replace(/\D/g, "")
+      .slice(0, 6)
   if (text.length === 0) return
-  otp.value = text.split('').concat(Array(6 - text.length).fill(''))
+
+  otp.value = text.split("").concat(Array(6 - text.length).fill(""))
   nextTick(() => otpInputs.value?.[Math.min(text.length, 5)]?.focus())
 }
 
 function reset() {
   step.value = 1
-  otp.value = ['', '', '', '', '', '']
+  otp.value = ["", "", "", "", "", ""]
 }
 
 async function verify() {
-  const code = otp.value.join('')
-  if (code.length !== 6) return
+  const code = otp.value.join("")
+  if (code.length !== 6 || verifying.value) return
 
   verifying.value = true
   try {
+    // backend returns: { access_token }
     const data = await verifyOtp(phone.value, code)
 
-    const token = data.access_token || data.token
-    const user = data.user || { phone: phone.value }
+    const token = data?.access_token
+    if (!token) throw new Error("توکن از سرور برنگشت")
 
-    if (!token) throw new Error('توکن از سرور برنگشت')
+    // چون بک‌اند فعلاً user برنمی‌گردونه، حداقل user رو بسازیم
+    const user = { phone: phone.value }
 
+    // مهم: auth.login باید توکن رو جایی ذخیره کنه (pinia + localStorage)
     auth.login({ token, user })
 
-    toast.success('ورود با موفقیت انجام شد')
-    router.push('/')
+    toast.success("ورود با موفقیت انجام شد")
+    router.push("/")
   } catch (err: any) {
     console.error(err)
-    toast.error(err?.response?.data?.message || 'کد وارد شده صحیح نیست')
+    toast.error(normalizeErrMessage(err) || "کد وارد شده صحیح نیست")
   } finally {
     verifying.value = false
   }
 }
-
-
 </script>
 
 <style scoped>
