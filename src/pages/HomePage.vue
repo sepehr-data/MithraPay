@@ -246,10 +246,10 @@
 <script setup lang="ts">
 import { onMounted, onBeforeUnmount, computed, ref } from 'vue'
 import { storeToRefs } from 'pinia'
-import { listPosts } from '@/services/api'
+import { listBlogPosts } from '@/services/blog'
 import type { BlogPost } from '@/services/types'
+import { mapBlogPostDto } from '@/services/mappers'
 import { useProductsStore } from '@/stores/products'
-import ProductGrid from '@/components/ProductGrid.vue'
 import HeroAppleOneBanner from '@/components/HeroAppleOneBanner.vue'
 import ProductCarousel from '@/components/ProductCarousel.vue'
 
@@ -332,26 +332,27 @@ function go(i: number) {
 }
 
 /* GIFT CARDS */
-const giftCards = computed(() =>
-    store.products
-        .filter(
-            (p: any) =>
-                p.categoryId === 'cat-gift' ||
-                p.categoryId === 'gift-cards' ||
-                p?.tags?.includes('gift-card') ||
-                p?.tags?.includes('گیفت‌کارت') ||
-                p?.tags?.includes('گیفت')
-        )
-        .slice(0, 8)
-)
+const giftCards = computed(() => {
+  return store.products
+    .filter((p: any) => {
+      const cat = String(p?.categoryId ?? '').toLowerCase()
+      const tags = Array.isArray(p?.tags) ? p.tags : []
+      return (
+        cat.includes('gift') ||
+        cat.includes('گیفت') ||
+        tags.some((tag: string) => tag.includes('gift') || tag.includes('گیفت'))
+      )
+    })
+    .slice(0, 8)
+})
 
 /* BLOG FETCH */
 const fetchBlogPosts = async () => {
   blogLoading.value = true
   blogError.value = null
   try {
-    const posts = await listPosts()
-    blogPosts.value = [...posts]
+    const posts = await listBlogPosts()
+    blogPosts.value = [...posts.map(mapBlogPostDto)]
         .sort((a: any, b: any) => {
           const ad = new Date(a.date || a.createdAt || 0).getTime()
           const bd = new Date(b.date || b.createdAt || 0).getTime()

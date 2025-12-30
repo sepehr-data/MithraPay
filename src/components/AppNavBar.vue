@@ -384,6 +384,7 @@ function logoutFromMenu() {
     localStorage.removeItem('token')
     localStorage.removeItem('auth')
   }
+  cart.reset()
   router.push({ name: 'login' })
 }
 
@@ -465,6 +466,7 @@ function unbindNavSearchEvents() {
 
 onMounted(async () => {
   ui.init()
+  await auth.initialize()
   document.addEventListener('click', onDocClick)
   document.addEventListener('keydown', onKeyDown)
 

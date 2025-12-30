@@ -32,7 +32,7 @@
 
       <div class="flex items-center justify-between gap-2">
         <PriceTag :price="product.price" :compareAt="product.compareAt" />
-        <button class="btn btn-primary btn-sm" @click="addToCart">افزودن</button>
+        <button class="btn btn-primary btn-sm" :disabled="cart.loading" @click="addToCart">افزودن</button>
       </div>
 
       <RouterLink

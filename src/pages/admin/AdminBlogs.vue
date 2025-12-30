@@ -1,5 +1,8 @@
 <template>
   <div class="space-y-6" dir="rtl">
+    <div class="rounded-2xl border border-warning/40 bg-warning/10 p-4 text-xs text-warning">
+      TODO: API مدیریت بلاگ هنوز آماده نیست. لیست مطالب از بک‌اند قابل دریافت نیست.
+    </div>
     <!-- HERO بالا برای مقالات -->
     <section class="relative overflow-hidden rounded-3xl bg-gradient-to-l from-primary/95 via-primary/85 to-secondary/80 text-primary-content p-5 sm:p-6 shadow-xl">
       <div class="relative z-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -84,10 +87,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 
-const blogs = ref([
-  { id: 'b1', title: 'آیکلود یک اپ؛ مشکلات رایج آیکلاد', slug: 'icloud-common-issues', author: 'ادمین', date: '1404/03/20', content: '<p>نمونه متن...</p>' },
-  { id: 'b2', title: 'مزایای یوتیوب پریمیوم', slug: 'youtube-premium', author: 'ادمین', date: '1404/03/21', content: '<p>نمونه متن...</p>' },
-])
+const blogs = ref([])
 
 const q = ref('')
 const filtered = computed(() => {
@@ -114,8 +114,7 @@ function changePage(page: number) {
   currentPage.value = page
 }
 
-function remove(id: string) {
-  const idx = blogs.value.findIndex((b) => b.id === id)
-  if (idx >= 0) blogs.value.splice(idx, 1)
+function remove() {
+  // TODO: اتصال به API حذف مقاله
 }
 </script>

@@ -16,9 +16,13 @@
         ]"
       />
 
-      <div v-if="!product" class="grid gap-5 lg:grid-cols-12">
+      <div v-if="loading" class="grid gap-5 lg:grid-cols-12">
         <div class="lg:col-span-7 skeleton h-[420px] rounded-3xl"></div>
         <div class="lg:col-span-5 skeleton h-[420px] rounded-3xl"></div>
+      </div>
+
+      <div v-else-if="error" class="rounded-3xl border border-base-300 bg-base-100 p-6 text-center text-sm text-error">
+        {{ error }}
       </div>
 
       <div v-else class="grid gap-5 lg:grid-cols-12">
@@ -205,7 +209,10 @@
                 <span v-if="selectedOffer?.instant" class="badge badge-success badge-outline">فوری</span>
               </div>
               <div class="mt-5 grid gap-3">
-                <button class="btn btn-primary w-full" @click="add">افزودن به سبد</button>
+                <button class="btn btn-primary w-full" :disabled="isAdding" @click="add">
+                  <span v-if="isAdding" class="loading loading-spinner loading-sm"></span>
+                  <span v-else>افزودن به سبد</span>
+                </button>
                 <button class="btn btn-ghost w-full" @click="scrollToDetails">جزئیات محصول</button>
               </div>
 
@@ -239,7 +246,10 @@
               <PriceTag :price="displayPrice" :compareAt="displayCompareAt" />
             </div>
           </div>
-          <button class="btn btn-primary" @click="add">خرید</button>
+          <button class="btn btn-primary" :disabled="isAdding" @click="add">
+            <span v-if="isAdding" class="loading loading-spinner loading-sm"></span>
+            <span v-else>خرید</span>
+          </button>
           <button class="btn btn-ghost" @click="scrollToDetails">جزئیات</button>
         </div>
       </div>
@@ -262,6 +272,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
+import { useToast } from 'vue-toastification'
 import { useRoute } from 'vue-router'
 import { useProductsStore } from '@/stores/products'
 import { useCartStore } from '@/stores/cart'
@@ -273,9 +284,13 @@ import QuantityInput from '@/components/QuantityInput.vue'
 const route = useRoute()
 const store = useProductsStore()
 const cart = useCartStore()
+const toast = useToast()
 
 const qty = ref(1)
 const product = ref<any>(null)
+const loading = ref(true)
+const error = ref<string | null>(null)
+const isAdding = ref(false)
 
 const tab = ref<'desc' | 'reviews'>('desc')
 const detailsRef = ref<HTMLElement | null>(null)
@@ -385,17 +400,41 @@ function closeZoom() {
   zoomRef.value?.close?.()
 }
 
-onMounted(async () => {
-  product.value = await store.find(route.params.slug as string)
-  activeImage.value = galleryImages.value[0]
+async function loadProduct() {
+  loading.value = true
+  error.value = null
+  try {
+    product.value = await store.find(route.params.slug as string)
+    if (!product.value) {
+      error.value = 'محصول موردنظر پیدا نشد.'
+      return
+    }
 
-  // init dropdown defaults
-  const first = normalizedOptions.value?.[0]
-  if (first) {
-    selectedPlanType.value = first._type
-    selectedPlanDuration.value = first._duration || ''
+    activeImage.value = galleryImages.value[0]
+
+    // init dropdown defaults
+    const first = normalizedOptions.value?.[0]
+    if (first) {
+      selectedPlanType.value = first._type
+      selectedPlanDuration.value = first._duration || ''
+    }
+  } catch (err: any) {
+    error.value = err?.message || 'خطا در دریافت اطلاعات محصول'
+  } finally {
+    loading.value = false
   }
+}
+
+onMounted(() => {
+  void loadProduct()
 })
+
+watch(
+  () => route.params.slug,
+  () => {
+    void loadProduct()
+  },
+)
 
 watch(galleryImages, (imgs) => {
   if (!imgs?.length) return
@@ -416,10 +455,19 @@ watch([planTypes, planDurations], () => {
   }
 })
 
-function add() {
-  if (!product.value) return
+async function add() {
+  if (!product.value || isAdding.value) return
   const id = selectedOffer.value?.id ?? product.value.id
-  cart.add(id, qty.value)
+  isAdding.value = true
+  try {
+    await cart.add(id, qty.value)
+    if (cart.error) throw new Error(cart.error)
+    toast.success('به سبد خرید اضافه شد')
+  } catch (err: any) {
+    toast.error(err?.message || cart.error || 'خطا در افزودن به سبد خرید')
+  } finally {
+    isAdding.value = false
+  }
 }
 
 function scrollToDetails() {

@@ -46,9 +46,19 @@
 
         <!-- Content -->
         <main class="flex-1 overflow-y-auto px-4 py-3 cart-scroll">
+          <div v-if="cart.error" class="mb-3 rounded-2xl border border-base-300 bg-base-100 p-3 text-xs text-error">
+            {{ cart.error }}
+          </div>
           <!-- Empty -->
           <div
-              v-if="cart.items.length === 0"
+              v-if="cart.loading"
+              class="rounded-2xl border border-base-200 p-4 text-center text-sm text-base-content/60"
+          >
+            در حال دریافت سبد خرید...
+          </div>
+
+          <div
+              v-else-if="cart.items.length === 0"
               class="rounded-2xl border border-base-200 p-4"
           >
             <div class="flex items-start gap-3">
@@ -107,6 +117,7 @@
 
                       <button
                           class="icon-btn"
+                          :disabled="cart.loading"
                           @click="cart.remove(line.productId)"
                           aria-label="remove"
                           title="حذف"
@@ -126,6 +137,7 @@
                       <div class="qty-wrap">
                         <QuantityInput
                             v-model="(line as any).qty"
+                            :disabled="cart.loading"
                             @update:model-value="cart.setQty(line.productId, $event)"
                         />
                       </div>
@@ -146,6 +158,7 @@
             <!-- ✅ Clear cart button (زیر محصولات) -->
             <button
                 class="btn btn-ghost w-full rounded-xl border border-base-200 mt-3"
+                :disabled="cart.loading"
                 @click="clearAll()"
                 type="button"
             >
@@ -171,8 +184,8 @@
               <RouterLink
                   to="/checkout"
                   class="btn btn-primary rounded-xl"
-                  :class="cart.items.length === 0 ? 'btn-disabled' : ''"
-                  @click="cart.items.length === 0 ? $event.preventDefault() : ui.closeCart()"
+                  :class="cart.items.length === 0 || cart.loading ? 'btn-disabled' : ''"
+                  @click="cart.items.length === 0 || cart.loading ? $event.preventDefault() : ui.closeCart()"
               >
                 پرداخت
               </RouterLink>
@@ -192,11 +205,13 @@
 import { onBeforeUnmount, onMounted, watch } from 'vue'
 import { useUiStore } from '@/stores/ui'
 import { useCartStore } from '@/stores/cart'
+import { useAuthStore } from '@/stores/auth'
 import { formatToman } from '@/services/currency'
 import QuantityInput from './QuantityInput.vue'
 
 const ui = useUiStore()
 const cart = useCartStore()
+const auth = useAuthStore()
 
 const money = (n: number) => String(formatToman(n)).replace(/تومان/g, '').trim()
 
@@ -212,17 +227,32 @@ watch(
     { immediate: true }
 )
 
-onMounted(() => window.addEventListener('keydown', onKey))
+onMounted(() => {
+  window.addEventListener('keydown', onKey)
+  if (auth.isAuthenticated) {
+    void cart.loadCart()
+  }
+})
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', onKey)
   document.documentElement.style.overflow = ''
 })
 
 const clearAll = () => {
-  ;(cart as any).clear?.()
-  ;(cart as any).clearCart?.()
-  ;(cart as any).reset?.()
+  if (auth.isAuthenticated) {
+    void cart.clearCart()
+  } else {
+    cart.reset()
+  }
 }
+
+watch(
+  () => auth.user?.id,
+  (id) => {
+    if (id) void cart.loadCart()
+    else cart.reset()
+  },
+)
 </script>
 
 <style scoped>

@@ -1,5 +1,8 @@
 <template>
   <div class="space-y-6" dir="rtl">
+    <div class="rounded-2xl border border-warning/40 bg-warning/10 p-4 text-xs text-warning">
+      TODO: اتصال به API مدیریت سفارش‌ها در سمت بک‌اند فراهم نشده است. تا زمان آماده شدن، لیست سفارش‌ها نمایش داده نمی‌شود.
+    </div>
     <!-- HERO بالا برای سفارشات -->
     <section class="relative overflow-hidden rounded-3xl bg-gradient-to-l from-primary/95 via-primary/85 to-secondary/80 text-primary-content p-5 sm:p-6 shadow-xl">
       <div class="relative z-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -126,10 +129,7 @@ interface Order {
   status: 'paid' | 'pending' | 'canceled'
 }
 
-const orders = ref<Order[]>([
-  { id: 'ORD-1001', userPhone: '09120000000', productTitle: 'Apple Music (3 ماهه)', amount: 249000, status: 'paid' },
-  { id: 'ORD-1002', userPhone: '09350000000', productTitle: 'iCloud+ (200GB)', amount: 189000, status: 'pending' },
-])
+const orders = ref<Order[]>([])
 
 const q = ref('')
 const filterTab = ref<'all' | 'paid' | 'pending'>('all') // تایپ دقیق filterTab به عنوان یکی از مقادیر 'all' | 'paid' | 'pending'

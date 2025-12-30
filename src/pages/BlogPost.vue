@@ -88,6 +88,15 @@
     </header>
 
     <main class="max-w-6xl mx-auto px-4 lg:px-6 py-6 lg:py-8">
+      <div v-if="loading" class="rounded-3xl border border-base-300 bg-base-100 p-6 text-center text-sm text-base-content/60">
+        در حال بارگذاری مطلب...
+      </div>
+
+      <div v-else-if="error" class="rounded-3xl border border-base-300 bg-base-100 p-6 text-center text-sm text-error">
+        {{ error }}
+      </div>
+
+      <template v-else>
       <!-- HERO -->
       <section class="relative overflow-hidden rounded-3xl border border-base-300 shadow-2xl">
         <div class="absolute inset-0 bg-gradient-to-br from-primary/12 via-secondary/10 to-transparent"></div>
@@ -263,6 +272,7 @@
           </article>
         </div>
       </section>
+      </template>
     </main>
 
     <div v-if="toast" class="toast toast-top toast-end z-[99]">
@@ -275,6 +285,19 @@
 
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
+import { getBlogPost } from '@/services/blog'
+import { mapBlogPostDto } from '@/services/mappers'
+
+type BlogPostView = {
+  title: string
+  excerpt: string
+  cover: string
+  tags: string[]
+  publishedAt: Date
+  author: { name: string }
+  content: string
+}
 
 type TocItem = { id: string; text: string; level: 2 | 3 }
 
@@ -477,28 +500,19 @@ watch(aaOpen, (v) => {
   nextTick(() => updateAaPos())
 })
 
-const post = ref({
-  title: 'طراحی صفحه بلاگ با خوانایی بالا و ناوبری ساده',
-  excerpt: 'در این مطلب یاد می‌گیریم چگونه یک صفحه بلاگ بسازیم که هم ریسپانسیو باشد، هم با تم سایت هماهنگ بماند و تجربه خواندن را بهتر کند.',
-  cover: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=2000&q=70',
-  tags: ['UI', 'Design', 'Vue'],
-  publishedAt: new Date('2025-12-21'),
-  author: { name: 'نام نویسنده' },
-  content: `
-    <h2>چرا این ساختار به تم سایت نزدیک‌تر است؟</h2>
-    <p>چون از رنگ‌های پایه DaisyUI استفاده می‌کند و تجربه خواندن را بهتر می‌کند.</p>
-    <h2>فهرست ثابت کنار متن</h2>
-    <p>فهرست کنار متن کمک می‌کند کاربر سریع اسکن کند.</p>
-    <h3>نکته</h3>
-    <div class="not-prose my-4 rounded-2xl border border-base-300 bg-base-200/60 p-4">
-      <div class="font-bold">نکته</div>
-      <p class="mt-2 text-sm text-base-content/70 leading-7">
-        عرض متن در حالت معمولی محدود می‌ماند، اما در حالت مطالعه، متن تمام‌عرض می‌شود.
-      </p>
-    </div>
-    <h2>جمع‌بندی</h2>
-    <p>این طراحی ساده‌تر و نزدیک‌تر به تم عمومی سایت است.</p>
-  `,
+const route = useRoute()
+
+const loading = ref(true)
+const error = ref<string | null>(null)
+
+const post = ref<BlogPostView>({
+  title: '',
+  excerpt: '',
+  cover: '',
+  tags: [],
+  publishedAt: new Date(),
+  author: { name: 'نویسنده' },
+  content: '',
 })
 
 const prettyDate = computed(() =>
@@ -528,15 +542,49 @@ const related = ref([
   { id: 2, title: 'ساخت فهرست خودکار در Vue', meta: '۶ دقیقه • Vue', cover: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=320&q=70' },
 ])
 
+async function loadPost() {
+  loading.value = true
+  error.value = null
+  try {
+    const slug = String(route.params.slug || '')
+    const data = await getBlogPost(slug)
+    const mapped = mapBlogPostDto(data)
+
+    post.value = {
+      title: mapped.title,
+      excerpt: mapped.excerpt,
+      cover: mapped.cover || 'https://placehold.co/1200x700?text=Blog',
+      tags: (data as any).tags || [],
+      publishedAt: new Date(mapped.date || Date.now()),
+      author: { name: (data as any).author?.name || 'نویسنده' },
+      content: mapped.content || mapped.excerpt,
+    }
+  } catch (err: any) {
+    error.value = err?.message || 'خطا در دریافت مطلب'
+  } finally {
+    loading.value = false
+    if (!error.value) {
+      await nextTick()
+      buildToc()
+      setupProgress()
+    }
+  }
+}
+
 onMounted(async () => {
-  await nextTick()
-  buildToc()
-  setupProgress()
+  await loadPost()
 
   // ✅ فقط برای اینکه وقتی اسکرول/ریسایز میشه، منو سرجاش بمونه
   window.addEventListener('scroll', onViewportChange, { passive: true })
   window.addEventListener('resize', onViewportChange)
 })
+
+watch(
+  () => route.params.slug,
+  () => {
+    void loadPost()
+  },
+)
 
 onBeforeUnmount(() => {
   if (io) io.disconnect()

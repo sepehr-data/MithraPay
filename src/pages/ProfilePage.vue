@@ -192,7 +192,7 @@
           </div>
         </div>
 
-        <div class="mt-4 rec-row-shell">
+        <div v-if="recommendedProducts.length" class="mt-4 rec-row-shell">
           <button
               type="button"
               class="btn btn-sm btn-outline rounded-2xl recNav"
@@ -226,6 +226,7 @@
             &gt;
           </button>
         </div>
+        <p v-else class="mt-4 text-sm text-base-content/60">محصول پیشنهادی موجود نیست.</p>
       </div>
     </section>
 
@@ -501,7 +502,10 @@ import { computed, ref, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
 import { useToast } from 'vue-toastification'
-import { http } from '@/services/http'
+import { updateMe } from '@/services/user'
+import { listOrders } from '@/services/orders'
+import { listProducts } from '@/services/products'
+import { mapProductDto } from '@/services/mappers'
 
 import ProductCard from '@/components/ProductCard.vue'
 import type { Product } from '@/services/types'
@@ -640,28 +644,19 @@ const fullName = computed(() => {
 
 const displayEmail = computed(() => (auth.user as any)?.email || 'ایمیل ثبت نشده')
 
-const stats = {
+const stats = ref({
   activeOrders: 0,
-  completedOrders: 12,
+  completedOrders: 0,
   canceledOrders: 0,
-  loyaltyPoints: 48,
+  loyaltyPoints: 0,
   processing: 0,
-  delivered: 12,
+  delivered: 0,
   canceled: 0,
-  returned: 0
-}
+  returned: 0,
+})
 
 /** ✅ recommended products */
-const recommendedProducts = ref<Product[]>(
-    [
-      { id: 101, slug: 'chatgpt-plus', title: 'ChatGPT Plus', image: 'https://placehold.co/600x600?text=ChatGPT', rating: 4.7, price: 590000, compareAt: 690000 },
-      { id: 102, slug: 'capcut-pro', title: 'CapCut Pro', image: 'https://placehold.co/600x600?text=CapCut', rating: 4.6, price: 320000, compareAt: 0 },
-      { id: 103, slug: 'duolingo-super', title: 'Duolingo Super', image: 'https://placehold.co/600x600?text=Duolingo', rating: 4.5, price: 210000, compareAt: 260000 },
-      { id: 104, slug: 'grammarly-premium', title: 'Grammarly Premium', image: 'https://placehold.co/600x600?text=Grammarly', rating: 4.6, price: 430000, compareAt: 520000 },
-      { id: 105, slug: 'vps-server', title: 'VPS Server', image: 'https://placehold.co/600x600?text=VPS', rating: 4.4, price: 780000, compareAt: 0 },
-      { id: 106, slug: 'canva-pro', title: 'Canva Pro', image: 'https://placehold.co/600x600?text=Canva', rating: 4.7, price: 290000, compareAt: 360000 }
-    ].map(p => p as any)
-)
+const recommendedProducts = ref<Product[]>([])
 
 /** dialogs/steps */
 const editDialog = ref<HTMLDialogElement | null>(null)
@@ -771,6 +766,46 @@ watch(
     { immediate: true }
 )
 
+async function loadStats() {
+  try {
+    const data = await listOrders()
+    const orders = Array.isArray(data) ? data : []
+
+    let completed = 0
+    let paid = 0
+    let canceled = 0
+    let pending = 0
+
+    for (const order of orders) {
+      const status = order?.status
+      if (status === 'completed') completed += 1
+      else if (status === 'paid') paid += 1
+      else if (status === 'canceled') canceled += 1
+      else pending += 1
+    }
+
+    stats.value.activeOrders = pending + paid
+    stats.value.completedOrders = completed
+    stats.value.canceledOrders = canceled
+    stats.value.processing = pending
+    stats.value.delivered = completed
+    stats.value.canceled = canceled
+    stats.value.returned = 0
+    stats.value.loyaltyPoints = Math.max(0, (paid + completed) * 4)
+  } catch {
+    // keep defaults
+  }
+}
+
+async function loadRecommendations() {
+  try {
+    const data = await listProducts()
+    recommendedProducts.value = data.map(mapProductDto).slice(0, 8)
+  } catch {
+    recommendedProducts.value = []
+  }
+}
+
 function openEdit() {
   editStep.value = 1
   if (auth.user) fillFormFromUser(auth.user)
@@ -813,6 +848,14 @@ function logout() {
 function isValidEmail(v: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
 }
+
+onMounted(async () => {
+  if (!auth.user && auth.token) {
+    await auth.fetchMe()
+  }
+  await loadStats()
+  await loadRecommendations()
+})
 
 /* ====== Slider + Calendar state (unchanged) ====== */
 const vw = ref(typeof window !== 'undefined' ? window.innerWidth : 1024)
@@ -937,6 +980,7 @@ onUnmounted(() => {
   window.removeEventListener('resize', computeRecWindow as any)
 })
 watch(vw, () => computeRecWindow())
+watch(recommendedProducts, () => computeRecWindow())
 
 /* ====== Profile completion (unchanged) ====== */
 const profileCompletion = computed(() => {
@@ -1033,10 +1077,9 @@ async function submitProfile() {
       sheba: normalize(sheba.value) || null
     }
 
-    const res = await http.put('/users/me', payload)
-    ;(auth as any).user = res.data.user
-    localStorage.setItem('auth_user', JSON.stringify((auth as any).user))
-    fillFormFromUser(res.data.user)
+    const res = await updateMe(payload)
+    auth.setUser(res.user as any)
+    fillFormFromUser(res.user)
 
     toast.success('اطلاعات شما با موفقیت به‌روزرسانی شد')
     closeEdit()

@@ -1,5 +1,8 @@
 <template>
   <div class="space-y-6 max-w-4xl mx-auto" dir="rtl">
+    <div class="rounded-2xl border border-warning/40 bg-warning/10 p-4 text-xs text-warning">
+      TODO: API مدیریت بلاگ برای ایجاد/ویرایش مقاله در دسترس نیست. این فرم فعلاً ذخیره نمی‌کند.
+    </div>
     <!-- هدر با گرادیانت ملایم و اوپاسیتی کم -->
     <section
         class="relative rounded-3xl border border-base-300 shadow-sm overflow-hidden
@@ -306,17 +309,7 @@
 import { reactive, ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
-const blogStore = ref([
-  {
-    id: 'b1',
-    title: 'نمونه مقاله',
-    slug: 'sample-post',
-    author: 'ادمین',
-    date: '1404/08/15',
-    cover: '',
-    content: '<p>نمونه متن...</p>',
-  },
-])
+const blogStore = ref([])
 
 const route = useRoute()
 const router = useRouter()
@@ -406,12 +399,7 @@ function clearContent() {
 }
 
 function save() {
-  if (isEdit.value) {
-    const idx = blogStore.value.findIndex(b => b.id === form.id)
-    if (idx >= 0) blogStore.value[idx] = { ...form }
-  } else {
-    blogStore.value.unshift({ ...form })
-  }
+  alert('امکان ذخیره مقاله در این نسخه فراهم نیست.')
   router.push('/admin/blogs')
 }
 </script>

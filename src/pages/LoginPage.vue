@@ -196,7 +196,7 @@ import { ref, computed, nextTick, onBeforeUnmount } from "vue"
 import { useRouter } from "vue-router"
 import authBg from "@/assets/auth-bg.png"
 import loginIllustration from "@/assets/branding-bg.png"
-import { requestOtp, verifyOtp } from "@/services/api"
+import { requestOtp, verifyOtp } from "@/services/auth"
 import { useAuthStore } from "@/stores/auth"
 import { useToast } from "vue-toastification"
 import AdminKnockModal from "@/components/AdminKnockModal.vue"
@@ -320,10 +320,12 @@ async function verify() {
     if (!token) throw new Error("توکن از سرور برنگشت")
 
     // چون بک‌اند فعلاً user برنمی‌گردونه، حداقل user رو بسازیم
-    const user = { phone: phone.value }
-
     // مهم: auth.login باید توکن رو جایی ذخیره کنه (pinia + localStorage)
-    auth.login({ token, user })
+    await auth.login({ token })
+
+    if (!auth.user) {
+      auth.setUser({ phone: phone.value } as any)
+    }
 
     toast.success("ورود با موفقیت انجام شد")
     router.push("/")

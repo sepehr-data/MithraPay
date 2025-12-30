@@ -110,7 +110,13 @@
             </div>
           </div>
 
-          <div class="products-grid">
+          <div v-if="store.loading" class="text-center py-8 text-sm text-base-content/60">
+            در حال بارگذاری محصولات...
+          </div>
+          <div v-else-if="store.error" class="text-center py-8 text-sm text-error">
+            {{ store.error }}
+          </div>
+          <div v-else class="products-grid">
             <ProductCard v-for="p in paged" :key="p.id" :product="p" class="product-card--main" />
           </div>
 

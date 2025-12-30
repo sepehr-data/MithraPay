@@ -1,4 +1,4 @@
-export type ID = string
+export type ID = string | number
 
 export interface Category {
   id: ID
@@ -18,6 +18,7 @@ export interface Product {
   categoryId: ID
   isDigital?: boolean
   tags?: string[]
+  createdAt?: string
 }
 
 export interface BlogPost {
@@ -28,6 +29,12 @@ export interface BlogPost {
   content: string
   date: string
   cover?: string
+  category?: string
+  tags?: string[]
+  readingTime?: number
+  views?: number
+  likes?: number
+  createdAt?: string
 }
 
 export interface CartItem {

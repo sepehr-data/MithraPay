@@ -20,6 +20,7 @@ export type UpdateMePayload = Partial<{
     sheba: string | null
     phone: string | null
     password: string | null
+    account_number: string | null
 }>
 
 export type UpdateMeResponse = {

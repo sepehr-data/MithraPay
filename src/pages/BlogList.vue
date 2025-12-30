@@ -125,8 +125,12 @@
           </article>
 
 
+          <div v-if="error" class="rounded-2xl border border-base-300 bg-base-100 p-4 text-center text-sm text-error">
+            {{ error }}
+          </div>
+
           <!-- POSTS GRID -->
-          <div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+          <div v-else class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
 
             <!-- Skeleton on loading -->
             <template v-if="loading">
@@ -303,8 +307,9 @@
 
 <script setup lang="ts">
 import { onMounted, ref, computed, watch } from 'vue'
-import { listPosts } from '@/services/api'
+import { listBlogPosts } from '@/services/blog'
 import type { BlogPost } from '@/services/types'
+import { mapBlogPostDto } from '@/services/mappers'
 
 type SortKey =
     | 'newest'
@@ -317,6 +322,7 @@ type SortKey =
 
 const posts = ref<BlogPost[]>([])
 const loading = ref(true)
+const error = ref<string | null>(null)
 
 const search = ref('')
 const sort = ref<SortKey>('newest')
@@ -340,7 +346,10 @@ const currentPage = ref(1)
 
 onMounted(async () => {
   try {
-    posts.value = await listPosts()
+    const data = await listBlogPosts()
+    posts.value = data.map(mapBlogPostDto)
+  } catch (err: any) {
+    error.value = err?.message || 'خطا در دریافت مطالب بلاگ'
   } finally {
     loading.value = false
   }

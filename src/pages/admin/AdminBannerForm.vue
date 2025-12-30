@@ -1,5 +1,8 @@
 <template>
   <div class="space-y-6 max-w-4xl mx-auto" dir="rtl">
+    <div class="rounded-2xl border border-warning/40 bg-warning/10 p-4 text-xs text-warning">
+      TODO: API مدیریت بنرها در دسترس نیست. ذخیره‌سازی این فرم غیرفعال است.
+    </div>
     <!-- هدر مینیمال شبیه فرم مقالات -->
     <section
         class="relative rounded-3xl border border-base-300 shadow-sm overflow-hidden
@@ -159,22 +162,12 @@ const banner = ref<Banner>({
 onMounted(() => {
   const bannerId = route.params.id as string
   if (bannerId) {
-    const foundBanner = {
-      id: bannerId,
-      image: '/banners/slider3.webp',
-      alt: 'Apple tv+',
-      to: '/product/apple-tv'
-    }
-    banner.value = foundBanner
+    banner.value.id = bannerId
   }
 })
 
 const saveBanner = () => {
-  if (banner.value.id) {
-    console.log('Updating banner:', banner.value)
-  } else {
-    console.log('Adding new banner:', banner.value)
-  }
+  alert('ذخیره بنر در این نسخه فعال نیست.')
   router.push('/admin/banners')
 }
 </script>

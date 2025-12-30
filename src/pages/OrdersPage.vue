@@ -373,7 +373,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import type { Order, OrderStatus } from '@/services/types'
-import { listOrders } from '@/services/api'
+import { listOrders } from '@/services/orders'
 import { useToast } from 'vue-toastification'
 
 const toast = useToast()
@@ -582,10 +582,39 @@ const stats = computed(() => {
   return { paid, completed, canceled, pending }
 })
 
+function normalizeStatus(status?: string): OrderStatus {
+  if (status === 'paid' || status === 'completed' || status === 'canceled' || status === 'pending') return status
+  return 'pending'
+}
+
+function mapOrder(raw: any): Order {
+  const id = raw?.id ?? raw?.order_id ?? raw?.orderId ?? raw?.order_number ?? raw?.code ?? '—'
+  const code = raw?.order_number ?? raw?.code ?? `#${id}`
+  const createdAt = raw?.created_at ?? raw?.createdAt ?? new Date().toISOString()
+
+  const itemsSource = raw?.items ?? raw?.order_items ?? raw?.products ?? []
+  const items = Array.isArray(itemsSource)
+    ? itemsSource.map((item: any) => ({
+        productTitle: item?.product_title ?? item?.title ?? item?.product?.title ?? 'محصول',
+        quantity: Number(item?.quantity ?? item?.qty ?? 1),
+      }))
+    : []
+
+  return {
+    id,
+    code,
+    status: normalizeStatus(raw?.status),
+    createdAt,
+    items,
+    totalAmount: raw?.total_amount ?? raw?.totalAmount ?? raw?.total,
+  }
+}
+
 onMounted(async () => {
   loading.value = true
   try {
-    orders.value = await listOrders()
+    const data = await listOrders()
+    orders.value = (Array.isArray(data) ? data : []).map(mapOrder)
   } catch (err: any) {
     console.error(err)
     toast.error(err?.response?.data?.message || 'خطا در دریافت سفارش‌ها')

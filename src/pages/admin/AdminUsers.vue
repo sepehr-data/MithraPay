@@ -1,5 +1,8 @@
 <template>
   <div class="space-y-6" dir="rtl">
+    <div class="rounded-2xl border border-warning/40 bg-warning/10 p-4 text-xs text-warning">
+      TODO: API مدیریت کاربران هنوز آماده نیست. لیست کاربران فعلاً نمایش داده نمی‌شود.
+    </div>
     <!-- HERO بالا برای کاربران -->
     <section class="relative overflow-hidden rounded-3xl bg-gradient-to-l from-primary/95 via-primary/85 to-secondary/80 text-primary-content p-5 sm:p-6 shadow-xl">
       <div class="relative z-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -117,10 +120,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 
-const users = ref([
-  { id: 1, phone: '09120000000', name: 'کاربر تست', createdAt: '1404/03/10' },
-  { id: 2, phone: '09350000000', name: '', createdAt: '1404/03/11' },
-])
+const users = ref([])
 
 const q = ref('')
 

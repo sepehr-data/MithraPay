@@ -45,6 +45,13 @@
         class="rounded-2xl bg-base-100 border border-base-300 shadow-sm px-4 sm:px-5 py-4 sm:py-5 space-y-5"
         @submit.prevent="save"
     >
+      <div v-if="error" class="rounded-2xl border border-base-300 bg-base-100 p-3 text-xs text-error">
+        {{ error }}
+      </div>
+
+      <div v-if="loading" class="rounded-2xl border border-base-300 bg-base-100 p-3 text-xs text-base-content/60">
+        در حال دریافت اطلاعات محصول...
+      </div>
       <!-- خلاصه کوچک بالا -->
       <div
           class="grid gap-3 sm:grid-cols-3 text-[11px] sm:text-xs rounded-2xl bg-base-200/60 px-3 py-2.5"
@@ -81,6 +88,7 @@
             <input
                 v-model="form.title"
                 class="input input-bordered input-sm"
+                :disabled="loading"
                 required
             />
           </label>
@@ -90,6 +98,7 @@
             <input
                 v-model="form.slug"
                 class="input input-bordered input-sm ltr text-left"
+                :disabled="loading"
                 required
             />
           </label>
@@ -102,6 +111,7 @@
               rows="3"
               class="textarea textarea-bordered text-xs"
               placeholder="توضیح کوتاه درباره محصول..."
+              :disabled="loading"
           ></textarea>
         </label>
       </div>
@@ -120,6 +130,7 @@
                 type="number"
                 class="input input-bordered input-sm ltr text-left"
                 min="0"
+                :disabled="loading"
                 required
             />
           </label>
@@ -131,6 +142,7 @@
                 type="number"
                 class="input input-bordered input-sm ltr text-left"
                 min="0"
+                :disabled="loading"
             />
           </label>
 
@@ -139,6 +151,7 @@
             <input
                 v-model="form.categoryId"
                 class="input input-bordered input-sm"
+                :disabled="loading"
             />
           </label>
 
@@ -148,6 +161,7 @@
                 v-model="form.image"
                 class="input input-bordered input-sm ltr text-left"
                 placeholder=" /images/product.png"
+                :disabled="loading"
             />
           </label>
         </div>
@@ -164,6 +178,7 @@
               v-model="form.isDigital"
               type="checkbox"
               class="checkbox checkbox-sm"
+              :disabled="loading"
           />
           <span>محصول دیجیتال است (تحویل به صورت اکانت / کد / اشتراک)</span>
         </label>
@@ -182,8 +197,10 @@
         <button
             class="btn btn-primary btn-sm px-6"
             type="submit"
+            :disabled="saving || loading"
         >
-          {{ isEdit ? 'ذخیره تغییرات' : 'ثبت محصول' }}
+          <span v-if="saving" class="loading loading-spinner loading-sm"></span>
+          <span v-else>{{ isEdit ? 'ذخیره تغییرات' : 'ثبت محصول' }}</span>
         </button>
       </div>
     </form>
@@ -191,48 +208,108 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, computed } from 'vue'
+import { reactive, computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useProductsStore } from '@/stores/products'
+import { useToast } from 'vue-toastification'
+import { adminCreateProduct, adminUpdateProduct } from '@/services/admin'
+import { getProduct } from '@/services/products'
+import type { ProductDto } from '@/api/products.dto'
 
 const route = useRoute()
 const router = useRouter()
-const store = useProductsStore()
+const toast = useToast()
 
 const isEdit = computed(() => !!route.params.id)
-const existing = isEdit.value
-    ? (store.products as any[]).find((p: any) => p.id === route.params.id)
-    : null
+const form = reactive<any>({
+  id: null as number | null,
+  slug: '',
+  title: '',
+  description: '',
+  price: 0,
+  compareAt: null as number | null,
+  image: '',
+  categoryId: '',
+  isDigital: true,
+})
 
-const form = reactive<any>(
-    existing
-        ? { ...existing }
-        : {
-          id: 'p' + Math.random().toString(36).slice(2, 7),
-          slug: '',
-          title: '',
-          description: '',
-          price: 0,
-          compareAt: null,
-          image: '',
-          categoryId: '',
-          isDigital: true,
-        },
-)
+const loading = ref(false)
+const saving = ref(false)
+const error = ref<string | null>(null)
 
-function save() {
-  if (isEdit.value) {
-    const idx = (store.products as any[]).findIndex(
-        (p: any) => p.id === form.id,
-    )
-    if (idx >= 0) (store.products as any[])[idx] = { ...form }
-  } else {
-    ;(store.products as any[]).unshift({ ...form })
+function normalizeNumber(value: any) {
+  const parsed = Number(value)
+  if (Number.isNaN(parsed)) return null
+  return parsed
+}
+
+function applyDto(dto: ProductDto) {
+  form.id = dto.id
+  form.slug = dto.slug ?? ''
+  form.title = dto.title
+  form.description = dto.description ?? dto.short_description ?? ''
+  form.price = dto.price ?? 0
+  form.compareAt = dto.compare_at_price ?? null
+  form.image = dto.image_url ?? ''
+  form.categoryId = dto.category_slug ?? dto.category_id ?? ''
+  form.isDigital = dto.delivery_type ? dto.delivery_type !== 'physical' : true
+}
+
+async function loadProduct() {
+  if (!isEdit.value) return
+  const id = Number(route.params.id)
+  if (Number.isNaN(id)) return
+
+  loading.value = true
+  error.value = null
+  try {
+    const dto = await getProduct(id)
+    applyDto(dto)
+  } catch (err: any) {
+    error.value = err?.message || 'خطا در دریافت اطلاعات محصول'
+  } finally {
+    loading.value = false
   }
-  router.push('/admin/products')
+}
+
+async function save() {
+  if (saving.value) return
+  saving.value = true
+  error.value = null
+
+  try {
+    const payload = {
+      title: form.title,
+      slug: form.slug || null,
+      category_id: normalizeNumber(form.categoryId),
+      price: Number(form.price) || 0,
+      compare_at_price: form.compareAt ? Number(form.compareAt) : null,
+      image_url: form.image || null,
+      description: form.description || null,
+      is_active: true,
+    }
+
+    if (isEdit.value && form.id) {
+      await adminUpdateProduct(form.id, payload)
+      toast.success('محصول به‌روزرسانی شد')
+    } else {
+      await adminCreateProduct(payload)
+      toast.success('محصول جدید ثبت شد')
+    }
+
+    router.push('/admin/products')
+  } catch (err: any) {
+    error.value = err?.message || 'خطا در ذخیره محصول'
+    toast.error(error.value)
+  } finally {
+    saving.value = false
+  }
 }
 
 function formatPreviewPrice(val: number) {
   return new Intl.NumberFormat('fa-IR').format(val) + ' تومان'
 }
+
+onMounted(() => {
+  void loadProduct()
+})
 </script>

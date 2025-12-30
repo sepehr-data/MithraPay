@@ -394,10 +394,11 @@
                   <button
                       type="button"
                       class="btn btn-primary rounded-2xl"
-                      :class="canSubmit ? '' : 'btn-disabled'"
+                      :class="canSubmit && !placingOrder ? '' : 'btn-disabled'"
                       @click="placeOrder"
                   >
-                    پرداخت و ثبت سفارش
+                    <span v-if="placingOrder" class="loading loading-spinner loading-sm"></span>
+                    <span v-else>پرداخت و ثبت سفارش</span>
                   </button>
 
                   <button type="button" class="btn btn-ghost rounded-2xl" @click="prevStep()">
@@ -468,9 +469,9 @@
               تحویل آیتم‌های دیجیتال از طریق ایمیل/پنل پس از پرداخت انجام می‌شود.
             </div>
 
-            <p v-if="cart.items.length === 0" class="text-xs text-base-content/60 mt-3">
-              سبد خرید خالی است.
-            </p>
+              <p v-if="cart.items.length === 0" class="text-xs text-base-content/60 mt-3">
+                سبد خرید خالی است.
+              </p>
           </div>
         </div>
       </aside>
@@ -479,13 +480,18 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, computed, ref } from 'vue'
+import { reactive, computed, ref, onMounted } from 'vue'
+import { useToast } from 'vue-toastification'
 import { useCartStore } from '@/stores/cart'
+import { useAuthStore } from '@/stores/auth'
+import { createOrder } from '@/services/orders'
 import type { Product } from '@/services/types'
 import { formatToman } from '@/services/currency'
 import QuantityInput from '@/components/QuantityInput.vue'
 
 const cart = useCartStore()
+const auth = useAuthStore()
+const toast = useToast()
 const price = (n: number) => formatToman(n)
 
 const step = ref<1 | 2 | 3>(1)
@@ -515,6 +521,7 @@ const form = reactive({
 
 const couponMsg = ref('')
 const discountAmount = ref(0)
+const placingOrder = ref(false)
 
 const shippingCost = computed(() => {
   if (!hasPhysical.value) return 0
@@ -591,17 +598,46 @@ function applyCoupon() {
   discountAmount.value = 0
 }
 
-function placeOrder() {
-  if (!canSubmit.value) return
-  alert('این یک دموی فرانت‌اند است. پرداخت واقعی متصل نشده است.')
+async function placeOrder() {
+  if (!canSubmit.value || placingOrder.value) return
+  if (!auth.user?.id) {
+    toast.error('برای ثبت سفارش ابتدا وارد شوید.')
+    return
+  }
+
+  placingOrder.value = true
+  try {
+    const payload = {
+      user_id: Number(auth.user.id),
+      items: cart.items.map((item) => ({
+        product_id: Number(item.productId),
+        quantity: item.qty,
+      })),
+    }
+    const result = await createOrder(payload)
+
+    toast.success(`سفارش ثبت شد. شماره سفارش: ${result.order_number}`)
+    await cart.clearCart()
+    step.value = 1
+  } catch (err: any) {
+    toast.error(err?.message || 'خطا در ثبت سفارش')
+  } finally {
+    placingOrder.value = false
+  }
 }
 
 const clearAll = () => {
-  ;(cart as any).clear?.()
-  ;(cart as any).clearCart?.()
-  ;(cart as any).reset?.()
+  if (auth.isAuthenticated) {
+    void cart.clearCart()
+  } else {
+    cart.reset()
+  }
   step.value = 1
 }
+
+onMounted(() => {
+  void cart.loadCart()
+})
 </script>
 
 <style scoped>

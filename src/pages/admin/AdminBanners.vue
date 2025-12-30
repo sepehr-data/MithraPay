@@ -1,5 +1,8 @@
 <template>
   <div class="space-y-6" dir="rtl">
+    <div class="rounded-2xl border border-warning/40 bg-warning/10 p-4 text-xs text-warning">
+      TODO: API مدیریت بنرها هنوز ارائه نشده است. تغییرات این بخش ذخیره نمی‌شود.
+    </div>
     <!-- HERO بالا برای بنرها -->
     <section class="relative overflow-hidden rounded-3xl bg-gradient-to-l from-primary/95 via-primary/85 to-secondary/80 text-primary-content p-5 sm:p-6 shadow-xl">
       <div class="relative z-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -107,11 +110,7 @@ interface Banner {
   to: string
 }
 
-const banners = ref<Banner[]>([
-  { id: 'b1', image: '/banners/slider3.webp', alt: 'Apple tv+', to: '/product/apple-tv' },
-  { id: 'b2', image: '/banners/slider4.webp', alt: 'Apple Music', to: '/product/apple-music-3m' },
-  // Add more banners here...
-])
+const banners = ref<Banner[]>([])
 
 const q = ref('')
 
@@ -158,8 +157,7 @@ function edit(id: string) {
   router.push({ name: 'admin-banner-edit', params: { id } })
 }
 
-function remove(id: string) {
-  const idx = banners.value.findIndex((b) => b.id === id)
-  if (idx >= 0) banners.value.splice(idx, 1)
+function remove() {
+  // TODO: API حذف بنر
 }
 </script>

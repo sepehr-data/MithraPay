@@ -60,8 +60,16 @@
         <button v-for="cat in categories" :key="cat" type="button" class="px-3 py-1 rounded-full border transition-colors" :class="categoryFilter === cat ? 'bg-primary text-primary-content border-primary/70' : 'bg-base-100 border-base-300 text-base-content/70 hover:bg-base-200'" @click="categoryFilter = cat">{{ cat }}</button>
       </div>
 
+      <div v-if="loading" class="py-10 text-center text-xs text-base-content/60">
+        در حال دریافت محصولات...
+      </div>
+
+      <div v-else-if="error" class="py-10 text-center text-xs text-error">
+        {{ error }}
+      </div>
+
       <!-- اگر محصولی هست -->
-      <div v-if="filtered.length" class="grid gap-3 sm:gap-4 md:grid-cols-2">
+      <div v-else-if="filtered.length" class="grid gap-3 sm:gap-4 md:grid-cols-2">
         <article v-for="p in paginatedProducts" :key="p.id" class="group rounded-2xl border border-base-300 bg-base-100/90 px-3.5 py-3 sm:px-4 sm:py-3.5 flex items-center justify-between gap-3 hover:-translate-y-0.5 hover:shadow-md hover:border-primary/40 transition-all">
           <!-- اطلاعات محصول -->
           <div class="flex items-center gap-3">
@@ -72,7 +80,9 @@
               <span class="text-xs sm:text-sm font-medium text-base-content truncate max-w-[200px]">{{ p.title }}</span>
               <div class="flex flex-wrap gap-1.5 items-center">
                 <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-base-200/80 text-[10px] sm:text-[11px] text-base-content/80 whitespace-nowrap">{{ formatPrice(p.price) }}</span>
-                <span v-if="p.categoryId" class="inline-flex items-center px-2 py-0.5 rounded-full bg-base-200/60 text-[10px] sm:text-[11px] text-base-content/70">دسته: {{ p.categoryId }}</span>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-base-200/60 text-[10px] sm:text-[11px] text-base-content/70">
+                  وضعیت: {{ p.isActive ? 'فعال' : 'غیرفعال' }}
+                </span>
               </div>
             </div>
           </div>
@@ -106,13 +116,21 @@
   </div>
 </template>
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted } from 'vue'
+import { useToast } from 'vue-toastification'
+import { adminListProducts } from '@/services/admin'
 
-const products = ref([
-  { id: 'p1', title: 'محصول 1', price: 1000, categoryId: 'cat1' },
-  { id: 'p2', title: 'محصول 2', price: 2000, categoryId: 'cat2' },
-  // اضافه کردن محصولات به همین شکل
-])
+type AdminProduct = {
+  id: number
+  title: string
+  price: number
+  isActive: boolean
+}
+
+const toast = useToast()
+const products = ref<AdminProduct[]>([])
+const loading = ref(false)
+const error = ref<string | null>(null)
 
 const q = ref('')
 const categoryFilter = ref<'all' | string>('all')
@@ -120,22 +138,14 @@ const currentPage = ref(1)
 const productsPerPage = 5
 
 // فیلتر دسته‌ها
-const categories = computed(() => {
-  const set = new Set<string>()
-  for (const p of products.value) {
-    if (p.categoryId) {
-      set.add(p.categoryId)
-    }
-  }
-  return Array.from(set)
-})
+const categories = computed(() => [])
 
 // فیلتر محصولات بر اساس جستجو و دسته
 const filtered = computed(() => {
   let base = [...products.value]
 
   if (categoryFilter.value !== 'all') {
-    base = base.filter(p => p.categoryId === categoryFilter.value)
+    base = base.filter(() => false)
   }
 
   if (!q.value) return base
@@ -167,13 +177,38 @@ function avatarInitial(p: { title?: string; id: string }) {
   return p.id.trim().charAt(0)
 }
 
-function remove(id: string) {
-  const idx = products.value.findIndex(p => p.id === id)
-  if (idx >= 0) products.value.splice(idx, 1)
+function remove(id?: number) {
+  if (id) {
+    toast.info(`حذف محصول #${id} در این نسخه فعال نیست.`)
+  } else {
+    toast.info('امکان حذف محصول در این نسخه فعال نیست.')
+  }
 }
 
 function changePage(page: number) {
   if (page < 1 || page > totalPages.value) return
   currentPage.value = page
 }
+
+async function loadProducts() {
+  loading.value = true
+  error.value = null
+  try {
+    const data = await adminListProducts()
+    products.value = data.map((item) => ({
+      id: item.id,
+      title: item.title,
+      price: item.price,
+      isActive: item.is_active,
+    }))
+  } catch (err: any) {
+    error.value = err?.message || 'خطا در دریافت محصولات'
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(() => {
+  void loadProducts()
+})
 </script>
