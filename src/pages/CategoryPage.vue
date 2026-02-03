@@ -16,6 +16,8 @@
               <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">
                 {{ catTitle }}
               </h1>
+              <span v-if="isLoading" class="badge badge-outline">در حال دریافت…</span>
+              <span v-else-if="isError" class="badge badge-error">خطا</span>
             </div>
 
             <div class="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -40,6 +42,11 @@
               <span class="badge badge-outline border-primary/30 text-primary">قیمت به‌روز</span>
               <span class="badge badge-outline border-primary/30 text-primary">پشتیبانی ۲۴/۷</span>
             </div>
+
+            <div v-if="isError" class="mt-4 text-sm text-error">
+              دریافت محصولات با خطا مواجه شد. دوباره تلاش کنید.
+              <button class="btn btn-ghost btn-sm ms-2" @click="loadProducts">تلاش مجدد</button>
+            </div>
           </div>
 
           <div class="h-1 w-full bg-gradient-to-r from-primary via-secondary to-primary opacity-80"></div>
@@ -52,11 +59,12 @@
           <div class="min-w-0">
             <p class="text-xs uppercase tracking-widest text-base-content/50">جستجو و انتخاب</p>
             <div class="flex items-center gap-3">
-              <h3 class="text-lg font-extrabold">{{ catTitle }}ی موجود </h3>
+              <h3 class="text-lg font-extrabold">{{ catTitle }}ی موجود</h3>
               <span class="hidden sm:inline h-1 w-10 rounded-full bg-primary/70"></span>
               <span class="hidden sm:inline text-sm text-base-content/60">({{ filtered.length }} محصول)</span>
             </div>
           </div>
+
         </div>
 
         <div class="p-4 sm:p-5 lg:p-6 space-y-4 min-w-0">
@@ -110,11 +118,20 @@
             </div>
           </div>
 
-          <div class="products-grid">
-            <ProductCard v-for="p in paged" :key="p.id" :product="p" class="product-card--main" />
+          <div v-if="isLoading" class="text-sm text-base-content/60 py-6">
+            در حال دریافت محصولات…
           </div>
 
-          <div class="mt-4 flex justify-center">
+          <div v-else class="products-grid">
+            <!-- ✅ حالا product ها image/url درست دارند -->
+            <ProductCard v-for="p in paged" :key="keyOf(p)" :product="p" class="product-card--main" />
+          </div>
+
+          <div v-if="!isLoading && !filtered.length" class="text-center text-sm text-base-content/60 py-10">
+            محصولی برای نمایش وجود ندارد.
+          </div>
+
+          <div class="mt-4 flex justify-center" v-if="pages > 1">
             <Pagination :page="page" :pages="pages" @update:page="page = $event" />
           </div>
         </div>
@@ -281,10 +298,12 @@
           >
             <div
                 v-for="(p, i) in visibleSimilar"
-                :key="`${p.__k}__slot_${i}`"
+                :key="`${keyOf(p)}__slot_${i}`"
                 class="similar-item"
             >
-              <ProductCard :product="p" class="product-card--similar" />
+              <div class="product-card--similar">
+                <ProductCard :product="p" />
+              </div>
             </div>
           </TransitionGroup>
 
@@ -306,7 +325,6 @@
 <script setup lang="ts">
 import { onMounted, onBeforeUnmount, ref, computed, watch, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
-import { useProductsStore } from '@/stores/products'
 
 import Breadcrumbs from '@/components/Breadcrumbs.vue'
 import FiltersSidebar from '@/components/FiltersSidebar.vue'
@@ -314,8 +332,9 @@ import SortBar from '@/components/SortBar.vue'
 import Pagination from '@/components/Pagination.vue'
 import ProductCard from '@/components/ProductCard.vue'
 
+import { listProducts } from '@/services/products'
+
 const route = useRoute()
-const store = useProductsStore()
 
 const sort = ref('bestselling')
 
@@ -338,9 +357,242 @@ const dropdownSide = ref<'right' | 'left'>('right')
 const dropdownUp = ref(false)
 const filtersDropdownStyle = ref<Record<string, string>>({})
 
-const catalog = ref<any[]>([])
-const catalogReady = ref(false)
+const allProducts = ref<any[]>([])
+const isLoading = ref(false)
+const isError = ref(false)
 
+/** =========================
+ * ✅ Image normalization (SAFE)
+ * ========================= */
+const ASSET_BASE =
+    (import.meta as any).env?.VITE_ASSET_BASE_URL ||
+    (import.meta as any).env?.VITE_FILES_BASE_URL ||
+    (import.meta as any).env?.VITE_API_BASE_URL ||
+    (import.meta as any).env?.VITE_API_URL ||
+    ''
+
+const PLACEHOLDER = 'https://placehold.co/1200x700'
+
+function isLikelyImagePath(s: string) {
+  return s.includes('/') || /\.(png|jpe?g|webp|gif|svg|avif)$/i.test(s)
+}
+
+function normalizeImageUrl(u?: string | null) {
+  const s = String(u ?? '').trim()
+  if (!s) return ''
+
+  if (/^https?:\/\//i.test(s)) return s
+  if (s.startsWith('//')) return `https:${s}`
+
+  if (s.startsWith('/')) return s
+
+  if (!isLikelyImagePath(s)) return ''
+
+  const base = String(ASSET_BASE || '').trim().replace(/\/+$/, '')
+  if (!base) return ''
+  return `${base}/${s.replace(/^\/+/, '')}`
+}
+
+function normalizeListProduct(p: any) {
+  const rawMain =
+      p?.image_url ??
+      p?.image ??
+      p?.imageUrl ??
+      p?.thumbnail ??
+      p?.thumb ??
+      p?.cover ??
+      p?.cover_url ??
+      p?.image_path ??
+      p?.imagePath
+
+  const main = normalizeImageUrl(rawMain)
+
+  const gallery = Array.isArray(p?.images)
+      ? p.images.map((x: any) => normalizeImageUrl(x)).filter(Boolean)
+      : Array.isArray(p?.gallery)
+          ? p.gallery.map((x: any) => normalizeImageUrl(x)).filter(Boolean)
+          : main
+              ? [main]
+              : []
+
+  return {
+    ...p,
+    image: main || PLACEHOLDER,
+    image_url: main || PLACEHOLDER,
+    images: gallery.length ? gallery : [main || PLACEHOLDER],
+  }
+}
+
+/** =========================
+ * ✅ Category mapping
+ * ========================= */
+type CategorySlug = 'account' | 'gift-card' | 'services'
+type PageSlug = 'accounts' | 'gift-cards'
+
+function normalize(v: any) {
+  return String(v ?? '').trim().toLowerCase()
+}
+
+function getCategorySlug(p: any): CategorySlug | null {
+  const cid = Number(p?.category_id ?? p?.categoryId ?? NaN)
+  if (cid === 1) return 'account'
+  if (cid === 2) return 'gift-card'
+  if (cid === 3) return 'services'
+
+  const slug = normalize(p?.category_slug ?? p?.categorySlug ?? p?.category?.slug)
+  if (slug === 'account') return 'account'
+  if (slug === 'gift-card' || slug === 'giftcard' || slug === 'gift_card') return 'gift-card'
+  if (slug === 'services' || slug === 'service') return 'services'
+  return null
+}
+
+function keyOf(p: any) {
+  return String(p?.id ?? p?._id ?? p?.sku ?? p?.slug ?? p?.code ?? JSON.stringify(p))
+}
+
+/** =========================
+ * ✅ Discount + Digital helpers (همون منطق کارت)
+ * ========================= */
+function toNumber(v: any): number {
+  if (v === null || v === undefined) return 0
+  const s = String(v).trim()
+  if (!s) return 0
+  const cleaned = s.replace(/[^0-9.\-]/g, '')
+  const n = Number(cleaned)
+  return Number.isFinite(n) ? n : 0
+}
+
+function priceA(p: any) {
+  return toNumber(p?.price ?? 0)
+}
+
+// ✅ بک‌اند شما compare_at_price دارد
+function priceB(p: any) {
+  return toNumber(
+      p?.compareAt ??
+      p?.compare_at_price ??
+      p?.compare_at ??
+      p?.compare_at_price ??
+      p?.old_price ??
+      0
+  )
+}
+
+function hasDiscountProduct(p: any) {
+  const a = priceA(p)
+  const b = priceB(p)
+  if (a <= 0 || b <= 0) return false
+  const original = Math.max(a, b)
+  const final = Math.min(a, b)
+  return original > final
+}
+
+function finalPriceOf(p: any) {
+  const a = priceA(p)
+  const b = priceB(p)
+  if (a > 0 && b > 0) return Math.min(a, b) // قیمت نهایی (تخفیف‌دار)
+  return a || b || 0
+}
+
+function isDigitalProduct(p: any) {
+  const dt = String(p?.delivery_type ?? '').toLowerCase()
+  if (dt === 'digital') return true
+  // طبق دیتای شما stock معمولاً null است (دیجیتال‌ها)
+  if (p?.stock === null) return true
+  return false
+}
+
+/** =========================
+ * ✅ Fetch products
+ * ========================= */
+async function loadProducts() {
+  isLoading.value = true
+  isError.value = false
+
+  try {
+    const data: any = await listProducts()
+    const items = Array.isArray(data) ? data : Array.isArray(data?.items) ? data.items : []
+
+    const normalizedItems = items.map((p: any) => normalizeListProduct(p))
+
+    // خدمات حذف
+    allProducts.value = normalizedItems.filter((p: any) => getCategorySlug(p) !== 'services')
+  } catch (e) {
+    console.error('listProducts error:', e)
+    isError.value = true
+    allProducts.value = []
+  } finally {
+    isLoading.value = false
+  }
+}
+
+/** =========================
+ * ✅ Grouped lists
+ * ========================= */
+const accountsProducts = computed(() => allProducts.value.filter((p) => getCategorySlug(p) === 'account'))
+const giftCardsProducts = computed(() => allProducts.value.filter((p) => getCategorySlug(p) === 'gift-card'))
+
+const currentSlug = computed(() => String(route.params.slug ?? '') as PageSlug | string)
+
+const catTitle = computed(() => {
+  if (currentSlug.value === 'accounts') return 'اکانت‌ها'
+  if (currentSlug.value === 'gift-cards') return 'گیفت‌کارت‌ها'
+  return 'محصولات'
+})
+
+const heroCta = computed(() => {
+  if (currentSlug.value === 'accounts') return { label: 'مشاهده گیفت‌کارت‌ها', to: '/category/gift-cards' }
+  if (currentSlug.value === 'gift-cards') return { label: 'مشاهده اکانت‌ها', to: '/category/accounts' }
+  return { label: 'مشاهده گیفت‌کارت‌ها', to: '/category/gift-cards' }
+})
+
+const currentProducts = computed(() => {
+  if (currentSlug.value === 'accounts') return accountsProducts.value
+  if (currentSlug.value === 'gift-cards') return giftCardsProducts.value
+  return [...accountsProducts.value, ...giftCardsProducts.value]
+})
+
+/** =========================
+ * ✅ Filters + Sort (FIXED)
+ * ========================= */
+const filtered = computed(() => {
+  let items = currentProducts.value.slice()
+
+  // ✅ فیلتر دیجیتال (متصل به منطق کارت)
+  if (appliedOnlyDigital.value) {
+    items = items.filter((p: any) => isDigitalProduct(p))
+  }
+
+  // ✅ فیلتر تخفیف (متصل به منطق کارت)
+  if (appliedOnlyDiscount.value) {
+    items = items.filter((p: any) => hasDiscountProduct(p))
+  }
+
+  // ✅ مرتب‌سازی درست بر اساس قیمت نهایی
+  if (sort.value === 'price-asc') {
+    items.sort((a: any, b: any) => finalPriceOf(a) - finalPriceOf(b))
+  }
+  if (sort.value === 'price-desc') {
+    items.sort((a: any, b: any) => finalPriceOf(b) - finalPriceOf(a))
+  }
+
+  // bestselling => تغییری نمی‌ده (همون ترتیب بک‌اند)
+  return items
+})
+
+const pages = computed(() => Math.max(1, Math.ceil(filtered.value.length / perPage)))
+const paged = computed(() => {
+  const start = (page.value - 1) * perPage
+  return filtered.value.slice(start, start + perPage)
+})
+
+watch([sort, appliedOnlyDigital, appliedOnlyDiscount], () => {
+  page.value = 1
+})
+
+/** =========================
+ * ✅ Similar products
+ * ========================= */
 const similarIndex = ref(0)
 const similarWindow = ref(5)
 const simDir = ref<'next' | 'prev'>('next')
@@ -352,250 +604,10 @@ function lockSimilar() {
   window.setTimeout(() => (simLock.value = false), SIM_ANIM_MS)
 }
 
-function keyOf(p: any) {
-  return String(p?.id ?? p?._id ?? p?.sku ?? p?.slug ?? p?.code ?? JSON.stringify(p))
-}
-function normalize(v: any) {
-  return String(v ?? '').trim().toLowerCase()
-}
-function belongsTo(slug: 'accounts' | 'gift-cards', p: any) {
-  const target = normalize(slug)
-  const candidates = [
-    p?.categoryId,
-    p?.category_id,
-    p?.categorySlug,
-    p?.category_slug,
-    p?.category,
-    p?.categoryName,
-    p?.category_name,
-    p?.category?.id,
-    p?.category?.slug,
-    p?.category?.key,
-    p?.category?.code,
-    p?.category?.name,
-  ].map(normalize)
-
-  if (candidates.includes(target)) return true
-
-  const tags = Array.isArray(p?.tags) ? p.tags.map(normalize) : []
-  if (slug === 'accounts') return tags.some((t) => t.includes('account') || t.includes('اکانت'))
-  if (slug === 'gift-cards') return tags.some((t) => t.includes('gift') || t.includes('گیفت') || t.includes('gift-card'))
-  return false
-}
-
-async function ensureCatalog() {
-  if (catalogReady.value) return
-  const s: any = store
-
-  if (Array.isArray(s.allProducts) && s.allProducts.length) {
-    catalog.value = s.allProducts
-    catalogReady.value = true
-    return
-  }
-  if (Array.isArray(s.catalog) && s.catalog.length) {
-    catalog.value = s.catalog
-    catalogReady.value = true
-    return
-  }
-  if (Array.isArray(s.all) && s.all.length) {
-    catalog.value = s.all
-    catalogReady.value = true
-    return
-  }
-
-  if (typeof s.loadAll === 'function') {
-    await Promise.resolve(s.loadAll())
-    if (Array.isArray(s.allProducts) && s.allProducts.length) {
-      catalog.value = s.allProducts
-      catalogReady.value = true
-      return
-    }
-    if (Array.isArray(s.catalog) && s.catalog.length) {
-      catalog.value = s.catalog
-      catalogReady.value = true
-      return
-    }
-    if (Array.isArray(s.all) && s.all.length) {
-      catalog.value = s.all
-      catalogReady.value = true
-      return
-    }
-  }
-
-  const currentSlug = route.params.slug as string
-  const map = new Map<string, any>()
-  store.products.forEach((p: any) => map.set(keyOf(p), p))
-
-  const slugsToTry: Array<'accounts' | 'gift-cards'> = ['accounts', 'gift-cards']
-  for (const slug of slugsToTry) {
-    if (slug === currentSlug) continue
-    await Promise.resolve(store.load(slug))
-    store.products.forEach((p: any) => map.set(keyOf(p), p))
-  }
-
-  await Promise.resolve(store.load(currentSlug))
-  store.products.forEach((p: any) => map.set(keyOf(p), p))
-
-  catalog.value = Array.from(map.values())
-  catalogReady.value = true
-}
-
-function positionFiltersDropdown() {
-  if (!filterBtn.value || !filterPanel.value) return
-
-  const btnRect = filterBtn.value.getBoundingClientRect()
-  const panelEl = filterPanel.value
-
-  const vw = window.innerWidth
-  const vh = window.innerHeight
-  const margin = 8
-  const gap = 10
-
-  const panelW = panelEl.offsetWidth
-  const panelH = panelEl.offsetHeight
-
-  let left = btnRect.right - panelW
-  let side: 'right' | 'left' = 'right'
-
-  if (left < margin) {
-    left = btnRect.left
-    side = 'left'
-  }
-  left = Math.max(margin, Math.min(left, vw - panelW - margin))
-
-  let top = btnRect.bottom + gap
-  let up = false
-  if (top + panelH > vh - margin && btnRect.top - gap - panelH > margin) {
-    top = btnRect.top - gap - panelH
-    up = true
-  } else {
-    top = Math.max(margin, Math.min(top, vh - panelH - margin))
-  }
-
-  dropdownSide.value = side
-  dropdownUp.value = up
-  filtersDropdownStyle.value = { left: `${left}px`, top: `${top}px` }
-}
-
-function toggleInlineFilters() {
-  if (!filtersOpen.value) {
-    draftOnlyDigital.value = appliedOnlyDigital.value
-    draftOnlyDiscount.value = appliedOnlyDiscount.value
-  }
-  filtersOpen.value = !filtersOpen.value
-}
-function resetFilters() {
-  draftOnlyDigital.value = false
-  draftOnlyDiscount.value = false
-  appliedOnlyDigital.value = false
-  appliedOnlyDiscount.value = false
-  page.value = 1
-}
-function applyFilters() {
-  appliedOnlyDigital.value = draftOnlyDigital.value
-  appliedOnlyDiscount.value = draftOnlyDiscount.value
-  page.value = 1
-  filtersOpen.value = false
-}
-
-function onDocClick(e: MouseEvent) {
-  if (!filtersOpen.value) return
-  const t = e.target as Node
-  if (filterWrap.value && !filterWrap.value.contains(t)) filtersOpen.value = false
-}
-function onKeyDown(e: KeyboardEvent) {
-  if (e.key === 'Escape') filtersOpen.value = false
-}
-function onViewportChange() {
-  if (!filtersOpen.value) return
-  positionFiltersDropdown()
-}
-
-const load = async () => {
-  await Promise.resolve(store.load(route.params.slug as string))
-
-  page.value = 1
-  filtersOpen.value = false
-
-  draftOnlyDigital.value = appliedOnlyDigital.value
-  draftOnlyDiscount.value = appliedOnlyDiscount.value
-
-  similarIndex.value = 0
-  simDir.value = 'next'
-
-  void ensureCatalog()
-
-  await nextTick()
-  measureSimilarWindow()
-}
-
-onMounted(() => {
-  void load()
-})
-
-watch(
-    () => route.params.slug,
-    () => void load()
-)
-
-watch([sort, appliedOnlyDigital, appliedOnlyDiscount], () => {
-  page.value = 1
-})
-
-watch(filtersOpen, async (isOpen) => {
-  if (isOpen) {
-    await nextTick()
-    positionFiltersDropdown()
-    window.addEventListener('resize', onViewportChange, { passive: true })
-    window.addEventListener('scroll', onViewportChange, true)
-  } else {
-    window.removeEventListener('resize', onViewportChange as any)
-    window.removeEventListener('scroll', onViewportChange as any, true)
-  }
-})
-
-const catTitle = computed(() => {
-  const slug = route.params.slug as string
-  if (slug === 'accounts') return 'اکانت‌ها'
-  if (slug === 'gift-cards') return 'گیفت‌کارت‌ها'
-  return 'محصولات'
-})
-
-const heroCta = computed(() => {
-  const slug = route.params.slug as string
-  if (slug === 'accounts') return { label: 'مشاهده گیفت‌کارت‌ها', to: '/category/gift-cards' }
-  if (slug === 'gift-cards') return { label: 'مشاهده اکانت‌ها', to: '/category/accounts' }
-  return { label: 'مشاهده گیفت‌کارت‌ها', to: '/category/gift-cards' }
-})
-
-const filtered = computed(() => {
-  let items = store.products.slice()
-  if (appliedOnlyDigital.value) items = items.filter((p: any) => p.isDigital)
-  if (appliedOnlyDiscount.value) items = items.filter((p: any) => p.compareAt && p.compareAt > p.price)
-  if (sort.value === 'price-asc') items.sort((a: any, b: any) => a.price - b.price)
-  if (sort.value === 'price-desc') items.sort((a: any, b: any) => b.price - a.price)
-  return items
-})
-
-const pages = computed(() => Math.max(1, Math.ceil(filtered.value.length / perPage)))
-const paged = computed(() => {
-  const start = (page.value - 1) * perPage
-  return filtered.value.slice(start, start + perPage)
-})
-
 const similarProducts = computed(() => {
-  const slug = route.params.slug as 'accounts' | 'gift-cards' | string
-  const source = (catalog.value.length ? catalog.value : store.products).slice()
-  const map = new Map<string, any>()
-  source.forEach((p: any) => map.set(keyOf(p), p))
-  const uniq = Array.from(map.values())
-
-  return (slug === 'accounts'
-          ? uniq.filter((p: any) => !belongsTo('accounts', p))
-          : slug === 'gift-cards'
-              ? uniq.filter((p: any) => !belongsTo('gift-cards', p))
-              : uniq
-  ).map((p: any) => ({ ...p, __k: keyOf(p) }))
+  if (currentSlug.value === 'accounts') return giftCardsProducts.value
+  if (currentSlug.value === 'gift-cards') return accountsProducts.value
+  return [...giftCardsProducts.value, ...accountsProducts.value]
 })
 
 const visibleSimilar = computed(() => {
@@ -645,8 +657,111 @@ watch(
     }
 )
 
-onMounted(() => {
-  void ensureCatalog()
+/** =========================
+ * Filters dropdown
+ * ========================= */
+function positionFiltersDropdown() {
+  if (!filterBtn.value || !filterPanel.value) return
+
+  const btnRect = filterBtn.value.getBoundingClientRect()
+  const panelEl = filterPanel.value
+
+  const vw = window.innerWidth
+  const vh = window.innerHeight
+  const margin = 8
+  const gap = 10
+
+  const panelW = panelEl.offsetWidth
+  const panelH = panelEl.offsetHeight
+
+  let left = btnRect.right - panelW
+  let side: 'right' | 'left' = 'right'
+
+  if (left < margin) {
+    left = btnRect.left
+    side = 'left'
+  }
+  left = Math.max(margin, Math.min(left, vw - panelW - margin))
+
+  let top = btnRect.bottom + gap
+  let up = false
+  if (top + panelH > vh - margin && btnRect.top - gap - panelH > margin) {
+    top = btnRect.top - gap - panelH
+    up = true
+  } else {
+    top = Math.max(margin, Math.min(top, vh - panelH - margin))
+  }
+
+  dropdownSide.value = side
+  dropdownUp.value = up
+  filtersDropdownStyle.value = { left: `${left}px`, top: `${top}px` }
+}
+
+function toggleInlineFilters() {
+  if (!filtersOpen.value) {
+    draftOnlyDigital.value = appliedOnlyDigital.value
+    draftOnlyDiscount.value = appliedOnlyDiscount.value
+  }
+  filtersOpen.value = !filtersOpen.value
+}
+
+function resetFilters() {
+  draftOnlyDigital.value = false
+  draftOnlyDiscount.value = false
+  appliedOnlyDigital.value = false
+  appliedOnlyDiscount.value = false
+  page.value = 1
+}
+
+function applyFilters() {
+  appliedOnlyDigital.value = draftOnlyDigital.value
+  appliedOnlyDiscount.value = draftOnlyDiscount.value
+  page.value = 1
+  filtersOpen.value = false
+}
+
+function onDocClick(e: MouseEvent) {
+  if (!filtersOpen.value) return
+  const t = e.target as Node
+  if (filterWrap.value && !filterWrap.value.contains(t)) filtersOpen.value = false
+}
+function onKeyDown(e: KeyboardEvent) {
+  if (e.key === 'Escape') filtersOpen.value = false
+}
+function onViewportChange() {
+  if (!filtersOpen.value) return
+  positionFiltersDropdown()
+}
+
+watch(filtersOpen, async (isOpen) => {
+  if (isOpen) {
+    await nextTick()
+    positionFiltersDropdown()
+    window.addEventListener('resize', onViewportChange, { passive: true })
+    window.addEventListener('scroll', onViewportChange, true)
+  } else {
+    window.removeEventListener('resize', onViewportChange as any)
+    window.removeEventListener('scroll', onViewportChange as any, true)
+  }
+})
+
+watch(
+    () => route.params.slug,
+    async () => {
+      page.value = 1
+      filtersOpen.value = false
+      similarIndex.value = 0
+      simDir.value = 'next'
+      await nextTick()
+      measureSimilarWindow()
+    }
+)
+
+/** =========================
+ * lifecycle
+ * ========================= */
+onMounted(async () => {
+  await loadProducts()
 
   document.addEventListener('click', onDocClick)
   window.addEventListener('keydown', onKeyDown)
@@ -667,6 +782,242 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
+/* همون استایل‌های خودت — بدون تغییر */
+.category-page { direction: rtl; }
+
+.category-page {
+  background:
+      radial-gradient(800px 500px at 20% 0%, rgba(255, 255, 255, 0.10), transparent 60%),
+      radial-gradient(900px 650px at 80% 20%, rgba(255, 255, 255, 0.08), transparent 65%);
+}
+
+/* Toolbar */
+.tools-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+@media (max-width: 640px) {
+  .tools-row { flex-direction: column; align-items: stretch; }
+}
+
+/* Dropdown transition */
+.drop-panel-enter-active,
+.drop-panel-leave-active { transition: opacity 160ms ease, transform 160ms ease; }
+.drop-panel-enter-from,
+.drop-panel-leave-to { opacity: 0; transform: translateY(-8px); }
+
+/* Dropdown */
+.filters-dropdown {
+  position: fixed;
+  z-index: 9999;
+  width: min(520px, calc(100vw - 16px));
+  border-radius: 24px;
+  border: 1px solid hsl(var(--b3));
+  background: hsl(var(--b1));
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  backdrop-filter: none;
+}
+.filters-dropdown.fd-right { transform-origin: top right; }
+.filters-dropdown.fd-left { transform-origin: top left; }
+.filters-dropdown.fd-up { transform-origin: bottom center; }
+
+/* Products grid */
+.products-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+@media (min-width: 640px) { .products-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 768px) { .products-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 1024px) { .products-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+
+/* Main product cards */
+:deep(.product-card--main .card) { border-radius: 26px; }
+:deep(.product-card--main .card-body) { padding: 14px !important; }
+:deep(.product-card--main .card-title) {
+  font-size: 15px !important;
+  line-height: 1.3 !important;
+  font-weight: 950 !important;
+}
+:deep(.product-card--main .badge) { font-size: 11.5px !important; padding: 3px 10px !important; }
+:deep(.product-card--main figure) { overflow: hidden; max-height: 220px; }
+:deep(.product-card--main figure img) { height: 220px; width: 100%; object-fit: cover; }
+:deep(.product-card--main .btn) { border-radius: 16px !important; }
+:deep(.product-card--main .btn.btn-sm),
+:deep(.product-card--main .btn-sm) {
+  height: 40px !important;
+  min-height: 40px !important;
+  font-size: 12.5px !important;
+  padding: 0 14px !important;
+}
+
+/* =========================
+   Similar (one row slider)
+   ========================= */
+.similar-row-shell {
+  display: grid;
+  grid-template-columns: 40px 1fr 40px;
+  gap: 10px;
+  align-items: center;
+}
+
+.similar-row {
+  --sim-cols: 5;
+  --sim-gap: 12px;
+
+  /* ✅ برگردوندن به ابعاد نرمال (پیشفرض) */
+  --sim-card-h: 330px;
+  --sim-img-h: 155px;
+
+  display: grid;
+  grid-template-columns: repeat(var(--sim-cols), minmax(0, 1fr));
+  gap: var(--sim-gap);
+
+  overflow: hidden;
+  border-radius: 22px;
+
+  height: var(--sim-card-h);
+  align-items: stretch;
+  min-width: 0;
+  contain: layout paint;
+}
+
+@media (max-width: 640px) {
+  .similar-row { --sim-card-h: 310px; --sim-img-h: 150px; }
+}
+@media (min-width: 1024px) {
+  .similar-row { --sim-card-h: 340px; --sim-img-h: 160px; }
+}
+
+.similar-item {
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 22px;
+  will-change: transform, opacity;
+}
+
+/* nav buttons */
+.similar-nav {
+  height: 44px;
+  width: 40px;
+  border-radius: 14px;
+  border: 1px solid hsl(var(--b3));
+  background: hsl(var(--b1));
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.1);
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform 140ms ease, opacity 140ms ease;
+}
+.similar-nav:hover { transform: translateY(-1px); }
+.similar-nav:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+@media (max-width: 640px) {
+  .similar-row-shell { grid-template-columns: 36px 1fr 36px; }
+  .similar-nav { width: 36px; border-radius: 12px; }
+}
+
+/* TransitionGroup */
+.sim-swap-move { transition: transform 280ms ease; }
+.sim-swap-enter-active { transition: transform 280ms ease, opacity 200ms ease; }
+.sim-swap-leave-active { transition: transform 240ms ease, opacity 170ms ease; }
+
+.dir-next .sim-swap-enter-from { opacity: 0; transform: translateX(14px); }
+.dir-next .sim-swap-leave-to   { opacity: 0; transform: translateX(-14px); }
+
+.dir-prev .sim-swap-enter-from { opacity: 0; transform: translateX(-14px); }
+.dir-prev .sim-swap-leave-to   { opacity: 0; transform: translateX(14px); }
+
+/* =========================
+   ✅ Similar FIX (قفل ابعاد و جلوگیری از دفرمه)
+   فقط روی Similar اعمال می‌شود
+   ========================= */
+
+/* wrapper ای که خودت گذاشتی */
+.product-card--similar { height: 100%; min-width: 0; }
+.product-card--similar :deep(.card) {
+  height: 100% !important;
+  max-height: 100% !important;
+  width: 100% !important;
+  overflow: hidden !important;
+  border-radius: 22px;
+}
+
+/* ظرف تصویر: ارتفاع ثابت */
+.product-card--similar :deep(figure),
+.product-card--similar :deep(.card figure),
+.product-card--similar :deep(.card > figure) {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
+
+  height: var(--sim-img-h) !important;
+  min-height: var(--sim-img-h) !important;
+  max-height: var(--sim-img-h) !important;
+
+  overflow: hidden !important;
+  position: relative !important;
+  line-height: 0 !important;
+
+  flex: 0 0 auto !important;
+  border-radius: 18px !important;
+}
+
+/* wrapper های رایج داخل figure */
+.product-card--similar :deep(figure > div),
+.product-card--similar :deep(figure > picture),
+.product-card--similar :deep(figure > a) {
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+  overflow: hidden !important;
+}
+
+/* ✅ badge تخفیف کش نیاد */
+.product-card--similar :deep(figure > span.absolute) {
+  width: auto !important;
+  height: auto !important;
+  display: inline-flex !important;
+}
+
+/* تصویر: فیت کامل */
+.product-card--similar :deep(img),
+.product-card--similar :deep(figure img),
+.product-card--similar :deep(.card figure img) {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  object-fit: cover !important;
+  object-position: center !important;
+}
+
+/* بدنه کارت: نذار بزرگ شه */
+.product-card--similar :deep(.card-body) {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 12px !important;
+}
+
+/* عنوان: دو خطه (نذار کارت کش بیاد) */
+.product-card--similar :deep(.card-title) {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  line-height: 1.25 !important;
+  min-height: calc(1.25em * 2);
+}
 .category-page { direction: rtl; }
 
 .category-page {
@@ -941,4 +1292,6 @@ onBeforeUnmount(() => {
   font-size: 12.5px !important;
   padding: 0 14px !important;
 }
+/* دکمه‌ها پایین کارت */
+.product-card--similar :deep(.card-actions) { margin-top: auto !important; }
 </style>

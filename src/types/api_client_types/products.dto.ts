@@ -1,4 +1,16 @@
-// src/api/products.dto.ts
+// src/types/products.dto.ts
+
+export type DurationTypeDto = {
+    id: number
+    title: string
+    slug: string
+}
+
+export type SubscriptionTypeDto = {
+    id: number
+    title: string
+    slug: string
+}
 
 export type ProductDto = {
     id: number
@@ -12,7 +24,20 @@ export type ProductDto = {
 
     delivery_type?: string | null
     platform?: string | null
+
+    // ✅ NEW id-based fields
+    duration_type_id?: number | null
+    subscription_type_id?: number | null
+    personal_account?: boolean
+
+    // ⚠️ legacy (backward compatibility)
     duration?: string | null
+    subscription_type?: string | null
+
+    // ✅ expanded objects (if backend returns them)
+    duration_type_detail?: DurationTypeDto | null
+    subscription_type_detail?: SubscriptionTypeDto | null
+
     region?: string | null
 
     stock?: number | null
@@ -35,7 +60,14 @@ export type CreateProductPayload = {
     compare_at_price?: number | null
     delivery_type?: string | null
     platform?: string | null
+
+    duration_type_id?: number | null
+    subscription_type_id?: number | null
+    personal_account?: boolean
+
     duration?: string | null
+    subscription_type?: string | null
+
     region?: string | null
     stock?: number | null
     is_active?: boolean
@@ -46,10 +78,14 @@ export type CreateProductPayload = {
 
 export type CreateProductResponse = ProductDto
 
-// GET /products/?category=&search=
+// GET /products/?category=&search=&duration_type_id=&subscription_type_id=&personal_account=
 export type ListProductsQuery = Partial<{
     category: string
     search: string
+
+    duration_type_id: number
+    subscription_type_id: number
+    personal_account: boolean
 }>
 export type ListProductsResponse = ProductDto[]
 

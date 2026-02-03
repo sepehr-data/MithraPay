@@ -28,6 +28,7 @@ export interface BlogPost {
   content: string
   date: string
   cover?: string
+  category?: string
 }
 
 export interface CartItem {

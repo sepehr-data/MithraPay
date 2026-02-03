@@ -1,4 +1,4 @@
-// src/api/user.dto.ts
+// src/types/user.dto.ts
 
 // GET /users/me
 export type UserMeResponse = {
@@ -9,6 +9,7 @@ export type UserMeResponse = {
     email?: string | null
     birthday?: string | null
     sheba?: string | null
+    bank_number?: string | null
 }
 
 // PUT /users/me
@@ -17,12 +18,15 @@ export type UpdateMePayload = Partial<{
     last_name: string | null
     email: string | null
     birthday: string | null
-    sheba: string | null
     phone: string | null
+    sheba: string | null
+    bank_number: string | null
     password: string | null
+
 }>
 
 export type UpdateMeResponse = {
     message: string
     user: UserMeResponse
 }
+

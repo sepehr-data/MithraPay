@@ -9,9 +9,7 @@
             <!-- Identity -->
             <div class="flex items-center gap-4 min-w-0">
               <div class="avatar placeholder shrink-0">
-                <div
-                    class="w-12 sm:w-14 rounded-2xl bg-gradient-to-br from-primary to-secondary text-primary-content shadow-lg"
-                >
+                <div class="w-12 sm:w-14 rounded-2xl bg-gradient-to-br from-primary to-secondary text-primary-content shadow-lg">
                   <span class="text-base sm:text-lg font-bold">{{ userInitial }}</span>
                 </div>
               </div>
@@ -27,7 +25,7 @@
                   <span class="text-sm opacity-60">•</span>
 
                   <span class="text-sm sm:text-base font-semibold opacity-80">
-                    {{ auth.user?.phone || 'بدون شماره' }}
+                    {{ (auth.user as any)?.phone || 'بدون شماره' }}
                   </span>
 
                   <span class="text-sm opacity-60">•</span>
@@ -72,9 +70,7 @@
               <p class="text-xs opacity-60 mt-1">در این ماه</p>
             </div>
 
-            <div
-                class="rounded-2xl border border-base-300/60 bg-gradient-to-br from-success/10 via-base-100 to-base-100 p-4 shadow-sm"
-            >
+            <div class="rounded-2xl border border-base-300/60 bg-gradient-to-br from-success/10 via-base-100 to-base-100 p-4 shadow-sm">
               <p class="text-xs opacity-70">امتیاز وفاداری</p>
               <p class="text-2xl font-extrabold mt-1">{{ stats.loyaltyPoints }}+</p>
               <p class="text-xs opacity-60 mt-1 hidden sm:block">پاداش‌های بیشتر</p>
@@ -182,68 +178,16 @@
       </div>
     </div>
 
-    <!-- ✅ LAST: RECOMMENDATIONS -->
-    <section class="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen">
-      <div class="max-w-6xl mx-auto w-full px-3 sm:px-4 py-4 sm:py-6">
-        <div class="flex items-center justify-between gap-3">
-          <div>
-            <p class="text-sm opacity-70">پیشنهاداتی که</p>
-            <h2 class="text-lg sm:text-xl font-bold">برای شما انتخاب شده‌اند</h2>
-          </div>
-        </div>
-
-        <div class="mt-4 rec-row-shell">
-          <button
-              type="button"
-              class="btn btn-sm btn-outline rounded-2xl recNav"
-              @click="recPrev"
-              :disabled="recNavDisabled || recBusy"
-              aria-label="قبلی"
-          >
-            &lt;
-          </button>
-
-          <div ref="recViewport" class="rec-viewport" :style="{ '--rec-cols': String(recWindow) }">
-            <div
-                class="rec-track"
-                :class="{ 'is-anim': recTransitioning }"
-                :style="recTrackStyle"
-                @transitionend="onRecTransitionEnd"
-            >
-              <div v-for="item in recRenderList" :key="item.__k" class="rec-cell">
-                <ProductCard :product="item" class="product-card--rec" />
-              </div>
-            </div>
-          </div>
-
-          <button
-              type="button"
-              class="btn btn-sm btn-outline rounded-2xl recNav"
-              @click="recNext"
-              :disabled="recNavDisabled || recBusy"
-              aria-label="بعدی"
-          >
-            &gt;
-          </button>
-        </div>
-      </div>
-    </section>
-
     <!-- ✅ EDIT PROFILE MODAL -->
     <dialog ref="editDialog" class="modal">
-      <div class="modal-box w-full max-w-4xl text-right rounded-3xl">
+      <div class="modal-box w-full max-w-4xl text-right rounded-3xl relative z-50 pointer-events-auto">
         <!-- Header -->
         <div class="flex items-start justify-between gap-3">
           <div class="min-w-0">
             <h3 class="text-lg sm:text-xl font-bold truncate">ویرایش اطلاعات کاربری</h3>
           </div>
 
-          <button
-              type="button"
-              class="btn btn-ghost btn-sm rounded-2xl shrink-0"
-              @click="closeEdit"
-              :disabled="saving"
-          >
+          <button type="button" class="btn btn-ghost btn-sm rounded-2xl shrink-0" @click="closeEdit" :disabled="saving">
             بستن
           </button>
         </div>
@@ -254,49 +198,32 @@
             <button type="button" class="flex items-center gap-3 text-right" @click="goStep(1)" :disabled="saving">
               <div
                   class="grid place-items-center rounded-2xl border font-extrabold transition w-10 h-10 sm:w-11 sm:h-11"
-                  :class="
-                  editStep >= 1
-                    ? 'bg-primary text-primary-content border-primary/40 shadow-sm'
-                    : 'bg-base-100 border-base-300 text-base-content/70'
-                "
+                  :class="editStep >= 1 ? 'bg-primary text-primary-content border-primary/40 shadow-sm' : 'bg-base-100 border-base-300 text-base-content/70'"
               >
                 1
               </div>
 
               <div class="leading-tight">
-                <div
-                    class="text-sm sm:text-base font-extrabold"
-                    :class="editStep >= 1 ? 'text-base-content' : 'text-base-content/70'"
-                >
+                <div class="text-sm sm:text-base font-extrabold" :class="editStep >= 1 ? 'text-base-content' : 'text-base-content/70'">
                   اطلاعات کاربری
                 </div>
               </div>
             </button>
 
             <div class="flex-1 h-1 rounded-full bg-base-300/70 overflow-hidden">
-              <div
-                  class="h-full rounded-full transition-all duration-300"
-                  :class="editStep >= 2 ? 'w-full bg-primary' : 'w-0 bg-primary'"
-              ></div>
+              <div class="h-full rounded-full transition-all duration-300" :class="editStep >= 2 ? 'w-full bg-primary' : 'w-0 bg-primary'"></div>
             </div>
 
             <button type="button" class="flex items-center gap-3 text-right" @click="goStep(2)" :disabled="saving">
               <div
                   class="grid place-items-center rounded-2xl border font-extrabold transition w-10 h-10 sm:w-11 sm:h-11"
-                  :class="
-                  editStep >= 2
-                    ? 'bg-primary text-primary-content border-primary/40 shadow-sm'
-                    : 'bg-base-100 border-base-300 text-base-content/70'
-                "
+                  :class="editStep >= 2 ? 'bg-primary text-primary-content border-primary/40 shadow-sm' : 'bg-base-100 border-base-300 text-base-content/70'"
               >
                 2
               </div>
 
               <div class="leading-tight">
-                <div
-                    class="text-sm sm:text-base font-extrabold"
-                    :class="editStep >= 2 ? 'text-base-content' : 'text-base-content/70'"
-                >
+                <div class="text-sm sm:text-base font-extrabold" :class="editStep >= 2 ? 'text-base-content' : 'text-base-content/70'">
                   اطلاعات حساب
                 </div>
               </div>
@@ -305,7 +232,7 @@
         </div>
 
         <!-- ✅ FORM -->
-        <form id="edit-profile-form" @submit.prevent="submitProfile" class="space-y-6 mt-6">
+        <form id="edit-profile-form" novalidate @submit.prevent="submitProfile" class="space-y-6 mt-6">
           <!-- STEP 1 -->
           <div v-show="editStep === 1" class="space-y-5">
             <div class="grid gap-4 sm:grid-cols-2">
@@ -324,20 +251,20 @@
                 <label class="label"><span class="label-text">ایمیل</span></label>
                 <input
                     v-model.trim="email"
-                    type="email"
+                    type="text"
+                    inputmode="email"
                     class="input input-bordered w-full rounded-2xl ltr-input"
                     placeholder="example@email.com"
                 />
-                <p v-if="email && !isValidEmail(email)" class="mt-1 text-xs text-error">فرمت ایمیل صحیح نیست.</p>
+                <p v-if="emailError" class="mt-1 text-xs text-error">{{ emailError }}</p>
               </div>
 
               <!-- ✅ Jalali Birthday Picker -->
               <div ref="birthdayPickerWrap" class="relative">
                 <label class="label">
-                  <span class="label-text">تاریخ تولد <span class="mr-1 text-xs text-error">(اختیاری)</span></span>
+                  <span class="label-text">تاریخ تولد </span>
                 </label>
 
-                <!-- ✅ WRAP: button is positioned relative to INPUT only -->
                 <div class="relative">
                   <input
                       v-model.trim="birthdayJalali"
@@ -351,24 +278,15 @@
                       autocomplete="off"
                   />
 
-                  <!-- ✅ FIX: no motion, fixed top/height, no transforms -->
-                  <button
-                      type="button"
-                      class="calBtn btn btn-ghost btn-sm rounded-xl"
-                      @click="toggleBirthdayPicker"
-                      tabindex="-1"
-                      aria-label="انتخاب تاریخ"
-                  >
+                  <button type="button" class="calBtn btn btn-ghost btn-sm rounded-xl" @click="toggleBirthdayPicker" tabindex="-1" aria-label="انتخاب تاریخ">
                     📅
                   </button>
                 </div>
 
-                <!-- ✅ FIX: keep space stable so layout doesn't jump -->
                 <div class="mt-1 min-h-[18px]">
                   <p v-if="birthdayError" class="text-xs text-error">{{ birthdayError }}</p>
                 </div>
 
-                <!-- ✅ Popover Calendar (opens to the RIGHT on desktop) -->
                 <div
                     v-show="birthdayPickerOpen"
                     class="jalali-popover rounded-2xl border border-base-300 bg-base-100 shadow-xl p-3"
@@ -376,17 +294,9 @@
                     aria-label="انتخاب تاریخ شمسی"
                 >
                   <div class="flex items-center justify-between gap-2">
-                    <button type="button" class="btn btn-xs btn-ghost rounded-xl" @click="prevJMonth" aria-label="ماه قبل">
-                      ‹
-                    </button>
-
-                    <div class="text-sm font-extrabold">
-                      {{ jMonthNames[jViewMonth - 1] }} {{ jViewYear }}
-                    </div>
-
-                    <button type="button" class="btn btn-xs btn-ghost rounded-xl" @click="nextJMonth" aria-label="ماه بعد">
-                      ›
-                    </button>
+                    <button type="button" class="btn btn-xs btn-ghost rounded-xl" @click="prevJMonth" aria-label="ماه قبل">‹</button>
+                    <div class="text-sm font-extrabold">{{ jMonthNames[jViewMonth - 1] }} {{ jViewYear }}</div>
+                    <button type="button" class="btn btn-xs btn-ghost rounded-xl" @click="nextJMonth" aria-label="ماه بعد">›</button>
                   </div>
 
                   <div class="grid grid-cols-7 gap-1 mt-2 text-xs opacity-70">
@@ -407,12 +317,8 @@
                   </div>
 
                   <div class="mt-2 flex items-center justify-between gap-2">
-                    <button type="button" class="btn btn-xs btn-outline rounded-xl" @click="pickTodayJ">
-                      امروز
-                    </button>
-                    <button type="button" class="btn btn-xs btn-ghost rounded-xl" @click="closeBirthdayPicker">
-                      بستن
-                    </button>
+                    <button type="button" class="btn btn-xs btn-outline rounded-xl" @click="pickTodayJ">امروز</button>
+                    <button type="button" class="btn btn-xs btn-ghost rounded-xl" @click="closeBirthdayPicker">بستن</button>
                   </div>
                 </div>
               </div>
@@ -423,12 +329,7 @@
                 <span class="text-sm font-semibold">تغییر شماره موبایل</span>
                 <span class="text-xs opacity-60 shrink-0">در صورت نیاز</span>
               </div>
-              <input
-                  v-model.trim="newPhone"
-                  type="text"
-                  class="input input-bordered w-full rounded-2xl ltr-input mt-3"
-                  placeholder="09xxxxxxxxx"
-              />
+              <input v-model.trim="newPhone" type="text" class="input input-bordered w-full rounded-2xl ltr-input mt-3" placeholder="09xxxxxxxxx" />
             </div>
           </div>
 
@@ -439,58 +340,37 @@
                 <div class="flex items-center justify-between gap-3">
                   <span class="text-sm font-semibold">شماره حساب <span class="mr-1 text-xs text-error">(اختیاری)</span></span>
                 </div>
-                <input
-                    v-model.trim="accountNumber"
-                    type="text"
-                    class="input input-bordered w-full rounded-2xl ltr-input mt-3"
-                    placeholder="6219 8619 XXXX XXXX"
-                />
+                <input v-model.trim="accountNumber" type="text" class="input input-bordered w-full rounded-2xl ltr-input mt-3" placeholder="6219 8619 XXXX XXXX" />
               </div>
 
               <div class="flex items-center justify-between gap-3">
                 <span class="text-sm font-semibold">شماره شبا</span>
                 <span class="text-xs opacity-60 shrink-0">برای عودت وجه</span>
               </div>
-              <input
-                  v-model.trim="sheba"
-                  type="text"
-                  class="input input-bordered w-full rounded-2xl ltr-input mt-3"
-                  placeholder="IRxxxxxxxxxxxxxxxxxxxxxx"
-              />
+              <input v-model.trim="sheba" type="text" class="input input-bordered w-full rounded-2xl ltr-input mt-3" placeholder="IRxxxxxxxxxxxxxxxxxxxxxx" />
             </div>
           </div>
+
+          <!-- ✅ Actions INSIDE form -->
+          <div class="modal-action mt-2 flex flex-col sm:flex-row sm:justify-start sm:items-center gap-2">
+            <button v-if="editStep === 2" type="button" class="btn btn-outline rounded-2xl w-full sm:w-auto" @click="prevStep" :disabled="saving">
+              مرحله قبل
+            </button>
+
+            <button v-if="editStep === 1" type="button" class="btn btn-primary rounded-2xl w-full sm:w-auto" @click="nextStep" :disabled="saving">
+              مرحله بعد
+            </button>
+
+            <button v-if="editStep === 2" type="submit" class="btn btn-primary rounded-2xl w-full sm:w-auto" :disabled="saving">
+              <span v-if="!saving">ذخیره</span>
+              <span v-else class="loading loading-spinner loading-sm"></span>
+            </button>
+          </div>
         </form>
-
-        <div class="modal-action mt-2 flex flex-col sm:flex-row sm:justify-start sm:items-center gap-2">
-          <button
-              v-if="editStep === 2"
-              type="button"
-              class="btn btn-outline rounded-2xl w-full sm:w-auto"
-              @click="prevStep"
-              :disabled="saving"
-          >
-            مرحله قبل
-          </button>
-
-          <button v-if="editStep === 1" type="button" class="btn btn-primary rounded-2xl w-full sm:w-auto" @click="nextStep">
-            مرحله بعد
-          </button>
-
-          <button
-              v-if="editStep === 2"
-              type="submit"
-              form="edit-profile-form"
-              class="btn btn-primary rounded-2xl w-full sm:w-auto"
-              :disabled="saving || !canSubmit"
-          >
-            <span v-if="!saving">ذخیره</span>
-            <span v-else class="loading loading-spinner loading-sm"></span>
-          </button>
-        </div>
       </div>
 
-      <form method="dialog" class="modal-backdrop">
-        <button>close</button>
+      <form method="dialog" class="modal-backdrop z-40">
+        <button aria-label="close">close</button>
       </form>
     </dialog>
   </div>
@@ -501,7 +381,7 @@ import { computed, ref, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
 import { useToast } from 'vue-toastification'
-import { http } from '@/services/http'
+import { updateMe, getMe } from '@/services/user' // ✅ اضافه شد
 
 import ProductCard from '@/components/ProductCard.vue'
 import type { Product } from '@/services/types'
@@ -578,9 +458,7 @@ function d2j(jdn: number) {
       jm = 1 + div(k, 31)
       jd = mod(k, 31) + 1
       return { jy, jm, jd }
-    } else {
-      k -= 186
-    }
+    } else k -= 186
   } else {
     jy -= 1
     k += 179
@@ -606,22 +484,14 @@ function jalaaliMonthLength(jy: number, jm: number) {
 }
 /* ========================= */
 
-const DEV_BYPASS_AUTH = import.meta.env.DEV && import.meta.env.VITE_DEV_BYPASS_AUTH === 'true'
-
-const DEV_USER = {
-  id: 1,
-  name: 'کاربر تست',
-  phone: '09120000000',
-  email: 'test@example.com',
-  birthday: '',
-  sheba: '',
-  accountNumber: '',
-  lastName: 'نمونه'
-}
+const DEV_BYPASS_AUTH = import.meta.env.DEV && import.meta.env.VITE_DEV_BYPASS_AUTH === 'false'
+const DEV_USER = { id: 1, name: 'کاربر تست', phone: '09120000000', email: 'test@example.com', birthday: '', sheba: '', accountNumber: '', lastName: 'نمونه' }
 
 const auth = useAuthStore()
 const router = useRouter()
 const toast = useToast()
+
+const loadingMe = ref(false) // ✅ اضافه شد
 
 const userInitial = computed(() => {
   const u: any = auth.user
@@ -673,9 +543,11 @@ const firstName = ref('')
 const lastName = ref('')
 const email = ref('')
 
-const birthdayJalali = ref<string>('') // like 1403/09/07
-const birthdayIso = ref<string>('')    // like 2024-11-27
+const birthdayJalali = ref<string>('')
+const birthdayIso = ref<string>('')
 const birthdayError = ref<string>('')
+
+const emailError = ref<string>('')
 
 const newPhone = ref('')
 const accountNumber = ref('')
@@ -688,6 +560,15 @@ function pad2(n: number) { return String(n).padStart(2, '0') }
 function isIsoDate(s: string) { return /^\d{4}-\d{2}-\d{2}$/.test(s) }
 function isJalaliDateString(s: string) { return /^\d{4}\/\d{1,2}\/\d{1,2}$/.test(s) }
 
+function toEnDigits(input: string) {
+  const fa = '۰۱۲۳۴۵۶۷۸۹'
+  const ar = '٠١٢٣٤٥٦٧٨٩'
+  return input
+      .replace(/[۰-۹]/g, d => String(fa.indexOf(d)))
+      .replace(/[٠-٩]/g, d => String(ar.indexOf(d)))
+}
+
+
 function isoToJalali(iso: string) {
   if (!iso || !isIsoDate(iso)) return ''
   const [y, m, d] = iso.split('-').map(Number)
@@ -695,7 +576,7 @@ function isoToJalali(iso: string) {
   return `${j.jy}/${pad2(j.jm)}/${pad2(j.jd)}`
 }
 function jalaliToIso(jstr: string) {
-  const s = normalize(jstr)
+  const s = toEnDigits(normalize(jstr))
   if (!s) return ''
   if (!isJalaliDateString(s)) return ''
   const [jy, jm, jd] = s.split('/').map(Number)
@@ -705,26 +586,82 @@ function jalaliToIso(jstr: string) {
 }
 
 function normalizeBirthdayToIso(v: any): string {
-  if (!v) return ''
+  if (v == null) return ''
+
   if (Array.isArray(v)) v = v[0]
   if (v && typeof v === 'object') v = (v as any).start ?? (v as any).from ?? v
+
   if (v instanceof Date) return v.toISOString().slice(0, 10)
 
-  const s = String(v).trim()
-  if (!s) return ''
+  // number timestamp
+  if (typeof v === 'number' && Number.isFinite(v)) {
+    const ms = v < 1e12 ? v * 1000 : v
+    const d = new Date(ms)
+    return isNaN(d.getTime()) ? '' : d.toISOString().slice(0, 10)
+  }
 
-  if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10)
-  if (isJalaliDateString(s)) return jalaliToIso(s)
+  const s0 = toEnDigits(String(v).trim())
+  if (!s0) return ''
+
+  // numeric timestamp string
+  if (/^\d{10,13}$/.test(s0)) {
+    const n = Number(s0)
+    if (!Number.isFinite(n)) return ''
+    const ms = s0.length === 10 ? n * 1000 : n
+    const d = new Date(ms)
+    return isNaN(d.getTime()) ? '' : d.toISOString().slice(0, 10)
+  }
+
+  // ✅ 1) Try to extract YYYY-MM-DD at start (with optional time)
+  const mDash = s0.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/)
+  if (mDash) {
+    const y = Number(mDash[1])
+    const mo = Number(mDash[2])
+    const d = Number(mDash[3])
+
+    // Jalali like 1402-09-07
+    if (y < 1700) {
+      if (!isValidJalaaliDate(y, mo, d)) return ''
+      const g = toGregorian(y, mo, d)
+      return `${g.gy}-${pad2(g.gm)}-${pad2(g.gd)}`
+    }
+
+    // Gregorian
+    return `${y}-${pad2(mo)}-${pad2(d)}`
+  }
+
+  // ✅ 2) Try to extract YYYY/MM/DD at start (with optional time)
+  const mSlash = s0.match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})/)
+  if (mSlash) {
+    const y = Number(mSlash[1])
+    const mo = Number(mSlash[2])
+    const d = Number(mSlash[3])
+
+    // Jalali like 1402/09/07 ...
+    if (y < 1700) {
+      if (!isValidJalaaliDate(y, mo, d)) return ''
+      const g = toGregorian(y, mo, d)
+      return `${g.gy}-${pad2(g.gm)}-${pad2(g.gd)}`
+    }
+
+    // Gregorian like 2024/1/20 ...
+    return `${y}-${pad2(mo)}-${pad2(d)}`
+  }
+
+  // ✅ 3) Last resort: let JS parse Gregorian (ISO, RFC, etc.)
+  const t = Date.parse(s0)
+  if (!Number.isNaN(t)) {
+    return new Date(t).toISOString().slice(0, 10)
+  }
+
   return ''
 }
 
 function syncBirthdayFromJalali() {
   birthdayError.value = ''
-  const s = normalize(birthdayJalali.value)
-  if (!s) {
-    birthdayIso.value = ''
-    return
-  }
+  const s = toEnDigits(normalize(birthdayJalali.value))
+  if (!s) { birthdayIso.value = ''; return }
+  if (!isJalaliDateString(s)) { birthdayIso.value = ''; return }
   const iso = jalaliToIso(s)
   if (!iso) {
     birthdayError.value = 'فرمت تاریخ شمسی صحیح نیست. نمونه: 1403/09/07'
@@ -742,9 +679,10 @@ function fillFormFromUser(u: any) {
   birthdayIso.value = normalizeBirthdayToIso(u?.birthday ?? '')
   birthdayJalali.value = birthdayIso.value ? isoToJalali(birthdayIso.value) : ''
   birthdayError.value = ''
+  emailError.value = ''
 
   newPhone.value = u?.phone ?? ''
-  accountNumber.value = u?.accountNumber ?? u?.account_number ?? ''
+  accountNumber.value = u?.accountNumber ?? u?.account_number ?? u?.bank_number ?? ''
   sheba.value = u?.sheba ?? ''
 
   initialSnapshot.value = {
@@ -757,6 +695,8 @@ function fillFormFromUser(u: any) {
     sheba: normalize(sheba.value)
   }
 }
+
+watch(birthdayJalali, () => syncBirthdayFromJalali())
 
 watch(
     () => auth.user,
@@ -771,35 +711,72 @@ watch(
     { immediate: true }
 )
 
+/* ✅ Fetch me on page load */
+async function fetchMeOnLoad() {
+  if (DEV_BYPASS_AUTH) return
+  loadingMe.value = true
+  try {
+    const me = await getMe()
+    ;(auth as any).user = me
+    localStorage.setItem('auth_user', JSON.stringify(me))
+    fillFormFromUser(me)
+  } catch (err: any) {
+    // اگر توکن نامعتبر باشه، بهتره کاربر رو ببری لاگین
+    // ولی فعلاً فقط پیام خطا می‌دیم
+    toast.error(err?.response?.data?.error || err?.message || 'خطا در دریافت اطلاعات کاربر')
+  } finally {
+    loadingMe.value = false
+  }
+}
+
+onMounted(() => {
+  void fetchMeOnLoad()
+})
+
 function openEdit() {
   editStep.value = 1
+  emailError.value = ''
+  birthdayError.value = ''
   if (auth.user) fillFormFromUser(auth.user)
   editDialog.value?.showModal()
 }
 function closeEdit() { editDialog.value?.close() }
 
-function goStep(step: 1 | 2) {
-  if (saving.value) return
-  if (step === 2 && email.value && !isValidEmail(email.value)) {
-    toast.error('ایمیل معتبر نیست')
-    return
-  }
-  if (birthdayJalali.value && !birthdayIso.value) {
-    toast.error('تاریخ تولد معتبر نیست')
-    return
-  }
-  editStep.value = step
+function isValidEmail(v: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
 }
 
-function nextStep() {
-  if (email.value && !isValidEmail(email.value)) {
+/** ✅ validate only step-1 (on Next) */
+function validateStep1(): boolean {
+  emailError.value = ''
+  birthdayError.value = ''
+  syncBirthdayFromJalali()
+
+  const e = normalize(email.value)
+  if (e && !isValidEmail(e)) {
+    emailError.value = 'فرمت ایمیل صحیح نیست.'
     toast.error('ایمیل معتبر نیست')
-    return
+    return false
   }
-  if (birthdayJalali.value && !birthdayIso.value) {
+
+  const bj = normalize(birthdayJalali.value)
+  if (bj && !birthdayIso.value) {
+    birthdayError.value = 'فرمت تاریخ شمسی صحیح نیست. نمونه: 1403/09/07'
     toast.error('تاریخ تولد معتبر نیست')
-    return
+    return false
   }
+
+  return true
+}
+
+function goStep(step: 1 | 2) {
+  if (saving.value) return
+  if (step === 2 && !validateStep1()) return
+  editStep.value = step
+}
+function nextStep() {
+  if (saving.value) return
+  if (!validateStep1()) return
   editStep.value = 2
 }
 function prevStep() { editStep.value = 1 }
@@ -810,8 +787,164 @@ function logout() {
   router.push('/')
 }
 
-function isValidEmail(v: string) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
+const profileCompletion = computed(() => {
+  const u: any = auth.user || {}
+  const fields = [
+    !!u?.name,
+    !!(u?.lastName || u?.last_name),
+    !!u?.phone,
+    !!u?.email,
+    !!u?.birthday,
+    !!(u?.accountNumber || u?.account_number || u?.bank_number),
+    !!u?.sheba
+  ]
+  const filled = fields.filter(Boolean).length
+  return Math.round((filled / fields.length) * 100)
+})
+const completionText = computed(() => {
+  const p = profileCompletion.value
+  if (p >= 100) return 'پروفایل شما کامل است. در صورت نیاز می‌توانید اطلاعات را ویرایش کنید.'
+  if (p >= 60) return 'پروفایل شما تقریباً کامل است. چند مورد باقی مانده است.'
+  return 'پروفایل را تکمیل کنید تا تجربه بهتری از سفارش و پشتیبانی داشته باشید.'
+})
+const completionHints = computed(() => {
+  const u: any = auth.user || {}
+  const hints: string[] = []
+  if (!u?.email) hints.push('ثبت ایمیل')
+  if (!u?.birthday) hints.push('ثبت تولد')
+  if (!(u?.accountNumber || u?.account_number || u?.bank_number)) hints.push('ثبت شماره حساب')
+  if (!u?.sheba) hints.push('ثبت شبا')
+  if (!(u?.lastName || u?.last_name)) hints.push('نام خانوادگی')
+  return hints.length ? hints.slice(0, 4) : ['همه چیز کامل است']
+})
+
+const isDirty = computed(() => {
+  const snap = initialSnapshot.value || {}
+  const now = {
+    name: normalize(firstName.value),
+    lastName: normalize(lastName.value),
+    email: normalize(email.value),
+    birthdayIso: normalize(birthdayIso.value),
+    phone: normalize(newPhone.value),
+    accountNumber: normalize(accountNumber.value),
+    sheba: normalize(sheba.value)
+  }
+  return (
+      now.name !== (snap.name || '') ||
+      now.lastName !== (snap.lastName || '') ||
+      now.email !== (snap.email || '') ||
+      now.birthdayIso !== (snap.birthdayIso || '') ||
+      now.phone !== (snap.phone || '') ||
+      now.accountNumber !== (snap.accountNumber || '') ||
+      now.sheba !== (snap.sheba || '')
+  )
+})
+const canSubmit = computed(() => {
+  if (!isDirty.value) return false
+  return true
+})
+
+function buildUpdatePayload(): Record<string, any> {
+  const snap = initialSnapshot.value || {}
+
+  const nowName = normalize(firstName.value)
+  const nowLast = normalize(lastName.value)
+  const nowEmail = normalize(email.value)
+  const nowBirth = normalize(birthdayIso.value)
+  const nowPhone = normalize(newPhone.value)
+  const nowBank = normalize(accountNumber.value)
+  const nowSheba = normalize(sheba.value)
+
+  const payload: Record<string, any> = {}
+
+  if (nowName !== (snap.name || '')) payload.name = nowName || null
+  if (nowLast !== (snap.lastName || '')) payload.last_name = nowLast || null
+  if (nowEmail !== (snap.email || '')) payload.email = nowEmail || null
+  if (nowBirth !== (snap.birthdayIso || '')) payload.birthday = nowBirth || null
+  if (nowPhone !== (snap.phone || '')) payload.phone = nowPhone || null
+
+  const bankChanged = nowBank !== (snap.accountNumber || '')
+  const shebaChanged = nowSheba !== (snap.sheba || '')
+
+  if (bankChanged || shebaChanged) {
+    payload.bank_number = nowBank || null
+    payload.sheba = nowSheba || null
+  }
+
+  return payload
+}
+
+/**
+ * ✅ Save: always send API request.
+ * - step2 has no validation.
+ * - if email/birthday invalid, we omit those fields.
+ * - minimum spinner time so user sees feedback
+ */
+const MIN_SPINNER_MS = 600
+function nowMs() { return (typeof performance !== 'undefined' ? performance.now() : Date.now()) }
+
+async function submitProfile() {
+  const t0 = nowMs()
+
+  syncBirthdayFromJalali()
+
+  const e = normalize(email.value)
+  const emailOk = !e || isValidEmail(e)
+  const bj = normalize(birthdayJalali.value)
+  const birthdayOk = !bj || !!birthdayIso.value
+
+  saving.value = true
+  await nextTick()
+
+  let shouldClose = false
+
+  try {
+    if (DEV_BYPASS_AUTH) {
+      const current: any = auth.user || {}
+      const updatedUser = {
+            ...current,
+            name: normalize(firstName.value) || current.name || '',
+            lastName: normalize(lastName.value) || current.lastName || current.last_name || '',
+            email: normalize(email.value) || current.email || '',
+            birthday: normalize(birthdayIso.value) || '',
+            phone: normalize(newPhone.value) || current.phone || '',
+            accountNumber: normalize(accountNumber.value) || current.accountNumber || current.account_number || '',
+            sheba: normalize(sheba.value) || current.sheba || ''
+          }
+
+      ;(auth as any).user = updatedUser
+      localStorage.setItem('auth_user', JSON.stringify(updatedUser))
+      fillFormFromUser(updatedUser)
+
+      toast.success('اطلاعات ذخیره شد (DEV)')
+      shouldClose = true
+      return
+    }
+
+    const payload = buildUpdatePayload()
+    if (!emailOk) delete payload.email
+    if (!birthdayOk) delete payload.birthday
+
+    const res = await updateMe(payload as any)
+
+    ;(auth as any).user = res.user
+    localStorage.setItem('auth_user', JSON.stringify(res.user))
+    fillFormFromUser(res.user)
+
+    toast.success('اطلاعات شما به‌روزرسانی شد')
+    shouldClose = true
+  } catch (err: any) {
+    toast.error(err?.response?.data?.error || err?.message || 'خطا در به‌روزرسانی پروفایل')
+  } finally {
+    const elapsed = nowMs() - t0
+    const remaining = Math.max(0, MIN_SPINNER_MS - elapsed)
+    if (remaining) await new Promise(r => setTimeout(r, remaining))
+
+    saving.value = false
+    await nextTick()
+
+    if (shouldClose) closeEdit()
+  }
 }
 
 /* ====== Slider + Calendar state (unchanged) ====== */
@@ -938,117 +1071,7 @@ onUnmounted(() => {
 })
 watch(vw, () => computeRecWindow())
 
-/* ====== Profile completion (unchanged) ====== */
-const profileCompletion = computed(() => {
-  const u: any = auth.user || {}
-  const fields = [
-    !!u?.name,
-    !!(u?.lastName || u?.last_name),
-    !!u?.phone,
-    !!u?.email,
-    !!u?.birthday,
-    !!(u?.accountNumber || u?.account_number),
-    !!u?.sheba
-  ]
-  const filled = fields.filter(Boolean).length
-  return Math.round((filled / fields.length) * 100)
-})
-const completionText = computed(() => {
-  const p = profileCompletion.value
-  if (p >= 100) return 'پروفایل شما کامل است. در صورت نیاز می‌توانید اطلاعات را ویرایش کنید.'
-  if (p >= 60) return 'پروفایل شما تقریباً کامل است. چند مورد باقی مانده است.'
-  return 'پروفایل را تکمیل کنید تا تجربه بهتری از سفارش و پشتیبانی داشته باشید.'
-})
-const completionHints = computed(() => {
-  const u: any = auth.user || {}
-  const hints: string[] = []
-  if (!u?.email) hints.push('ثبت ایمیل')
-  if (!u?.birthday) hints.push('ثبت تولد')
-  if (!(u?.accountNumber || u?.account_number)) hints.push('ثبت شماره حساب')
-  if (!u?.sheba) hints.push('ثبت شبا')
-  if (!(u?.lastName || u?.last_name)) hints.push('نام خانوادگی')
-  return hints.length ? hints.slice(0, 4) : ['همه چیز کامل است']
-})
-
-/* ====== Modal submit / validation (kept minimal) ====== */
-const isDirty = computed(() => {
-  const snap = initialSnapshot.value || {}
-  const now = {
-    name: normalize(firstName.value),
-    lastName: normalize(lastName.value),
-    email: normalize(email.value),
-    birthdayIso: normalize(birthdayIso.value),
-    phone: normalize(newPhone.value),
-    accountNumber: normalize(accountNumber.value),
-    sheba: normalize(sheba.value)
-  }
-  return (
-      now.name !== (snap.name || '') ||
-      now.lastName !== (snap.lastName || '') ||
-      now.email !== (snap.email || '') ||
-      now.birthdayIso !== (snap.birthdayIso || '') ||
-      now.phone !== (snap.phone || '') ||
-      now.accountNumber !== (snap.accountNumber || '') ||
-      now.sheba !== (snap.sheba || '')
-  )
-})
-const canSubmit = computed(() => {
-  if (!isDirty.value) return false
-  if (email.value && !isValidEmail(email.value)) return false
-  if (birthdayJalali.value && !birthdayIso.value) return false
-  return true
-})
-
-async function submitProfile() {
-  if (!canSubmit.value) return
-  saving.value = true
-  try {
-    if (DEV_BYPASS_AUTH) {
-      const current: any = auth.user || {}
-      const updatedUser = {
-            ...current,
-            name: normalize(firstName.value) || current.name || '',
-            lastName: normalize(lastName.value) || current.lastName || current.last_name || '',
-            email: normalize(email.value) || current.email || '',
-            birthday: normalize(birthdayIso.value) || '',
-            phone: normalize(newPhone.value) || current.phone || '',
-            accountNumber: normalize(accountNumber.value) || current.accountNumber || current.account_number || '',
-            sheba: normalize(sheba.value) || current.sheba || ''
-          }
-      ;(auth as any).user = updatedUser
-      localStorage.setItem('auth_user', JSON.stringify(updatedUser))
-      fillFormFromUser(updatedUser)
-      toast.success('اطلاعات ذخیره شد')
-      closeEdit()
-      return
-    }
-
-    const payload: any = {
-      name: normalize(firstName.value) || null,
-      last_name: normalize(lastName.value) || null,
-      email: normalize(email.value) || null,
-      birthday: normalize(birthdayIso.value) || null,
-      phone: normalize(newPhone.value) || null,
-      account_number: normalize(accountNumber.value) || null,
-      sheba: normalize(sheba.value) || null
-    }
-
-    const res = await http.put('/users/me', payload)
-    ;(auth as any).user = res.data.user
-    localStorage.setItem('auth_user', JSON.stringify((auth as any).user))
-    fillFormFromUser(res.data.user)
-
-    toast.success('اطلاعات شما با موفقیت به‌روزرسانی شد')
-    closeEdit()
-  } catch (e: any) {
-    console.error(e)
-    toast.error(e?.response?.data?.error || 'خطا در به‌روزرسانی پروفایل')
-  } finally {
-    saving.value = false
-  }
-}
-
-/* ====== Calendar popover state ====== */
+/* ====== Calendar popover state (unchanged) ====== */
 const birthdayPickerWrap = ref<HTMLElement | null>(null)
 const birthdayPickerOpen = ref(false)
 const weekDaysFa = ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج']
@@ -1074,18 +1097,10 @@ function ensureViewOnCurrentValue() {
     jViewMonth.value = j.jm
   }
 }
-function toggleBirthdayPicker() {
-  if (birthdayPickerOpen.value) closeBirthdayPicker()
-  else openBirthdayPicker()
-}
-function openBirthdayPicker() {
-  birthdayPickerOpen.value = true
-  ensureViewOnCurrentValue()
-}
+function toggleBirthdayPicker() { birthdayPickerOpen.value ? closeBirthdayPicker() : openBirthdayPicker() }
+function openBirthdayPicker() { birthdayPickerOpen.value = true; ensureViewOnCurrentValue() }
 function closeBirthdayPicker() { birthdayPickerOpen.value = false }
-function onBirthdayBlur() {
-  window.setTimeout(() => syncBirthdayFromJalali(), 0)
-}
+function onBirthdayBlur() { window.setTimeout(() => syncBirthdayFromJalali(), 0) }
 function prevJMonth() {
   let y = jViewYear.value
   let m = jViewMonth.value - 1
@@ -1161,15 +1176,13 @@ const bigRadialThickness = computed(() => (vw.value >= 640 ? '11px' : '10px'))
 </script>
 
 <style scoped>
-.ltr-input {
-  direction: ltr;
-  text-align: left;
-}
+.ltr-input { direction: ltr; text-align: left; }
+.modal-box { overflow: visible; }
 
-/* ✅ allow popovers to render correctly inside modal */
-.modal-box {
-  overflow: visible;
-}
+/* ✅ ensure modal stack order + clicks */
+.modal { position: relative; }
+.modal-box { pointer-events: auto; }
+.modal-backdrop { position: absolute; inset: 0; pointer-events: auto; }
 
 .statusPill {
   border-radius: 1rem;
@@ -1181,83 +1194,7 @@ const bigRadialThickness = computed(() => (vw.value >= 640 ? '11px' : '10px'))
   border: 1px solid rgba(0, 0, 0, 0.06);
 }
 
-/* =========================
-   Recommendations slider
-========================= */
-.rec-row-shell {
-  display: grid;
-  grid-template-columns: 44px 1fr 44px;
-  gap: 10px;
-  align-items: center;
-}
-
-.recNav {
-  height: 44px;
-  width: 44px;
-  padding: 0;
-  font-size: 18px;
-  line-height: 1;
-  transition: transform 160ms ease, opacity 160ms ease;
-}
-.recNav:hover { transform: translateY(-1px); }
-.recNav:active { transform: translateY(0); }
-.recNav:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.rec-viewport {
-  overflow: hidden;
-  min-width: 0;
-  border-radius: 22px;
-}
-
-.rec-track {
-  display: flex;
-  align-items: stretch;
-  will-change: transform;
-  transform: translateX(0);
-}
-.rec-track.is-anim { transition: transform 420ms ease; }
-
-.rec-cell {
-  flex: 0 0 calc(100% / var(--rec-cols));
-  min-width: 0;
-  padding-inline: 6px;
-  box-sizing: border-box;
-  display: flex;
-}
-
-.rec-cell :deep(.card) {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-}
-.rec-cell :deep(figure) { overflow: hidden; }
-.rec-cell :deep(figure img) {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-.rec-cell :deep(.card-title) {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  overflow: hidden;
-  line-height: 1.5;
-  min-height: calc(1.5em * 2);
-}
-.rec-cell :deep(.card-body) {
-  display: flex;
-  flex-direction: column;
-}
-.rec-cell :deep(.card-body .btn.btn-ghost) { margin-top: auto; }
-
-/* =========================
-   ✅ Jalali popover (RIGHT of input on desktop)
-========================= */
+/* ✅ Jalali popover (RIGHT of input on desktop) */
 .jalali-popover {
   position: absolute;
   z-index: 60;
@@ -1267,8 +1204,6 @@ const bigRadialThickness = computed(() => (vw.value >= 640 ? '11px' : '10px'))
   width: 320px;
   max-width: min(360px, 86vw);
 }
-
-/* ✅ On small screens, popover falls back below input */
 @media (max-width: 640px) {
   .jalali-popover {
     top: calc(100% + 8px);
@@ -1280,26 +1215,20 @@ const bigRadialThickness = computed(() => (vw.value >= 640 ? '11px' : '10px'))
   }
 }
 
-/* =========================
-   ✅ Calendar button: NO MOTION
-========================= */
+/* ✅ Calendar button: NO MOTION */
 .calBtn {
   position: absolute;
   right: 8px;
-  top: 8px;                 /* ثابت */
-  height: calc(100% - 16px); /* هم‌قد input */
+  top: 8px;
+  height: calc(100% - 16px);
   width: 40px;
   padding: 0;
   display: grid;
   place-items: center;
-  /* مهم: حذف هر موشن/ترنسفورم ناخواسته */
   transform: none !important;
   transition: none !important;
 }
-
-.calBtn:hover,
-.calBtn:active,
-.calBtn:focus {
+.calBtn:hover, .calBtn:active, .calBtn:focus {
   transform: none !important;
   transition: none !important;
 }

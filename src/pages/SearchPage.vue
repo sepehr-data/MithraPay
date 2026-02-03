@@ -6,14 +6,14 @@
         <h1 class="text-xl font-bold">نتایج جستجو</h1>
 
         <p class="text-sm text-base-content/70 mt-1 leading-6">
-          <span v-if="query">
+          <span v-if="effectiveQuery">
             برای
             <span
                 class="font-semibold px-2 py-0.5 rounded-lg bg-base-200/60 font-mono"
                 dir="auto"
                 style="unicode-bidi: plaintext;"
             >
-              {{ query }}
+              {{ effectiveQuery }}
             </span>
             —
             {{ results.length.toLocaleString('fa-IR') }}
@@ -21,20 +21,20 @@
           </span>
 
           <span v-else>
-            همه محصولات — {{ results.length.toLocaleString('fa-IR') }} مورد
+            برای شروع، عبارت مورد نظر رو جستجو کن.
           </span>
         </p>
       </div>
 
       <div class="flex gap-2 items-center">
-        <select v-model="sort" class="select select-bordered select-sm">
+        <select v-model="sort" class="select select-bordered select-sm" :disabled="!effectiveQuery">
           <option value="relevance">مرتبط‌ترین</option>
           <option value="newest">جدیدترین</option>
           <option value="price_asc">ارزان‌ترین</option>
           <option value="price_desc">گران‌ترین</option>
         </select>
 
-        <button class="btn btn-ghost btn-sm" @click="clearSearch" :disabled="!query">
+        <button class="btn btn-ghost btn-sm" @click="clearSearch" :disabled="!effectiveQuery">
           پاک کردن
         </button>
       </div>
@@ -64,8 +64,8 @@
       <button v-if="localQ" class="btn btn-ghost btn-xs rounded-xl" @click="localQ = ''">✕</button>
     </label>
 
-    <!-- States -->
-    <div v-if="store.loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+    <!-- Loading (فقط وقتی کاربر چیزی تایپ کرده) -->
+    <div v-if="loading && effectiveQuery" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
       <div v-for="i in 6" :key="i" class="card border border-base-300 bg-base-100">
         <div class="card-body">
           <div class="skeleton h-5 w-2/3"></div>
@@ -75,7 +75,24 @@
       </div>
     </div>
 
-    <div v-else-if="!results.length" class="card border border-base-300 bg-base-100">
+    <!-- حالت پیش‌فرض -->
+    <div v-else-if="!effectiveQuery" class="card border border-base-300 bg-base-100">
+      <div class="card-body items-center text-center">
+        <div class="text-4xl">🔎</div>
+        <h3 class="font-bold">جستجو کن تا نتایج رو ببینی</h3>
+        <p class="text-sm text-base-content/70">
+          محصولات از API دریافت شده‌اند، ولی تا وقتی چیزی تایپ نکنی نمایش داده نمی‌شن.
+        </p>
+      </div>
+    </div>
+
+    <!-- خطا -->
+    <div v-else-if="errorMsg" class="alert alert-error">
+      {{ errorMsg }}
+    </div>
+
+    <!-- No results -->
+    <div v-else-if="effectiveQuery && !results.length" class="card border border-base-300 bg-base-100">
       <div class="card-body items-center text-center">
         <div class="text-4xl">🫥</div>
         <h3 class="font-bold">موردی پیدا نشد</h3>
@@ -83,54 +100,51 @@
           املای کلمه رو چک کن یا عبارت کوتاه‌تری وارد کن.
         </p>
         <div class="mt-2 flex gap-2">
-          <button class="btn btn-primary btn-sm" @click="clearSearch">نمایش همه</button>
+          <button class="btn btn-primary btn-sm" @click="clearSearch">پاک کردن جستجو</button>
           <button class="btn btn-ghost btn-sm" @click="suggestLooseSearch">جستجوی آزادتر</button>
         </div>
       </div>
     </div>
 
     <!-- Results -->
-    <!-- اگر ProductGrid prop های highlight رو نداره، :highlight="query" رو حذف کن -->
-    <ProductGrid v-else :products="results" :highlight="query" />
+    <ProductGrid v-else :products="results" :highlight="effectiveQuery" />
   </section>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useProductsStore } from '@/stores/products'
 import ProductGrid from '@/components/ProductGrid.vue'
+import { listProducts } from '@/services/products.ts'
 
 type SortMode = 'relevance' | 'newest' | 'price_asc' | 'price_desc'
 
 const route = useRoute()
 const router = useRouter()
-const store = useProductsStore()
 
-onMounted(() => {
-  store.load()
-})
+/** query from route (برای وقتی از نوبار/لینک میای) */
+const routeQ = computed(() => String(route.query.q || '').trim())
 
-/** query from route */
-const query = computed(() => String(route.query.q || '').trim())
+/** input محلی */
+const localQ = ref(routeQ.value)
 
-/** local input + debounce -> sync to route */
-const localQ = ref(query.value)
+/** چیزی که باید سرچ و نمایش بر اساسش انجام شه: همون تایپ کاربر */
+const effectiveQuery = computed(() => String(localQ.value || '').trim())
 
-watch(query, (v) => {
+/** وقتی route عوض شد (مثلاً از navbar)، input رو sync کن */
+watch(routeQ, (v) => {
   if (v !== localQ.value) localQ.value = v
 })
 
+/** debounce -> sync به route برای shareable URL */
 let t: number | undefined
 watch(localQ, (v) => {
   window.clearTimeout(t)
   t = window.setTimeout(() => {
     const nv = String(v || '').trim()
     const nextQuery = { ...route.query }
-
     if (nv) nextQuery.q = nv
     else delete nextQuery.q
-
     router.replace({ query: nextQuery })
   }, 250)
 })
@@ -138,11 +152,62 @@ watch(localQ, (v) => {
 /** sort */
 const sort = ref<SortMode>('relevance')
 
-/** ---- Search helpers (Persian-friendly) ---- */
+/** ---- API cache ---- */
+const loading = ref(false)
+const errorMsg = ref('')
+const allProducts = ref<any[]>([])
+
+async function loadAllProducts() {
+  if (loading.value) return
+  loading.value = true
+  errorMsg.value = ''
+
+  try {
+    const limit = 200
+    let offset = 0
+    let out: any[] = []
+    let safety = 0
+
+    while (safety < 200) {
+      safety++
+      const data: any = await listProducts({ limit, offset } as any)
+
+      const items: any[] =
+          (data?.items as any[]) ??
+          (data?.products as any[]) ??
+          (data?.data as any[]) ??
+          (Array.isArray(data) ? data : [])
+
+      out = out.concat(items)
+
+      const total = Number(data?.total ?? data?.count ?? data?.meta?.total ?? data?.pagination?.total ?? NaN)
+      offset += items.length || limit
+
+      if (Number.isFinite(total)) {
+        if (out.length >= total) break
+      } else {
+        if (items.length < limit) break
+      }
+      if (!items.length) break
+    }
+
+    allProducts.value = out
+  } catch (e: any) {
+    errorMsg.value = e?.message || 'خطا در دریافت محصولات'
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(() => {
+  loadAllProducts()
+})
+
+/** ---- Search helpers (title + category فقط) ---- */
 function normalizeFa(input: string) {
-  return input
+  return String(input || '')
       .toLowerCase()
-      .replace(/\u200c/g, ' ')          // نیم‌فاصله
+      .replace(/[\u200c\u200d\u200e\u200f]/g, ' ')
       .replace(/[ي]/g, 'ی')
       .replace(/[ك]/g, 'ک')
       .replace(/[ۀ]/g, 'ه')
@@ -157,86 +222,56 @@ function tokenize(q: string) {
 }
 
 function includesAllTokens(haystack: string, tokens: string[]) {
-  return tokens.every(tok => haystack.includes(tok))
+  return tokens.every((tok) => haystack.includes(tok))
 }
 
-/**
- * امتیازدهی ساده برای relevance:
- * - match در title وزن بیشتر
- * - match در tags/brand/category وزن کمتر
- */
-function scoreProduct(p: any, tokens: string[]) {
+function scoreProduct(p: any, tokens: string[], qRaw: string) {
   const title = normalizeFa(p.title || '')
   const cat = normalizeFa(p.category?.title || p.category || '')
-  const brand = normalizeFa(p.brand || '')
-  const tags = normalizeFa(Array.isArray(p.tags) ? p.tags.join(' ') : (p.tags || ''))
-  const desc = normalizeFa(p.description || '')
 
   let score = 0
   for (const tok of tokens) {
-    if (title.includes(tok)) score += 5
-    if (brand.includes(tok)) score += 3
-    if (cat.includes(tok)) score += 2
-    if (tags.includes(tok)) score += 2
-    if (desc.includes(tok)) score += 1
+    if (title.includes(tok)) score += 6
+    if (cat.includes(tok)) score += 3
   }
 
-  const qn = normalizeFa(query.value)
-  if (qn && title.startsWith(qn)) score += 5
-
+  const qn = normalizeFa(qRaw)
+  if (qn && title.startsWith(qn)) score += 6
   return score
 }
 
 const results = computed(() => {
-  const all = store.products || []
-  const tokens = tokenize(query.value)
+  const q = effectiveQuery.value
+  if (!q) return []
 
-  if (!tokens.length) {
-    return applySort(all.slice(), [])
-  }
+  const all = allProducts.value || []
+  const tokens = tokenize(q)
+  if (!tokens.length) return []
 
   const filtered = all.filter((p: any) => {
-    const hay = normalizeFa(
-        [
-          p.title,
-          p.brand,
-          p.category?.title ?? p.category,
-          Array.isArray(p.tags) ? p.tags.join(' ') : p.tags,
-          p.description,
-        ]
-            .filter(Boolean)
-            .join(' ')
-    )
-
+    const hay = normalizeFa([p.title, p.category?.title ?? p.category].filter(Boolean).join(' '))
     return includesAllTokens(hay, tokens)
   })
 
-  return applySort(filtered, tokens)
+  return applySort(filtered, tokens, q)
 })
 
-function applySort(list: any[], tokens: string[]) {
+function applySort(list: any[], tokens: string[], qRaw: string) {
   switch (sort.value) {
     case 'newest':
-      return list.sort(
-          (a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
-      )
+      return list.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())
     case 'price_asc':
       return list.sort((a, b) => Number(a.price || 0) - Number(b.price || 0))
     case 'price_desc':
       return list.sort((a, b) => Number(b.price || 0) - Number(a.price || 0))
     case 'relevance':
     default:
-      if (!tokens.length) return list
       return list
-          .map(p => ({ p, s: scoreProduct(p, tokens) }))
+          .map((p) => ({ p, s: scoreProduct(p, tokens, qRaw) }))
           .sort((a, b) => b.s - a.s)
-          .map(x => x.p)
+          .map((x) => x.p)
   }
 }
-
-watch([sort, query], () => {
-  // اگر pagination داشتی اینجا page=1
-})
 
 function clearSearch() {
   localQ.value = ''
@@ -246,12 +281,15 @@ function clearSearch() {
 }
 
 function suggestLooseSearch() {
-  // نسخه فعلی: اگر چند کلمه بود فقط اولین کلمه رو نگه می‌داره
   const tokens = tokenize(localQ.value)
   if (tokens.length > 1) localQ.value = tokens[0]
 }
-</script>
 
-<style scoped>
-/* (اختیاری) اگر خواستی ورودی حتی گردتر شه ولی DaisyUI override نشه */
-</style>
+/** اگر کاربر سرچ کرد و هنوز محصولات نیومده بود، دوباره تلاش کن */
+watch(
+    () => effectiveQuery.value,
+    (q) => {
+      if (q && !allProducts.value.length && !loading.value) loadAllProducts()
+    }
+)
+</script>

@@ -16,11 +16,8 @@
     <!-- Blog Top Bar (sticky فقط در Zen) -->
     <header :class="zen ? 'sticky top-0 z-[80]' : ''" class="relative border-b border-base-300 bg-base-100/70 backdrop-blur">
       <div class="max-w-6xl mx-auto px-4 lg:px-6 py-3">
-        <!-- ✅ فقط برای چیدمان LTR -->
         <div class="flex items-center justify-between gap-3 overflow-visible" dir="ltr">
-          <!-- ✅ LEFT: Buttons -->
           <div class="flex items-center gap-2" dir="rtl">
-            <!-- ✅ Aa (Fix: Teleport + Fixed Position) -->
             <div class="relative">
               <button
                   ref="aaBtnRef"
@@ -33,10 +30,7 @@
 
               <teleport to="body">
                 <div v-if="aaOpen" class="fixed z-[9999]" :style="aaMenuStyle">
-                  <div
-                      class="p-3 w-64 rounded-2xl border border-base-300 bg-base-100 shadow-xl space-y-3"
-                      dir="rtl"
-                  >
+                  <div class="p-3 w-64 rounded-2xl border border-base-300 bg-base-100 shadow-xl space-y-3" dir="rtl">
                     <div class="text-xs text-base-content/60">اندازه متن</div>
                     <div class="flex items-center gap-2">
                       <button class="btn btn-ghost btn-xs rounded-xl no-hover" @click="decFont">A-</button>
@@ -50,35 +44,23 @@
 
                     <div class="text-xs text-base-content/60">فاصله خطوط</div>
                     <div class="flex items-center gap-2">
-                      <button class="btn btn-ghost btn-xs rounded-xl no-hover" @click="leadingStep = clamp(leadingStep - 1, 0, 2)">
-                        کم
-                      </button>
-                      <button class="btn btn-ghost btn-xs rounded-xl no-hover" @click="leadingStep = 1">
-                        نرمال
-                      </button>
-                      <button class="btn btn-ghost btn-xs rounded-xl no-hover" @click="leadingStep = clamp(leadingStep + 1, 0, 2)">
-                        زیاد
-                      </button>
+                      <button class="btn btn-ghost btn-xs rounded-xl no-hover" @click="leadingStep = clamp(leadingStep - 1, 0, 2)">کم</button>
+                      <button class="btn btn-ghost btn-xs rounded-xl no-hover" @click="leadingStep = 1">نرمال</button>
+                      <button class="btn btn-ghost btn-xs rounded-xl no-hover" @click="leadingStep = clamp(leadingStep + 1, 0, 2)">زیاد</button>
                     </div>
                   </div>
                 </div>
               </teleport>
             </div>
 
-            <!-- Back -->
             <RouterLink to="/blog" class="btn btn-ghost btn-sm rounded-2xl">
               بازگشت
             </RouterLink>
           </div>
 
-          <!-- ✅ RIGHT: Blog / Title -->
           <div class="flex items-center gap-2 min-w-0 justify-end text-right" dir="rtl">
-            <RouterLink to="/blog" class="btn btn-ghost btn-sm rounded-2xl px-3 no-hover">
-              بلاگ
-            </RouterLink>
-
+            <RouterLink to="/blog" class="btn btn-ghost btn-sm rounded-2xl px-3 no-hover">بلاگ</RouterLink>
             <span class="opacity-60 text-sm">/</span>
-
             <span class="line-clamp-1 max-w-[52ch] text-sm font-bold text-base-content">
               {{ post.title }}
             </span>
@@ -99,17 +81,22 @@
               {{ post.title }}
             </h1>
 
-            <p class="text-base-content/75 leading-8 max-w-2xl">
+            <!-- ✅ excerpt justify -->
+            <p class="!mt-8 text-base-content/75 leading-8 max-w-md text-right text-justify [text-align-last:right]">
               {{ post.excerpt }}
             </p>
 
-            <div class="flex flex-wrap items-center gap-3 text-sm text-base-content/60">
+            <!-- meta row -->
+            <div class="!mt-8 flex flex-wrap items-center gap-3 text-sm text-base-content/60">
               <time>{{ prettyDate }}</time>
+
               <span class="opacity-40">•</span>
               <span>{{ readingTime }} دقیقه مطالعه</span>
+
               <span class="opacity-40">•</span>
               <span class="font-medium text-base-content/70">{{ post.author.name }}</span>
             </div>
+
 
             <div class="pt-2 flex flex-wrap gap-2">
               <button class="btn btn-primary rounded-2xl" @click="scrollToArticle">شروع خواندن</button>
@@ -126,13 +113,14 @@
             </div>
           </div>
 
-          <!-- Cover (ثابت - بدون تغییر در Zen) -->
+          <!-- Cover -->
           <div class="lg:col-span-6">
             <div class="relative rounded-3xl overflow-hidden border border-base-300 shadow-xl bg-base-100">
               <img
                   :src="post.cover"
                   class="w-full object-cover h-56 sm:h-64 lg:h-[320px]"
                   alt="cover"
+                  @error="onCoverError"
               />
               <div class="absolute inset-0 bg-gradient-to-t from-base-100/35 via-transparent to-transparent"></div>
             </div>
@@ -148,7 +136,7 @@
             <div ref="articleRef">
               <div
                   :key="fontStep + '-' + leadingStep"
-                  class="prose prose-invert prose-headings:scroll-mt-24 mx-auto"
+                  class="prose prose-invert prose-headings:scroll-mt-24 mx-auto justify-all"
                   :class="[proseWidthClass, proseLeadingClass]"
                   :style="{ fontSize: fontPx + 'px' }"
                   v-html="post.content"
@@ -171,17 +159,13 @@
                   </div>
                 </div>
               </div>
-              <button class="btn btn-ghost btn-sm rounded-2xl like-btn group" @click="toggleLike">
-                <span class="emoji text-lg transition-transform duration-150 group-hover:scale-125">👍</span>
-                <span class="text-sm">{{ likes }}</span>
-              </button>
             </div>
           </article>
         </div>
 
         <!-- Normal -->
         <div v-else class="flex flex-col lg:flex-row gap-6 items-start">
-          <!-- Sidebar RIGHT -->
+          <!-- Sidebar -->
           <aside class="w-full lg:w-[300px] space-y-5 lg:sticky lg:top-6 order-2 lg:order-1">
             <div class="bg-base-100 border border-base-300 rounded-3xl shadow p-4">
               <div class="flex items-center justify-between">
@@ -210,19 +194,24 @@
             <div class="bg-base-100 border border-base-300 rounded-3xl shadow p-4">
               <div class="flex items-center justify-between">
                 <div class="font-bold">مطالب مرتبط</div>
-                <a class="link link-hover text-sm text-base-content/60" href="#">همه</a>
+                <RouterLink class="link link-hover text-sm text-base-content/60" to="/blog">همه</RouterLink>
               </div>
 
               <div class="mt-4 space-y-3">
-                <a v-for="p in related" :key="p.id" href="#" class="block group">
+                <RouterLink v-for="p in related" :key="p.id" :to="`/blog/${p.slug}`" class="block group">
                   <div class="flex items-start gap-3">
-                    <img :src="p.cover" class="w-14 h-14 rounded-2xl object-cover border border-base-300" alt="" />
+                    <img
+                        :src="p.cover"
+                        class="w-14 h-14 rounded-2xl object-cover border border-base-300"
+                        alt=""
+                        @error="onRelatedImgError"
+                    />
                     <div class="flex-1 min-w-0">
                       <div class="font-bold text-sm leading-7 group-hover:underline line-clamp-2">{{ p.title }}</div>
                       <div class="text-xs text-base-content/60 mt-1">{{ p.meta }}</div>
                     </div>
                   </div>
-                </a>
+                </RouterLink>
               </div>
             </div>
           </aside>
@@ -232,7 +221,7 @@
             <div ref="articleRef">
               <div
                   :key="fontStep + '-' + leadingStep"
-                  class="prose prose-invert prose-headings:scroll-mt-24 mx-auto"
+                  class="prose prose-invert prose-headings:scroll-mt-24 mx-auto justify-all"
                   :class="[proseWidthClass, proseLeadingClass]"
                   :style="{ fontSize: fontPx + 'px' }"
                   v-html="post.content"
@@ -255,10 +244,6 @@
                   </div>
                 </div>
               </div>
-              <button class="btn btn-ghost btn-sm rounded-2xl like-btn group" @click="toggleLike">
-                <span class="emoji text-lg transition-transform duration-150 group-hover:scale-125">👍</span>
-                <span class="text-sm">{{ likes }}</span>
-              </button>
             </div>
           </article>
         </div>
@@ -275,8 +260,25 @@
 
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
+import { getBlogPost, listBlogPosts } from '@/services/blog'
+import type { BlogPostDto } from '@/types/api_client_types/blog.dto'
 
 type TocItem = { id: string; text: string; level: 2 | 3 }
+
+type ViewPost = {
+  slug: string
+  title: string
+  excerpt: string
+  cover: string
+  tags: string[]
+  publishedAt: Date
+  author: { name: string }
+  content: string
+  category?: string | null
+}
+
+const route = useRoute()
 
 const zen = ref(false)
 const toast = ref('')
@@ -292,35 +294,14 @@ const toc = ref<TocItem[]>([])
 const activeId = ref('')
 let io: IntersectionObserver | null = null
 
-// Like
-const likes = ref(24)
-const liked = ref(false)
-function toggleLike() {
-  liked.value = !liked.value
-  likes.value += liked.value ? 1 : -1
-}
+// ✅ ASSET BASE (برای عکس‌های نسبی)
+const ASSET_BASE =
+    (import.meta as any).env?.VITE_ASSET_BASE_URL ||
+    (import.meta as any).env?.VITE_API_BASE_URL ||
+    ''
 
-// Reading controls
-const fontStep = ref(0) // -1..2
-const leadingStep = ref(1) // 0..2
-
-function clamp(n: number, min: number, max: number) {
-  return Math.max(min, Math.min(max, n))
-}
-function incFont() {
-  fontStep.value = clamp(fontStep.value + 1, -1, 2)
-}
-function decFont() {
-  fontStep.value = clamp(fontStep.value - 1, -1, 2)
-}
-
-const fontPx = computed(() =>
-    fontStep.value === -1 ? 15 : fontStep.value === 0 ? 16 : fontStep.value === 1 ? 18 : 20
-)
-const proseLeadingClass = computed(() =>
-    leadingStep.value === 0 ? 'leading-8' : leadingStep.value === 1 ? 'leading-9' : 'leading-10'
-)
-const proseWidthClass = computed(() => (zen.value ? 'max-w-none lg:px-10' : 'max-w-[900px]'))
+const FALLBACK_COVER =
+    'https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=2000&q=70'
 
 function setToast(msg: string) {
   toast.value = msg
@@ -375,7 +356,12 @@ function buildToc() {
     const text = (h.textContent || '').trim()
     if (!text) return
 
-    const base = text.toLowerCase().replace(/[^\p{L}\p{N}\s-]/gu, '').trim().replace(/\s+/g, '-')
+    const base = text
+        .toLowerCase()
+        .replace(/[^\p{L}\p{N}\s-]/gu, '')
+        .trim()
+        .replace(/\s+/g, '-')
+
     const id = h.id || `${base || 'section'}-${idx + 1}`
     h.id = id
     items.push({ id, text, level })
@@ -397,12 +383,9 @@ function buildToc() {
   headings.forEach((h) => io?.observe(h))
 }
 
-/** ====== Zen: بدون تکون ====== */
+/** ====== Zen ====== */
 const zenCompensate = ref(0)
-
-function getAppNavbar() {
-  return document.getElementById('app-navbar')
-}
+function getAppNavbar() { return document.getElementById('app-navbar') }
 function getNavbarHeight() {
   const nav = getAppNavbar()
   if (!nav) return 0
@@ -417,15 +400,12 @@ function isNavbarStuck() {
 function applyZenToSiteNavbar(isZen: boolean) {
   document.documentElement.classList.toggle('zen-reading', isZen)
 }
-
 function toggleZen() {
   const h = getNavbarHeight()
   const shouldCompensate = window.scrollY > 6 && isNavbarStuck() && h > 0
 
   zen.value = !zen.value
-
   if (zen.value && shouldCompensate) zenCompensate.value = h
-
   applyZenToSiteNavbar(zen.value)
 
   if (zen.value && zenCompensate.value) {
@@ -441,64 +421,125 @@ function toggleZen() {
   nextTick(() => buildToc())
 }
 
-/** ====== ✅ Aa dropdown: فقط با خود دکمه Aa باز/بسته می‌شود ====== */
+/** ====== Aa ====== */
+const fontStep = ref(0) // -1..2
+const leadingStep = ref(1) // 0..2
+function clamp(n: number, min: number, max: number) { return Math.max(min, Math.min(max, n)) }
+function incFont() { fontStep.value = clamp(fontStep.value + 1, -1, 2) }
+function decFont() { fontStep.value = clamp(fontStep.value - 1, -1, 2) }
+
+const fontPx = computed(() => (fontStep.value === -1 ? 15 : fontStep.value === 0 ? 16 : fontStep.value === 1 ? 18 : 20))
+const proseLeadingClass = computed(() => (leadingStep.value === 0 ? 'leading-8' : leadingStep.value === 1 ? 'leading-9' : 'leading-10'))
+const proseWidthClass = computed(() => (zen.value ? 'max-w-none lg:px-10' : 'max-w-[900px]'))
+
 const aaOpen = ref(false)
 const aaBtnRef = ref<HTMLElement | null>(null)
 const aaPos = ref({ top: 0, left: 0 })
-
-const aaMenuStyle = computed(() => ({
-  top: aaPos.value.top + 'px',
-  left: aaPos.value.left + 'px',
-  transform: 'translateX(-100%)',
-}))
-
+const aaMenuStyle = computed(() => ({ top: aaPos.value.top + 'px', left: aaPos.value.left + 'px', transform: 'translateX(-100%)' }))
 function updateAaPos() {
   const btn = aaBtnRef.value
   if (!btn) return
   const r = btn.getBoundingClientRect()
-  aaPos.value = {
-    top: Math.round(r.bottom + 8),
-    left: Math.round(r.right),
-  }
+  aaPos.value = { top: Math.round(r.bottom + 8), left: Math.round(r.right) }
 }
-
 function toggleAa() {
   aaOpen.value = !aaOpen.value
   if (aaOpen.value) updateAaPos()
 }
+function onViewportChange() { if (aaOpen.value) updateAaPos() }
 
-function onViewportChange() {
-  if (!aaOpen.value) return
-  updateAaPos()
+/** ==============================
+ *  ✅ Image URL helpers
+ *  ============================== */
+
+function isAbsUrl(s: string) {
+  return /^(https?:)?\/\//i.test(s) || s.startsWith('data:') || s.startsWith('blob:')
+}
+function joinAssetUrl(raw: string) {
+  const s = String(raw || '').trim()
+  if (!s) return ''
+  if (isAbsUrl(s)) return encodeURI(s)
+
+  const base = String(ASSET_BASE || '').replace(/\/$/, '')
+  const path = s.startsWith('/') ? s : `/${s}`
+  return base ? `${base}${path}` : path
+}
+function coverSrc(dto: any): string {
+  const raw =
+      dto?.cover_image ??
+      dto?.coverImage ??
+      dto?.image_url ??
+      dto?.imageUrl ??
+      dto?.cover ??
+      dto?.coverUrl ??
+      dto?.cover_url ??
+      dto?.image ??
+      dto?.thumbnail ??
+      dto?.thumbnailUrl ??
+      null
+
+  const s = String(raw || '').trim()
+  if (!s) return FALLBACK_COVER
+  const out = joinAssetUrl(s)
+  return out || FALLBACK_COVER
+}
+function normalizeHtmlContent(html: string): string {
+  if (!html) return ''
+  return String(html).replace(/<img\b([^>]*?)\bsrc\s*=\s*["']([^"']+)["']([^>]*?)>/gi, (m, a, src, b) => {
+    const fixed = isAbsUrl(src) ? src : joinAssetUrl(src)
+    return `<img ${a} src="${fixed}" ${b}>`
+  })
 }
 
-watch(aaOpen, (v) => {
-  if (!v) return
-  nextTick(() => updateAaPos())
-})
+function asDate(input?: string | null) {
+  if (!input) return new Date()
+  const d = new Date(input)
+  return isNaN(d.getTime()) ? new Date() : d
+}
 
-const post = ref({
-  title: 'طراحی صفحه بلاگ با خوانایی بالا و ناوبری ساده',
-  excerpt: 'در این مطلب یاد می‌گیریم چگونه یک صفحه بلاگ بسازیم که هم ریسپانسیو باشد، هم با تم سایت هماهنگ بماند و تجربه خواندن را بهتر کند.',
-  cover: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=2000&q=70',
-  tags: ['UI', 'Design', 'Vue'],
-  publishedAt: new Date('2025-12-21'),
-  author: { name: 'نام نویسنده' },
-  content: `
-    <h2>چرا این ساختار به تم سایت نزدیک‌تر است؟</h2>
-    <p>چون از رنگ‌های پایه DaisyUI استفاده می‌کند و تجربه خواندن را بهتر می‌کند.</p>
-    <h2>فهرست ثابت کنار متن</h2>
-    <p>فهرست کنار متن کمک می‌کند کاربر سریع اسکن کند.</p>
-    <h3>نکته</h3>
-    <div class="not-prose my-4 rounded-2xl border border-base-300 bg-base-200/60 p-4">
-      <div class="font-bold">نکته</div>
-      <p class="mt-2 text-sm text-base-content/70 leading-7">
-        عرض متن در حالت معمولی محدود می‌ماند، اما در حالت مطالعه، متن تمام‌عرض می‌شود.
-      </p>
-    </div>
-    <h2>جمع‌بندی</h2>
-    <p>این طراحی ساده‌تر و نزدیک‌تر به تم عمومی سایت است.</p>
-  `,
+function extractTags(dto: BlogPostDto): string[] {
+  const anyDto = dto as any
+  if (Array.isArray(anyDto.tags)) return anyDto.tags.filter((x: any) => typeof x === 'string')
+  if (Array.isArray(anyDto.tag_list)) return anyDto.tag_list.filter((x: any) => typeof x === 'string')
+  if (typeof anyDto.category === 'string' && anyDto.category.trim()) return [anyDto.category.trim()]
+  return []
+}
+function extractAuthorName(dto: BlogPostDto): string {
+  const anyDto = dto as any
+  const n1 = anyDto.author_name
+  const n2 = anyDto.author?.name
+  const n3 = anyDto.author
+  if (typeof n1 === 'string' && n1.trim()) return n1.trim()
+  if (typeof n2 === 'string' && n2.trim()) return n2.trim()
+  if (typeof n3 === 'string' && n3.trim()) return n3.trim()
+  return 'نام نویسنده'
+}
+
+function mapDtoToView(dto: BlogPostDto): ViewPost {
+  const anyDto = dto as any
+  const contentRaw = (dto.content ?? '').toString()
+  return {
+    slug: dto.slug,
+    title: (dto.title ?? 'بدون عنوان').toString(),
+    excerpt: (dto.excerpt ?? '').toString(),
+    cover: coverSrc(anyDto),
+    tags: extractTags(dto),
+    publishedAt: asDate(anyDto.published_at ?? dto.created_at ?? dto.updated_at),
+    author: { name: extractAuthorName(dto) },
+    content: normalizeHtmlContent(contentRaw),
+    category: anyDto.category ?? null
+  }
+}
+
+const post = ref<ViewPost>({
+  slug: '',
+  title: 'در حال بارگذاری...',
+  excerpt: '',
+  cover: FALLBACK_COVER,
+  tags: [],
+  publishedAt: new Date(),
+  author: { name: '—' },
+  content: ''
 })
 
 const prettyDate = computed(() =>
@@ -506,10 +547,15 @@ const prettyDate = computed(() =>
 )
 
 const readingTime = computed(() => {
-  const tmp = document.createElement('div')
-  tmp.innerHTML = post.value.content
-  const text = (tmp.textContent || '').trim()
-  const words = text.split(/\s+/).filter(Boolean).length
+  const html = post.value.content || ''
+  const text = html
+      .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, ' ')
+      .replace(/<style[\s\S]*?>[\s\S]*?<\/style>/gi, ' ')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+
+  const words = text ? text.split(' ').filter(Boolean).length : 0
   return Math.max(1, Math.round(words / 200))
 })
 
@@ -519,24 +565,88 @@ const share = computed(() => {
   return {
     twitter: `https://twitter.com/intent/tweet?url=${url}&text=${title}`,
     telegram: `https://t.me/share/url?url=${url}&text=${title}`,
-    whatsapp: `https://wa.me/?text=${title}%20${url}`,
+    whatsapp: `https://wa.me/?text=${title}%20${url}`
   }
 })
 
-const related = ref([
-  { id: 1, title: 'بهبود تایپوگرافی و فاصله‌گذاری', meta: '۵ دقیقه • طراحی', cover: 'https://images.unsplash.com/photo-1522542550221-31fd19575a2d?auto=format&fit=crop&w=320&q=70' },
-  { id: 2, title: 'ساخت فهرست خودکار در Vue', meta: '۶ دقیقه • Vue', cover: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=320&q=70' },
-])
+type RelatedItem = { id: number | string; slug: string; title: string; meta: string; cover: string }
+const related = ref<RelatedItem[]>([])
+
+function buildMeta(dto: BlogPostDto) {
+  const anyDto = dto as any
+  const d = asDate(anyDto.published_at ?? dto.created_at ?? dto.updated_at)
+  const dateFa = d.toLocaleDateString('fa-IR', { month: 'short', day: 'numeric' })
+  const cat = (anyDto.category ?? '').toString().trim()
+  return cat ? `${dateFa} • ${cat}` : `${dateFa}`
+}
+
+async function fetchPostBySlug(slug: string) {
+  try {
+    const dto = await getBlogPost(slug)
+    post.value = mapDtoToView(dto)
+
+    await nextTick()
+    buildToc()
+  } catch (e) {
+    console.error('getBlogPost error:', e)
+    setToast('دریافت مقاله ناموفق بود')
+  }
+}
+
+async function fetchRelated(currentSlug: string) {
+  try {
+    const list = await listBlogPosts()
+    const items = (list || [])
+        .filter((x: any) => x?.slug && x.slug !== currentSlug)
+        .slice(0, 2)
+        .map((x: any) => ({
+          id: x.id ?? x.slug,
+          slug: x.slug,
+          title: (x.title ?? 'بدون عنوان').toString(),
+          meta: buildMeta(x),
+          cover: coverSrc(x)
+        }))
+
+    related.value = items
+  } catch (e) {
+    console.error('listBlogPosts error:', e)
+  }
+}
+
+function onCoverError(e: Event) {
+  const img = e.target as HTMLImageElement
+  if (img && img.src !== FALLBACK_COVER) img.src = FALLBACK_COVER
+}
+function onRelatedImgError(e: Event) {
+  const img = e.target as HTMLImageElement
+  if (img && img.src !== FALLBACK_COVER) img.src = FALLBACK_COVER
+}
 
 onMounted(async () => {
   await nextTick()
-  buildToc()
   setupProgress()
 
-  // ✅ فقط برای اینکه وقتی اسکرول/ریسایز میشه، منو سرجاش بمونه
+  const slug = String(route.params.slug ?? '')
+  if (slug) {
+    await fetchPostBySlug(slug)
+    await fetchRelated(slug)
+  } else {
+    setToast('slug مقاله پیدا نشد')
+  }
+
   window.addEventListener('scroll', onViewportChange, { passive: true })
   window.addEventListener('resize', onViewportChange)
 })
+
+watch(
+    () => route.params.slug,
+    async (newSlug) => {
+      const slug = String(newSlug ?? '')
+      if (!slug) return
+      await fetchPostBySlug(slug)
+      await fetchRelated(slug)
+    }
+)
 
 onBeforeUnmount(() => {
   if (io) io.disconnect()
@@ -568,11 +678,44 @@ onBeforeUnmount(() => {
 .no-hover:hover,
 .no-hover:focus-visible { background-color: transparent !important; }
 
-.like-btn:hover,
-.like-btn:focus-visible { background-color: transparent !important; }
+/* ✅ Justify ALL readable content */
+.justify-all :deep(p),
+.justify-all :deep(li),
+.justify-all :deep(blockquote) {
+  text-align: justify;
+  text-justify: inter-word;
+  direction: rtl;
+  text-align-last: right;
+}
+
+/* ✅ Keep headings right + readable sizes */
+.justify-all :deep(h2) {
+  text-align: right;
+  text-align-last: right;
+  font-size: 1.55rem;
+  font-weight: 900;
+  margin: 1.4rem 0 0.7rem;
+  line-height: 1.55;
+}
+.justify-all :deep(h3) {
+  text-align: right;
+  text-align-last: right;
+  font-size: 1.25rem;
+  font-weight: 850;
+  margin: 1.1rem 0 0.55rem;
+  line-height: 1.7;
+}
+
+/* ✅ Article images */
+.justify-all :deep(img) {
+  max-width: 100%;
+  height: auto;
+  border-radius: 1rem;
+  margin: 0.8rem 0;
+  border: 1px solid hsl(var(--b3, 0 0% 80%) / 0.6);
+}
 </style>
 
-<!-- ✅ GLOBAL -->
 <style>
 html.zen-reading #app-navbar {
   position: relative !important;

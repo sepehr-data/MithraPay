@@ -193,7 +193,6 @@
 
 <script setup lang="ts">
 import { ref, computed, nextTick, onBeforeUnmount } from "vue"
-import { useRouter } from "vue-router"
 import authBg from "@/assets/auth-bg.png"
 import loginIllustration from "@/assets/branding-bg.png"
 import { requestOtp, verifyOtp } from "@/services/api"
@@ -201,11 +200,14 @@ import { useAuthStore } from "@/stores/auth"
 import { useToast } from "vue-toastification"
 import AdminKnockModal from "@/components/AdminKnockModal.vue"
 import { useAdminKnock } from "@/composables/useAdminKnock"
+import { useRoute, useRouter } from "vue-router"
+
+const route = useRoute()
+const router = useRouter()
 
 const { isOpen } = useAdminKnock()
 const toast = useToast()
 const auth = useAuthStore()
-const router = useRouter()
 
 const step = ref<1 | 2>(1)
 const phone = ref("")
@@ -307,6 +309,11 @@ function reset() {
   otp.value = ["", "", "", "", "", ""]
 }
 
+async function afterLoginSuccess() {
+  const redirect = typeof route.query.redirect === "string" ? route.query.redirect : "/"
+  await router.replace(redirect)
+}
+
 async function verify() {
   const code = otp.value.join("")
   if (code.length !== 6 || verifying.value) return
@@ -326,7 +333,7 @@ async function verify() {
     auth.login({ token, user })
 
     toast.success("ورود با موفقیت انجام شد")
-    router.push("/")
+    afterLoginSuccess()
   } catch (err: any) {
     console.error(err)
     toast.error(normalizeErrMessage(err) || "کد وارد شده صحیح نیست")

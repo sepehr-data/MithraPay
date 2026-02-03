@@ -1,4 +1,4 @@
-// src/api/blog.dto.ts
+// src/types/blog.dto.ts
 
 export type BlogPostDto = {
     id?: number
@@ -6,11 +6,18 @@ export type BlogPostDto = {
     title?: string | null
     excerpt?: string | null
     content?: string | null
+
+    // تصاویر (بسته به اینکه بک چی می‌فرسته)
     image_url?: string | null
+    cover_image?: string | null
+
     created_at?: string | null
     updated_at?: string | null
 
-    // اگر بک فیلدهای بیشتری می‌فرسته، این باعث می‌شه TypeScript گیر نده
+    category_id?: number | null
+
+    category?: string | null
+
     [key: string]: any
 }
 

@@ -1,4 +1,4 @@
-// src/api/auth.dto.ts
+// src/types/auth.dto.ts
 
 // POST /auth/register
 export type RegisterPayload = {

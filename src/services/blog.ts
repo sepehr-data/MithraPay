@@ -1,7 +1,7 @@
 // src/services/blog.ts
 import { http } from "@/lib/http"
-import { endpoints } from "@/api/endpoints"
-import type { ListBlogPostsResponse, GetBlogPostResponse } from "@/api/blog.dto"
+import { endpoints } from "@/types/api_client_types/endpoints.ts"
+import type { ListBlogPostsResponse, GetBlogPostResponse } from "@/types/api_client_types/blog.dto.ts"
 
 export async function listBlogPosts() {
     const { data } = await http.get<ListBlogPostsResponse>(endpoints.blog.list)

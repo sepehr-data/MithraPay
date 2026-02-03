@@ -1,4 +1,4 @@
-// src/api/cart.dto.ts
+// src/types/cart.dto.ts
 
 export type CartItemDto = {
     id: number

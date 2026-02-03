@@ -1,38 +1,50 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
+import { VueQueryPlugin, QueryClient } from '@tanstack/vue-query'
 import App from './App.vue'
 import router from './router'
 import './styles/tailwind.css'
 import '@/assets/fonts.css'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
-import Toast from "vue-toastification"
-import "vue-toastification/dist/index.css"
-import "@/styles/toast.css"
+import Toast from 'vue-toastification'
+import 'vue-toastification/dist/index.css'
+import '@/styles/toast.css'
 
-// 👇 NEW
+// DatePicker
 import DatePicker from '@alireza-ab/vue3-persian-datepicker'
-// (you probably need to import its css file too; if Vite complains,
-// open node_modules/@alireza-ab/vue3-persian-datepicker/dist and import
-// the css you see there, e.g.:
-// import '@alireza-ab/vue3-persian-datepicker/dist/style.css'
 
+const app = createApp(App)
+
+// Pinia
 const pinia = createPinia()
 pinia.use(piniaPluginPersistedstate)
 
-const app = createApp(App)
-app.use(createPinia())
-app.use(router)
-app.use(pinia)
+// TanStack Query
+const queryClient = new QueryClient({
+    defaultOptions: {
+        queries: {
+            staleTime: 15_000,
+            refetchOnWindowFocus: true,
+            retry: 1,
+        },
+    },
+})
 
-// Toast global options (optional)
+// Plugins
+app.use(pinia)
+app.use(router)
+app.use(VueQueryPlugin, { queryClient })
+
 app.use(Toast, {
-    position: "top-right",
+    position: 'top-right',
     timeout: 3000,
     closeOnClick: true,
     pauseOnHover: true,
     draggable: true,
 })
 
+// Global components
 app.component('DatePicker', DatePicker)
 
+// Mount (فقط یک بار)
 app.mount('#app')

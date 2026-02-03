@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@alireza-ab/vue3-persian-datepicker": "^1.0.6",
+    "@tanstack/vue-query": "^5.92.9",
     "axios": "^1.13.2",
     "pinia": "^2.2.6",
     "pinia-plugin-persistedstate": "^3.2.3",

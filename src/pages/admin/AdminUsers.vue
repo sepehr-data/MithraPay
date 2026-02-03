@@ -39,7 +39,7 @@
               <line x1="15.5" y1="15.5" x2="20" y2="20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
             </svg>
           </span>
-          <input v-model="q" class="input input-bordered min-h-0 h-9 w-full pr-8 rounded-2xl text-[11px] py-1" placeholder="جستجو بر اساس شماره موبایل..."/>
+          <input v-model="q" class="input input-bordered min-h-0 h-9 w-full pr-8 rounded-2xl text-[11px] py-1" placeholder="جستجو بر اساس ایمیل یا شماره تلفن..."/>
         </div>
       </div>
 
@@ -60,7 +60,7 @@
 
       <!-- اگر کاربری هست -->
       <div v-if="filtered.length" class="grid gap-3 sm:gap-4 md:grid-cols-2">
-        <article v-for="u in filtered" :key="u.id" class="group rounded-2xl border border-base-300 bg-base-100/90 px-3.5 py-3 sm:px-4 sm:py-3.5 flex items-center justify-between gap-3 hover:-translate-y-0.5 hover:shadow-md hover:border-primary/40 transition-all">
+        <article v-for="u in paginatedUsers" :key="u.id" class="group rounded-2xl border border-base-300 bg-base-100/90 px-3.5 py-3 sm:px-4 sm:py-3.5 flex items-center justify-between gap-3 hover:-translate-y-0.5 hover:shadow-md hover:border-primary/40 transition-all">
           <!-- اطلاعات اصلی کاربر -->
           <div class="flex items-center gap-3">
             <!-- آواتار -->
@@ -70,7 +70,7 @@
 
             <div class="flex flex-col gap-0.5">
               <div class="flex items-center gap-2">
-                <span v-if="u.name" class="text-xs sm:text-sm font-medium text-base-content">{{ u.name }}</span>
+                <span v-if="u.full_name" class="text-xs sm:text-sm font-medium text-base-content">{{ u.full_name }}</span>
                 <span v-else class="inline-flex items-center px-2 py-0.5 rounded-full bg-base-200/80 text-[10px] sm:text-[11px] text-base-content/70">بدون نام</span>
                 <span class="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded-full bg-base-200 text-[10px] text-base-content/60">ID: {{ u.id }}</span>
               </div>
@@ -82,7 +82,7 @@
 
           <!-- تاریخ و وضعیت ساده -->
           <div class="flex flex-col items-end gap-1 text-[10px] sm:text-[11px]">
-            <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-base-200/80 text-base-content/70 whitespace-nowrap">{{ u.createdAt }}</span>
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-base-200/80 text-base-content/70 whitespace-nowrap">{{ formatDate(u.created_at) }}</span>
             <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-base-100 text-base-content/60 border border-dashed border-base-300 group-hover:border-primary/40">
               <span class="w-1 h-1 rounded-full bg-success/70"></span>
               کاربر ثبت‌شده
@@ -113,73 +113,84 @@
     </section>
   </div>
 </template>
-
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { ref, computed, onMounted, watch } from "vue"
+import { adminListUsers } from "@/services/admin"
+import type { AdminUserItem } from "@/types/api_client_types/admin.dto.ts"
 
-const users = ref([
-  { id: 1, phone: '09120000000', name: 'کاربر تست', createdAt: '1404/03/10' },
-  { id: 2, phone: '09350000000', name: '', createdAt: '1404/03/11' },
-])
+/* ===================== STATE ===================== */
+const users = ref<AdminUserItem[]>([])
+const loading = ref(false)
+const q = ref("")
 
-const q = ref('')
-
-type FilterKey = 'all' | 'named' | 'nameless'
-
+type FilterKey = "all" | "named" | "nameless"
+const filterTab = ref<FilterKey>("all")
 const filterOptions: { key: FilterKey; label: string }[] = [
-  { key: 'all', label: 'همه کاربران' },
-  { key: 'named', label: 'فقط کاربران با نام' },
-  { key: 'nameless', label: 'فقط کاربران بدون نام' },
+  { key: "all", label: "همه کاربران" },
+  { key: "named", label: "فقط کاربران با نام" },
+  { key: "nameless", label: "فقط کاربران بدون نام" },
 ]
 
-const filterTab = ref<FilterKey>('all')
+const totalUsers = ref(0)
+const currentPage = ref(1)
+const limit = 6
+const totalPages = computed(() => Math.max(1, Math.ceil(totalUsers.value / limit)))
 
-// فیلتر نهایی بر اساس تب + جستجو
+/* ===================== FETCH USERS ===================== */
+async function fetchUsers() {
+  loading.value = true
+  try {
+    const offset = (currentPage.value - 1) * limit
+    const res = await adminListUsers({ limit, offset }) // API expects limit + offset
+    users.value = res.items
+    totalUsers.value = res.pagination.total
+  } finally {
+    loading.value = false
+  }
+}
+
+// load users on mount
+onMounted(fetchUsers)
+
+// reload users whenever page changes
+watch([currentPage], fetchUsers)
+
+/* ===================== FILTERING ON FRONT ===================== */
 const filtered = computed(() => {
   let base = [...users.value]
 
-  if (filterTab.value === 'named') {
-    base = base.filter((u) => u.name && u.name.trim() !== '')
-  } else if (filterTab.value === 'nameless') {
-    base = base.filter((u) => !u.name || u.name.trim() === '')
+  if (filterTab.value === "named") {
+    base = base.filter(u => u.full_name && u.full_name.trim().length > 0)
+  } else if (filterTab.value === "nameless") {
+    base = base.filter(u => !u.full_name || u.full_name.trim().length === 0)
   }
 
-  if (q.value) {
-    base = base.filter((u) => u.phone.includes(q.value))
+  if (q.value.trim()) {
+    base = base.filter(
+        u => u.email?.toLowerCase().includes(q.value.toLowerCase()) || u.phone.includes(q.value)
+    )
   }
 
   return base
 })
 
-const totalUsers = computed(() => users.value.length)
+/* ===================== COUNTS ===================== */
 const filteredCount = computed(() => filtered.value.length)
 
-// حروف آواتار (اول نام، اگر نبود اول شماره)
-const avatarInitial = (u: { name?: string; phone: string }) => {
-  if (u.name && u.name.trim().length > 0) {
-    return u.name.trim().charAt(0)
-  }
-  return u.phone.trim().charAt(0)
-}
-function remove(id: string) {
-  const idx = users.value.findIndex(u => String(u.id) === id)
-  if (idx >= 0) users.value.splice(idx, 1)
+/* ===================== HELPERS ===================== */
+const avatarInitial = (u: AdminUserItem) => {
+  if (u.full_name && u.full_name.trim().length > 0) return u.full_name.trim().charAt(0)
+  return u.phone.charAt(0)
 }
 
-const currentPage = ref(1)
-const usersPerPage = 5
+const formatDate = (iso: string) => new Date(iso).toLocaleDateString("fa-IR")
 
-// صفحه‌بندی کاربران
-const totalPages = computed(() => Math.ceil(filtered.value.length / usersPerPage))
-
-const paginatedUsers = computed(() => {
-  const start = (currentPage.value - 1) * usersPerPage
-  const end = start + usersPerPage
-  return filtered.value.slice(start, end)
-})
-
+/* ===================== PAGINATION ===================== */
 function changePage(page: number) {
   if (page < 1 || page > totalPages.value) return
   currentPage.value = page
 }
+
+/* ===================== PAGINATED USERS ===================== */
+const paginatedUsers = computed(() => filtered.value)
 </script>

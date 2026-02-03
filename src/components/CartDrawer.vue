@@ -77,12 +77,12 @@
             </div>
           </div>
 
-          <!-- Items list (minimal) -->
+          <!-- Items list via API -->
           <div v-else>
             <div class="divide-y divide-base-200">
               <div
-                  v-for="line in cart.detailed"
-                  :key="line.productId"
+                  v-for="line in detailed"
+                  :key="line.productKey"
                   class="py-3"
               >
                 <div class="flex gap-3">
@@ -103,11 +103,15 @@
                           {{ money(line.product.price) }}
                           <span class="opacity-60">تومان</span>
                         </div>
+
+                        <div v-if="loadingProducts" class="mt-1 text-[10px] text-base-content/45">
+                          در حال همگام‌سازی اطلاعات...
+                        </div>
                       </div>
 
                       <button
                           class="icon-btn"
-                          @click="cart.remove(line.productId)"
+                          @click="cart.remove(line.productKey)"
                           aria-label="remove"
                           title="حذف"
                           type="button"
@@ -124,9 +128,10 @@
 
                     <div class="mt-2 flex items-end justify-between gap-3">
                       <div class="qty-wrap">
+                        <!-- ✅ v-model روی computed حذف شد -->
                         <QuantityInput
-                            v-model="(line as any).qty"
-                            @update:model-value="cart.setQty(line.productId, $event)"
+                            :model-value="line.qty"
+                            @update:model-value="cart.setQty(line.productKey, $event)"
                         />
                       </div>
 
@@ -138,12 +143,17 @@
                         </div>
                       </div>
                     </div>
+
+                    <div v-if="line.product.isDigital !== undefined" class="mt-2 text-[11px] text-base-content/55">
+                      <span v-if="line.product.isDigital">دیجیتال</span>
+                      <span v-else>فیزیکی</span>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <!-- ✅ Clear cart button (زیر محصولات) -->
+            <!-- Clear cart -->
             <button
                 class="btn btn-ghost w-full rounded-xl border border-base-200 mt-3"
                 @click="clearAll()"
@@ -161,7 +171,7 @@
               <div>
                 <div class="text-[11px] text-base-content/60">جمع کل</div>
                 <div class="text-base font-semibold mt-1">
-                  {{ money(cart.total) }}
+                  {{ money(cartTotal) }}
                   <span class="text-[11px] font-normal text-base-content/60">تومان</span>
                 </div>
               </div>
@@ -169,10 +179,10 @@
 
             <div class="grid grid-cols-2 gap-2 mt-3">
               <RouterLink
-                  to="/checkout"
+                  :to="payTo"
                   class="btn btn-primary rounded-xl"
                   :class="cart.items.length === 0 ? 'btn-disabled' : ''"
-                  @click="cart.items.length === 0 ? $event.preventDefault() : ui.closeCart()"
+                  @click="onPayClick"
               >
                 پرداخت
               </RouterLink>
@@ -189,16 +199,36 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useUiStore } from '@/stores/ui'
 import { useCartStore } from '@/stores/cart'
+import { useAuthStore } from '@/stores/auth'
 import { formatToman } from '@/services/currency'
 import QuantityInput from './QuantityInput.vue'
+import { getProduct } from '@/services/products' // ✅ API client: /products/:id
+import type { Product } from '@/services/types'
 
+const auth = useAuthStore()
 const ui = useUiStore()
 const cart = useCartStore()
 
-const money = (n: number) => String(formatToman(n)).replace(/تومان/g, '').trim()
+const isLoggedIn = computed(() => Boolean(auth.token))
+
+const payTo = computed(() => {
+  return isLoggedIn.value
+      ? '/checkout'
+      : { path: '/auth/login', query: { redirect: '/checkout' } }
+})
+
+function onPayClick(e: MouseEvent) {
+  if (cart.items.length === 0) {
+    e.preventDefault()
+    return
+  }
+  ui.closeCart()
+}
+
+const money = (n: number) => String(formatToman(Number(n || 0))).replace(/تومان/g, '').trim()
 
 const onKey = (e: KeyboardEvent) => {
   if (e.key === 'Escape') ui.closeCart()
@@ -223,6 +253,103 @@ const clearAll = () => {
   ;(cart as any).clearCart?.()
   ;(cart as any).reset?.()
 }
+
+/** --------------------------------
+ * ✅ Load product info for cart via API
+ * -------------------------------- */
+type ProductVM = Product & {
+  image?: string
+  isDigital?: boolean
+  title?: string
+  price?: number
+}
+
+const productsById = ref<Record<number, ProductVM>>({})
+const loadingProducts = ref(false)
+
+function normalizeImageUrl(u?: string | null) {
+  const s = String(u ?? '').trim()
+  if (!s) return ''
+  if (/^https?:\/\//i.test(s)) return s
+  if (s.startsWith('/')) return s
+  return ''
+}
+
+function normalizeProduct(dto: any): ProductVM {
+  const raw = dto?.data ?? dto?.product ?? dto
+  return {
+    ...(raw as any),
+    id: raw?.id,
+    title: raw?.title ?? 'بدون عنوان',
+    price: Number(raw?.price ?? 0),
+    image: normalizeImageUrl(raw?.image_url || raw?.image) || '',
+    isDigital: raw?.is_digital ?? raw?.isDigital
+  }
+}
+
+async function ensureCartProductsLoaded() {
+  const numericIds = (cart.items || [])
+      .map((x: any) => Number(String(x.productId)))
+      .filter((n: number) => Number.isFinite(n))
+
+  const missing = numericIds.filter((id) => !productsById.value[id])
+  if (!missing.length) return
+
+  loadingProducts.value = true
+  try {
+    const res = await Promise.all(
+        missing.map(async (id) => {
+          const dto = await getProduct(id)
+          return [id, normalizeProduct(dto)] as const
+        })
+    )
+
+    const next = { ...productsById.value }
+    res.forEach(([id, p]) => (next[id] = p))
+    productsById.value = next
+  } catch (e) {
+    console.error(e)
+  } finally {
+    loadingProducts.value = false
+  }
+}
+
+watch(
+    () => cart.items,
+    () => void ensureCartProductsLoaded(),
+    { deep: true, immediate: true }
+)
+
+/**
+ * ✅ detailed با دیتاهای API
+ * - productKey: برای store (string)
+ * - productId: برای lookup عددی
+ */
+const detailed = computed(() => {
+  const items = cart.items || []
+  return items.map((it: any) => {
+    const productKey = String(it.productId)
+    const productId = Number(productKey)
+    const qty = Number(it.qty ?? 1)
+
+    const product =
+        Number.isFinite(productId) && productsById.value[productId]
+            ? productsById.value[productId]
+            : ({
+              id: productId || productKey,
+              title: 'در حال دریافت...',
+              price: 0,
+              image: '',
+              isDigital: undefined
+            } as any)
+
+    const lineTotal = (Number((product as any).price ?? 0) || 0) * qty
+
+    return { productKey, productId, qty, product, lineTotal }
+  })
+})
+
+const cartTotal = computed(() => detailed.value.reduce((sum, l) => sum + (l.lineTotal || 0), 0))
 </script>
 
 <style scoped>

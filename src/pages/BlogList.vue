@@ -42,9 +42,6 @@
                 <option value="oldest">قدیمی‌تر</option>
                 <option value="popular">محبوب‌ترین</option>
                 <option value="mostViewed">پربازدیدترین</option>
-                <option value="shortest">کوتاه‌ترین مطالعه</option>
-                <option value="longest">طولانی‌ترین مطالعه</option>
-                <option value="random">تصادفی</option>
               </select>
             </div>
           </div>
@@ -56,7 +53,7 @@
               <p class="text-[11px] text-base-content/60">مقاله</p>
             </div>
             <div class="rounded-2xl bg-base-200/60 border border-base-300 p-4 text-right space-y-1">
-              <p class="text-lg font-extrabold text-primary">{{ categories.length || 0 }}</p>
+              <p class="text-lg font-extrabold text-primary">{{ BLOG_CATEGORIES.length }}</p>
               <p class="text-[11px] text-base-content/60">دسته</p>
             </div>
             <div class="rounded-2xl bg-base-200/60 border border-base-300 p-4 text-right space-y-1">
@@ -66,7 +63,6 @@
           </div>
         </div>
       </section>
-
 
       <div class="flex flex-col gap-6 lg:flex-row">
 
@@ -80,19 +76,19 @@
           >
             <figure class="aspect-[16/9] md:aspect-auto bg-base-200 overflow-hidden">
               <img
-                  :src="featuredPost.cover || 'https://placehold.co/1200x700?text=Featured'"
-                  :alt="featuredPost.title"
+                  :src="coverSrc(featuredPost)"
+                  :alt="featuredPost.title ?? ''"
                   class="w-full h-full object-cover group-hover:scale-[1.03] transition duration-500"
+                  @error="onImgError"
               />
             </figure>
 
             <div class="p-5 md:p-6 text-right flex flex-col gap-3">
               <div class="flex items-center justify-between gap-3">
-                <span class="badge badge-primary badge-sm rounded-full">
-                  مطلب ویژه
-                </span>
-                <span v-if="featuredPost.category" class="badge badge-ghost badge-sm rounded-full">
-                  {{ featuredPost.category }}
+                <span class="badge badge-primary badge-sm rounded-full">مطلب ویژه</span>
+
+                <span v-if="categoryLabel(featuredPost)" class="badge badge-ghost badge-sm rounded-full">
+                  {{ categoryLabel(featuredPost) }}
                 </span>
               </div>
 
@@ -104,7 +100,7 @@
               </RouterLink>
 
               <div class="flex flex-wrap gap-3 text-xs text-base-content/60 justify-end">
-                <span>{{ formatDate(featuredPost.date || featuredPost.createdAt) }}</span>
+                <span>{{ formatDate(featuredPost.created_at) }}</span>
                 <span v-if="featuredPost.readingTime">• {{ featuredPost.readingTime }} دقیقه مطالعه</span>
                 <span v-if="featuredPost.views">• {{ featuredPost.views }} بازدید</span>
               </div>
@@ -124,14 +120,13 @@
             </div>
           </article>
 
-
           <!-- POSTS GRID -->
           <div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
 
             <!-- Skeleton on loading -->
             <template v-if="loading">
               <div
-                  v-for="i in 6"
+                  v-for="i in 7"
                   :key="i"
                   class="bg-base-100 border border-base-300 rounded-2xl overflow-hidden"
               >
@@ -153,13 +148,15 @@
             >
               <figure class="aspect-[16/9] bg-base-200 overflow-hidden relative">
                 <img
-                    :src="p.cover || 'https://placehold.co/800x450?text=Blog'"
-                    :alt="p.title"
+                    :src="coverSrc(p)"
+                    :alt="p.title ?? ''"
                     class="w-full h-full object-cover group-hover:scale-[1.04] transition duration-500"
+                    @error="onImgError"
                 />
-                <div v-if="p.category" class="absolute top-3 right-3">
+
+                <div v-if="categoryLabel(p)" class="absolute top-3 right-3">
                   <span class="badge badge-ghost badge-sm rounded-full bg-base-100/90">
-                    {{ p.category }}
+                    {{ categoryLabel(p) }}
                   </span>
                 </div>
               </figure>
@@ -173,7 +170,7 @@
                 </RouterLink>
 
                 <div class="flex flex-wrap gap-2 text-xs text-base-content/55 justify-end">
-                  <span>{{ formatDate(p.date || p.createdAt) }}</span>
+                  <span>{{ formatDate(p.created_at) }}</span>
                   <span v-if="p.readingTime">• {{ p.readingTime }} دقیقه</span>
                   <span v-if="p.views">• {{ p.views }} بازدید</span>
                 </div>
@@ -202,24 +199,10 @@
             </div>
           </div>
 
-          <!-- ✅ Pagination bar -->
+          <!-- Pagination -->
           <div v-if="!loading && totalPages > 1" class="pt-6 flex justify-center">
             <div class="join">
-              <button
-                  class="join-item btn btn-sm"
-                  :disabled="currentPage === 1"
-                  @click="goToPage(1)"
-              >
-                اول
-              </button>
-
-              <button
-                  class="join-item btn btn-sm"
-                  :disabled="currentPage === 1"
-                  @click="prevPage"
-              >
-                قبلی
-              </button>
+              <button class="join-item btn btn-sm" :disabled="currentPage === 1" @click="prevPage">قبلی</button>
 
               <button
                   v-for="p in visiblePages"
@@ -231,25 +214,11 @@
                 {{ p }}
               </button>
 
-              <button
-                  class="join-item btn btn-sm"
-                  :disabled="currentPage === totalPages"
-                  @click="nextPage"
-              >
-                بعدی
-              </button>
-
-              <button
-                  class="join-item btn btn-sm"
-                  :disabled="currentPage === totalPages"
-                  @click="goToPage(totalPages)"
-              >
-                آخر
-              </button>
+              <button class="join-item btn btn-sm" :disabled="currentPage === totalPages" @click="nextPage">بعدی</button>
             </div>
           </div>
-        </main>
 
+        </main>
 
         <!-- SIDEBAR -->
         <aside class="lg:w-72 shrink-0 space-y-5 order-first lg:order-last">
@@ -262,29 +231,24 @@
               <div class="flex flex-wrap gap-2 justify-end">
                 <button
                     class="btn btn-xs rounded-full"
-                    :class="activeCat === '' ? 'btn-primary' : 'btn-ghost'"
-                    @click="activeCat = ''"
+                    :class="activeCatId === null ? 'btn-primary' : 'btn-ghost'"
+                    @click="activeCatId = null"
                 >
                   همه
                 </button>
 
                 <button
-                    v-for="cat in categories"
-                    :key="cat"
+                    v-for="cat in BLOG_CATEGORIES"
+                    :key="cat.id"
                     class="btn btn-xs rounded-full"
-                    :class="activeCat === cat ? 'btn-primary' : 'btn-ghost'"
-                    @click="activeCat = cat"
+                    :class="activeCatId === cat.id ? 'btn-primary' : 'btn-ghost'"
+                    @click="activeCatId = cat.id"
                 >
-                  {{ cat }}
+                  {{ cat.name }}
                 </button>
               </div>
-
-              <p v-if="!categories.length" class="text-xs text-base-content/40 text-right">
-                هنوز دسته‌ای تعریف نشده است.
-              </p>
             </div>
 
-            <!-- Small tips card -->
             <div class="bg-base-100 border border-base-300 rounded-2xl p-4 text-right space-y-2">
               <p class="text-sm font-semibold">راهنمای سریع</p>
               <p class="text-xs text-base-content/70 leading-6">
@@ -295,99 +259,226 @@
 
           </div>
         </aside>
-      </div>
 
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+console.log('✅ BLOG PAGE SCRIPT LOADED', new Date().toISOString())
+
 import { onMounted, ref, computed, watch } from 'vue'
-import { listPosts } from '@/services/api'
-import type { BlogPost } from '@/services/types'
+import { listBlogPosts } from '@/services/blog.ts'
+import type { BlogPostDto } from '@/types/api_client_types/blog.dto.ts'
 
-type SortKey =
-    | 'newest'
-    | 'oldest'
-    | 'popular'
-    | 'mostViewed'
-    | 'shortest'
-    | 'longest'
-    | 'random'
+type SortKey = 'newest' | 'oldest' | 'popular' | 'mostViewed' | 'shortest' | 'longest' | 'random'
 
-const posts = ref<BlogPost[]>([])
+const posts = ref<BlogPostDto[]>([])
 const loading = ref(true)
 
 const search = ref('')
 const sort = ref<SortKey>('newest')
-const activeCat = ref('')
+const activeCatId = ref<number | null>(null)
 
-// ✅ دسته‌بندی‌های پیش‌فرض پیشنهادی
-const preferredCats = [
-  'موسیقی و استریم',
-  'فیلم و سریال',
-  'اپل و آیکلود',
-  'یوتیوب و شبکه‌های اجتماعی',
-  'گیمینگ و گیفت‌کارت',
-  'آموزش و راهنما',
-  'اخبار و بروزرسانی‌ها',
-  'نکته‌ها و ترفندها',
-]
+const BLOG_CATEGORIES = [
+  { id: 1, name: 'موسیقی و استریم', slug: 'music-streaming' },
+  { id: 2, name: 'فیلم و سریال', slug: 'movies-series' },
+  { id: 3, name: 'اپل و آیکلود', slug: 'apple-icloud' },
+  { id: 4, name: 'یوتیوب و شبکه‌های اجتماعی', slug: 'youtube-social' },
+  { id: 5, name: 'گیمینگ و گیفت‌کارت', slug: 'gaming-giftcard' },
+  { id: 6, name: 'آموزش و راهنما', slug: 'tutorials-guides' },
+  { id: 7, name: 'اخبار و بروزرسانی‌ها', slug: 'news-updates' },
+  { id: 8, name: 'نکته‌ها و ترفندها', slug: 'tips-tricks' },
+] as const
 
-// ✅ Pagination
-const pageSize = 9
+const CAT_BY_ID = computed(() => {
+  const m = new Map<number, { id: number; name: string; slug: string }>()
+  BLOG_CATEGORIES.forEach(c => m.set(c.id, c))
+  return m
+})
+
+function normalizeFa(input: any): string {
+  if (input == null) return ''
+  return String(input)
+      .trim()
+      .replace(/ي/g, 'ی')
+      .replace(/ك/g, 'ک')
+      .replace(/\u200c/g, ' ') // نیم‌فاصله
+      .replace(/\s+/g, ' ')
+      .trim()
+}
+
+function getPostCategoryId(p: any): number {
+  const direct =
+      p?.category_id ??
+      p?.categoryId ??
+      p?.categoryID ??
+      p?.category?.id ??
+      null
+
+  const n = Number(direct || 0)
+  if (Number.isFinite(n) && n > 0) return n
+
+  // category به صورت متن
+  const catText = normalizeFa(p?.category)
+  if (catText) {
+    const found = BLOG_CATEGORIES.find(c => normalizeFa(c.name) === catText)
+    if (found) return found.id
+  }
+
+  // category داخل tags
+  if (Array.isArray(p?.tags)) {
+    const tags = p.tags.map((t: any) => normalizeFa(t))
+    const found = BLOG_CATEGORIES.find(c => tags.includes(normalizeFa(c.name)))
+    if (found) return found.id
+  }
+
+  return 0
+}
+
+function categoryLabel(p: any): string {
+  const id = getPostCategoryId(p)
+  if (!id) return ''
+  return CAT_BY_ID.value.get(id)?.name || ''
+}
+
+const pageSize = 7
 const currentPage = ref(1)
 
 onMounted(async () => {
+  console.log('🟡 onMounted start')
+  loading.value = true
+
   try {
-    posts.value = await listPosts()
+    const res = await listBlogPosts()
+    posts.value = Array.isArray(res)
+        ? res
+        : (res as any)?.items ?? (res as any)?.data ?? (res as any)?.posts ?? []
+
+    console.log('🧪 posts after set:', posts.value.length)
+    console.log('🧪 extracted category ids:',
+        posts.value.slice(0, 20).map((p: any) => ({
+          id: p.id,
+          slug: p.slug,
+          catId: getPostCategoryId(p),
+          raw: p.category_id ?? p.categoryId ?? p.category,
+        }))
+    )
+  } catch (err) {
+    console.error('🔴 listBlogPosts failed:', err)
   } finally {
     loading.value = false
+    console.log('🟣 onMounted finally, loading:', loading.value)
   }
 })
 
-// هر بار فیلتر/سرچ/سورت عوض شد، برگرد صفحه 1
-watch([search, sort, activeCat, posts], () => {
+watch([search, sort, activeCatId, posts], () => {
   currentPage.value = 1
 })
 
-const categories = computed(() => {
-  const s = new Set<string>()
+function stripHtml(input: any = '') {
+  return String(input).replace(/<[^>]+>/g, ' ')
+}
 
-  posts.value.forEach((p: any) => {
-    if (p.category) s.add(p.category)
-    if (Array.isArray(p.tags)) p.tags.forEach((t: string) => s.add(t))
-  })
+function decodeHtmlEntities(input: any) {
+  const s = String(input ?? '')
+  if (typeof document === 'undefined') return s
+  const el = document.createElement('textarea')
+  el.innerHTML = s
+  return el.value
+}
 
-  if (s.size === 0) return preferredCats
-  preferredCats.forEach(c => s.add(c))
-  return Array.from(s)
-})
+function toTextCandidate(input: any): string {
+  if (input == null) return ''
+
+  // ✅ اگر object/array بود، سعی کن محتواش رو قابل خواندن کنی
+  if (typeof input === 'object') {
+    // حالت‌های رایج ادیتورهای block-based
+    if (Array.isArray((input as any)?.blocks)) {
+      try {
+        return (input as any).blocks
+            .map((b: any) => b?.data?.text || b?.text || '')
+            .filter(Boolean)
+            .join(' ')
+      } catch {
+        // fallthrough
+      }
+    }
+
+    // اگر content به شکل delta یا هر ساختار دیگه بود
+    try {
+      return JSON.stringify(input)
+    } catch {
+      return ''
+    }
+  }
+
+  return String(input)
+}
+
+function cleanText(input: any) {
+  let s = toTextCandidate(input)
+  if (!s) return ''
+
+  // ✅ decode (&lt;h2&gt; -> <h2>)
+  s = decodeHtmlEntities(s)
+
+  // حذف front-matter
+  s = s.replace(/^---[\s\S]*?---\s*/m, '')
+
+  // حذف handlebars/vue template tags مثل {{...}} یا <% %>
+  s = s.replace(/{{[\s\S]*?}}/g, ' ')
+  s = s.replace(/<%[\s\S]*?%>/g, ' ')
+
+  // حذف HTML tags
+  s = stripHtml(s)
+
+  // جمع کردن فاصله‌ها
+  s = s.replace(/\s+/g, ' ').trim()
+
+  return s
+}
+
+function getExcerpt(p: any) {
+  // ✅ اولویت: excerpt واقعی
+  const ex = cleanText(p?.excerpt)
+  if (ex.length) return ex.length > 140 ? ex.slice(0, 140) + '…' : ex
+
+  // ✅ بعد: summary/description (اگر داشت)
+  const desc = cleanText(p?.description || p?.summary)
+  if (desc.length) return desc.length > 140 ? desc.slice(0, 140) + '…' : desc
+
+  // ✅ آخر: content
+  const body = cleanText(p?.content)
+  if (body.length) return body.length > 140 ? body.slice(0, 140) + '…' : body
+
+  return ''
+}
+
 
 const filteredPosts = computed(() => {
-  let arr = [...posts.value]
+  let arr = [...posts.value] as any[]
 
   if (search.value.trim()) {
     const q = search.value.trim().toLowerCase()
     arr = arr.filter((p: any) =>
-        (p.title && p.title.toLowerCase().includes(q)) ||
-        (p.excerpt && p.excerpt.toLowerCase().includes(q)) ||
-        (p.description && p.description.toLowerCase().includes(q)) ||
+        (p.title && String(p.title).toLowerCase().includes(q)) ||
+        (p.excerpt && String(p.excerpt).toLowerCase().includes(q)) ||
+        (p.description && String(p.description).toLowerCase().includes(q)) ||
         (p.content && stripHtml(p.content).toLowerCase().includes(q))
     )
   }
 
-  if (activeCat.value) {
-    arr = arr.filter((p: any) => {
-      const byCat = p.category === activeCat.value
-      const byTag = Array.isArray(p.tags) && p.tags.includes(activeCat.value)
-      return byCat || byTag
-    })
+  // ✅ فیلتر قطعی کتگوری با همان ساختار فرم ادمین (category_id)
+  if (activeCatId.value !== null) {
+    const selected = Number(activeCatId.value)
+    arr = arr.filter((p: any) => getPostCategoryId(p) === selected)
   }
 
   arr.sort((a: any, b: any) => {
-    const ad = new Date(a.date || a.createdAt || 0).getTime()
-    const bd = new Date(b.date || b.createdAt || 0).getTime()
+    const ad = new Date(a.created_at || 0).getTime()
+    const bd = new Date(b.created_at || 0).getTime()
 
     const aViews = Number(a.views || 0)
     const bViews = Number(b.views || 0)
@@ -413,27 +504,20 @@ const filteredPosts = computed(() => {
   return arr
 })
 
-// ✅ Pagination computed
-const totalPages = computed(() =>
-    Math.max(1, Math.ceil(filteredPosts.value.length / pageSize))
-)
+const totalPages = computed(() => Math.max(1, Math.ceil(filteredPosts.value.length / pageSize)))
 
 const pageSlice = computed(() => {
   const start = (currentPage.value - 1) * pageSize
   return filteredPosts.value.slice(start, start + pageSize)
 })
 
-// مطلب ویژه فقط صفحه اول
-const featuredPost = computed(() =>
-    currentPage.value === 1 ? filteredPosts.value[0] || null : null
-)
+const featuredPost = computed(() => (currentPage.value === 1 ? filteredPosts.value[0] || null : null))
 
 const restPosts = computed(() => {
   if (!pageSlice.value.length) return []
   return currentPage.value === 1 ? pageSlice.value.slice(1) : pageSlice.value
 })
 
-// ✅ visible page numbers (max 5)
 const visiblePages = computed(() => {
   const total = totalPages.value
   const cur = currentPage.value
@@ -454,33 +538,74 @@ const visiblePages = computed(() => {
 
 function goToPage(p: number) {
   currentPage.value = Math.min(Math.max(1, p), totalPages.value)
-  // اسکرول نرم به بالا
-  if (typeof window !== 'undefined') {
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
+  if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' })
 }
-function nextPage() {
-  goToPage(currentPage.value + 1)
-}
-function prevPage() {
-  goToPage(currentPage.value - 1)
-}
+function nextPage() { goToPage(currentPage.value + 1) }
+function prevPage() { goToPage(currentPage.value - 1) }
 
-function formatDate(val?: string) {
+function formatDate(val?: string | null) {
   if (!val) return ''
   const d = new Date(val)
-  if (isNaN(d.getTime())) return val
+  if (isNaN(d.getTime())) return String(val)
   return d.toLocaleDateString('fa-IR')
 }
 
-function getExcerpt(p: any) {
-  if (p.excerpt) return p.excerpt
-  if (p.description) return p.description
-  if (p.content) return stripHtml(p.content).slice(0, 120) + '…'
-  return ''
+
+const PLACEHOLDER = 'https://placehold.co/800x450?text=Blog'
+const ASSET_BASE =
+    (import.meta as any).env?.VITE_ASSET_BASE_URL ||
+    (import.meta as any).env?.VITE_API_BASE_URL ||
+    ''
+
+function looksLikeBadRoute(s: string) {
+  return (
+      s.startsWith('/blogs') ||
+      s.startsWith('/blog') ||
+      s.startsWith('/admin') ||
+      s.startsWith('/products') ||
+      s.startsWith('/api')
+  )
 }
 
-function stripHtml(html = '') {
-  return html.replace(/<[^>]+>/g, '')
+function looksLikeImagePath(s: string) {
+  const hasExt = /\.(png|jpe?g|webp|gif|svg|avif)(\?|#|$)/i.test(s)
+  const looksMedia = /(upload|uploads|media|images|storage|static)/i.test(s)
+  return hasExt || looksMedia
+}
+
+function coverSrc(p: any) {
+  const raw =
+      p?.cover_image ??
+      p?.image_url ??
+      p?.imageUrl ??
+      p?.cover ??
+      p?.coverUrl ??
+      p?.cover_url ??
+      p?.image ??
+      p?.thumbnail ??
+      p?.thumbnailUrl ??
+      null
+
+  if (!raw) return PLACEHOLDER
+
+  const s = String(raw).trim()
+
+  if (/^(https?:)?\/\//i.test(s) || s.startsWith('data:') || s.startsWith('blob:')) {
+    return encodeURI(s)
+  }
+
+  if (looksLikeBadRoute(s) || !looksLikeImagePath(s)) {
+    return PLACEHOLDER
+  }
+
+  const base = String(ASSET_BASE || '').replace(/\/$/, '')
+  const path = s.startsWith('/') ? s : `/${s}`
+  return base ? `${base}${path}` : path
+}
+
+function onImgError(e: Event) {
+  const img = e.target as HTMLImageElement
+  console.warn('[Blog img error]', img?.src)
+  if (img && img.src !== PLACEHOLDER) img.src = PLACEHOLDER
 }
 </script>

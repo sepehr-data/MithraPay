@@ -1,6 +1,6 @@
 // src/services/cart.ts
 import { http } from "@/lib/http"
-import { endpoints } from "@/api/endpoints"
+import { endpoints } from "@/types/api_client_types/endpoints.ts"
 import type {
     GetCartResponse,
     AddCartItemPayload,
@@ -9,7 +9,7 @@ import type {
     UpdateCartItemResponse,
     RemoveCartItemResponse,
     ClearCartResponse,
-} from "@/api/cart.dto"
+} from "@/types/api_client_types/cart.dto.ts"
 
 export async function getCart(userId: number) {
     const { data } = await http.get<GetCartResponse>(endpoints.cart.byUserId(userId))

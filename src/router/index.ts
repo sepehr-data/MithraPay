@@ -16,7 +16,7 @@ import AdminSetting from "@/pages/admin/AdminSetting.vue";
 const routes: RouteRecordRaw[] = [
   { path: '/', name: 'home', component: () => import('@/pages/HomePage.vue') },
   { path: '/category/:slug', name: 'category', component: () => import('@/pages/CategoryPage.vue') },
-  { path: '/product/:slug', name: 'product', component: () => import('@/pages/ProductPage.vue') },
+    { path: '/product/:id(\\d+)', name: 'product', component: () => import('@/pages/ProductPage.vue') },
   { path: '/cart', name: 'cart', component: () => import('@/pages/CartPage.vue') },
   { path: '/checkout', name: 'checkout', component: () => import('@/pages/CheckoutPage.vue') },
   { path: '/blog', name: 'blog', component: () => import('@/pages/BlogList.vue') },

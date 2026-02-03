@@ -14,6 +14,7 @@
           class="step"
           :class="step === 1 ? 'step--active' : step > 1 ? 'step--done' : ''"
           @click="goTo(1)"
+          :disabled="savingProfile"
       >
         <span class="step__num">1</span>
         <span class="step__text">سبد خرید</span>
@@ -26,7 +27,7 @@
           class="step"
           :class="step === 2 ? 'step--active' : step > 2 ? 'step--done' : ''"
           @click="goTo(2)"
-          :disabled="cart.items.length === 0"
+          :disabled="cart.items.length === 0 || savingProfile"
       >
         <span class="step__num">2</span>
         <span class="step__text">اطلاعات</span>
@@ -39,7 +40,7 @@
           class="step"
           :class="step === 3 ? 'step--active' : ''"
           @click="goTo(3)"
-          :disabled="!canGoToPayment"
+          :disabled="!canGoToPayment || savingProfile"
       >
         <span class="step__num">3</span>
         <span class="step__text">پرداخت</span>
@@ -48,7 +49,7 @@
 
     <!-- Layout -->
     <div class="grid lg:grid-cols-[1fr,380px] gap-6">
-      <!-- LEFT: Step content -->
+      <!-- LEFT -->
       <div>
         <transition name="fade-slide" mode="out-in">
           <!-- STEP 1: Cart -->
@@ -70,6 +71,11 @@
                 </button>
               </div>
 
+              <!-- loading products -->
+              <div v-if="loadingProducts && cart.items.length" class="mt-3 text-xs text-base-content/60">
+                در حال دریافت اطلاعات محصولات...
+              </div>
+
               <!-- Empty -->
               <div v-if="cart.items.length === 0" class="mt-4 rounded-3xl border border-base-200 p-4">
                 <div class="text-sm font-semibold">سبد خرید خالی است</div>
@@ -84,7 +90,7 @@
 
               <!-- Items -->
               <div v-else class="mt-4 divide-y divide-base-200">
-                <div v-for="line in cart.detailed" :key="line.productId" class="py-4">
+                <div v-for="line in detailed" :key="line.productKey" class="py-4">
                   <div class="flex gap-3">
                     <img
                         :src="line.product.image || 'https://placehold.co/96x96'"
@@ -99,7 +105,7 @@
                             {{ line.product.title }}
                           </div>
                           <div class="text-xs text-base-content/60 mt-1">
-                            {{ price(line.product.price) }}
+                            {{ price(line.product.price || 0) }}
                             <span class="opacity-60"> / واحد</span>
                           </div>
                         </div>
@@ -107,7 +113,7 @@
                         <button
                             type="button"
                             class="icon-btn"
-                            @click="cart.remove(line.productId)"
+                            @click="cart.remove(line.productKey)"
                             aria-label="remove"
                             title="حذف"
                         >
@@ -124,8 +130,8 @@
                       <div class="mt-3 flex items-end justify-between gap-3">
                         <div class="qty-wrap">
                           <QuantityInput
-                              v-model="(line as any).qty"
-                              @update:model-value="cart.setQty(line.productId, $event)"
+                              :model-value="line.qty"
+                              @update:model-value="cart.setQty(line.productKey, $event)"
                           />
                         </div>
 
@@ -136,17 +142,22 @@
                           </div>
                         </div>
                       </div>
+
+                      <div class="mt-2 text-[11px] text-base-content/55">
+                        <span v-if="line.product.isDigital">دیجیتال</span>
+                        <span v-else>فیزیکی</span>
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                <!-- ✅ Step actions (ادامه سمت چپ) -->
                 <div class="pt-4 flex items-center justify-start">
                   <button
                       type="button"
                       class="btn btn-primary rounded-2xl"
                       :class="cart.items.length ? '' : 'btn-disabled'"
                       @click="nextStep()"
+                      :disabled="savingProfile"
                   >
                     ادامه
                   </button>
@@ -157,7 +168,6 @@
 
           <!-- STEP 2: Info -->
           <section v-else-if="step === 2" key="s2" class="space-y-4">
-            <!-- Contact -->
             <div class="card bg-base-100 border border-base-300 shadow-sm">
               <div class="card-body">
                 <div class="flex items-center justify-between">
@@ -167,22 +177,22 @@
                 <div class="grid md:grid-cols-2 gap-3 mt-4">
                   <label class="form-control">
                     <span class="label-text">نام و نام خانوادگی</span>
-                    <input v-model="form.fullName" class="input input-bordered rounded-2xl" placeholder="مثال: علی رضایی" />
+                    <input v-model="form.fullName" class="input input-bordered rounded-2xl" placeholder="مثال: علی رضایی" :disabled="savingProfile" />
                   </label>
 
                   <label class="form-control">
                     <span class="label-text">ایمیل</span>
-                    <input v-model="form.email" class="input input-bordered rounded-2xl" type="email" placeholder="name@email.com" />
+                    <input v-model="form.email" class="input input-bordered rounded-2xl" type="email" placeholder="name@email.com" :disabled="savingProfile" />
                   </label>
 
                   <label class="form-control">
                     <span class="label-text">تلفن</span>
-                    <input v-model="form.phone" class="input input-bordered rounded-2xl" type="tel" placeholder="09xxxxxxxxx" />
+                    <input v-model="form.phone" class="input input-bordered rounded-2xl" type="tel" placeholder="09xxxxxxxxx" :disabled="savingProfile" />
                   </label>
 
                   <label class="form-control">
                     <span class="label-text">کد ملی (اختیاری)</span>
-                    <input v-model="form.nationalId" class="input input-bordered rounded-2xl" placeholder="123xxxxxxx" />
+                    <input v-model="form.nationalId" class="input input-bordered rounded-2xl" placeholder="123xxxxxxx" :disabled="savingProfile" />
                   </label>
                 </div>
 
@@ -194,22 +204,24 @@
                         class="textarea textarea-bordered rounded-2xl"
                         rows="3"
                         placeholder="توضیحات..."
+                        :disabled="savingProfile"
                     />
                   </label>
                 </div>
 
-                <!-- Actions -->
                 <div class="mt-5 flex items-center justify-between gap-3">
                   <button
                       type="button"
                       class="btn btn-primary rounded-2xl order-1"
                       :class="canGoToPayment ? '' : 'btn-disabled'"
                       @click="nextStep()"
+                      :disabled="!canGoToPayment || savingProfile"
                   >
-                    ادامه پرداخت
+                    <span v-if="!savingProfile">ادامه پرداخت</span>
+                    <span v-else class="loading loading-spinner loading-sm"></span>
                   </button>
 
-                  <button type="button" class="btn btn-ghost rounded-2xl order-2" @click="prevStep()">
+                  <button type="button" class="btn btn-ghost rounded-2xl order-2" @click="prevStep()" :disabled="savingProfile">
                     بازگشت
                   </button>
                 </div>
@@ -217,88 +229,6 @@
                 <p v-if="!canGoToPayment" class="text-xs text-base-content/60 mt-2">
                   لطفاً اطلاعات ضروری را کامل کنید.
                 </p>
-              </div>
-            </div>
-
-            <!-- Shipping -->
-            <div class="card bg-base-100 border border-base-300 shadow-sm" v-if="hasPhysical">
-              <div class="card-body">
-                <div class="flex items-center justify-between">
-                  <h2 class="text-lg font-extrabold">آدرس ارسال</h2>
-                </div>
-
-                <div class="grid md:grid-cols-2 gap-3 mt-4">
-                  <label class="form-control">
-                    <span class="label-text">استان</span>
-                    <input v-model="form.state" class="input input-bordered rounded-2xl" placeholder="مثال: تهران" />
-                  </label>
-
-                  <label class="form-control">
-                    <span class="label-text">شهر</span>
-                    <input v-model="form.city" class="input input-bordered rounded-2xl" placeholder="مثال: تهران" />
-                  </label>
-
-                  <label class="form-control">
-                    <span class="label-text">کد پستی</span>
-                    <input v-model="form.postalCode" class="input input-bordered rounded-2xl" placeholder="10 رقمی" />
-                  </label>
-
-                  <label class="form-control">
-                    <span class="label-text">پلاک / واحد</span>
-                    <input v-model="form.unit" class="input input-bordered rounded-2xl" placeholder="پلاک 12، واحد 3" />
-                  </label>
-                </div>
-
-                <div class="mt-3">
-                  <label class="form-control">
-                    <span class="label-text">آدرس کامل</span>
-                    <textarea
-                        v-model="form.address"
-                        class="textarea textarea-bordered rounded-2xl"
-                        rows="3"
-                        placeholder="خیابان... کوچه... پلاک..."
-                    />
-                  </label>
-                </div>
-
-                <div class="mt-4 grid md:grid-cols-2 gap-3">
-                  <div class="rounded-3xl border border-base-200 p-4 bg-base-200/20">
-                    <div class="font-semibold mb-2">روش ارسال</div>
-                    <div class="join w-full">
-                      <button
-                          type="button"
-                          class="btn join-item rounded-2xl"
-                          :class="form.shippingMethod==='standard' ? 'btn-primary' : 'btn-ghost'"
-                          @click="form.shippingMethod='standard'"
-                      >
-                        عادی
-                      </button>
-                      <button
-                          type="button"
-                          class="btn join-item rounded-2xl"
-                          :class="form.shippingMethod==='express' ? 'btn-primary' : 'btn-ghost'"
-                          @click="form.shippingMethod='express'"
-                      >
-                        سریع
-                      </button>
-                    </div>
-                    <div class="text-xs text-base-content/60 mt-2">
-                      هزینه ارسال در جمع کل محاسبه می‌شود.
-                    </div>
-                  </div>
-
-                  <div class="rounded-3xl border border-base-200 p-4 bg-base-200/20">
-                    <div class="font-semibold mb-2">زمان تحویل</div>
-                    <select v-model="form.deliveryWindow" class="select select-bordered rounded-2xl w-full">
-                      <option value="any">فرقی ندارد</option>
-                      <option value="morning">صبح (۹ تا ۱۳)</option>
-                      <option value="evening">عصر (۱۳ تا ۱۸)</option>
-                    </select>
-                    <div class="text-xs text-base-content/60 mt-2">
-                      در صورت امکان هماهنگ می‌شود.
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
           </section>
@@ -312,7 +242,6 @@
                 </div>
 
                 <div class="mt-4 grid md:grid-cols-2 gap-3">
-                  <!-- ONLINE (emoji) -->
                   <button
                       type="button"
                       class="payPick"
@@ -331,14 +260,10 @@
                     </div>
                   </button>
 
-                  <!-- COD (emoji) -->
                   <button
                       type="button"
                       class="payPick"
-                      :class="[
-                      form.paymentMethod === 'cod' ? 'payPick--active' : '',
-                      allDigital ? 'payPick--disabled' : ''
-                    ]"
+                      :class="[form.paymentMethod === 'cod' ? 'payPick--active' : '', allDigital ? 'payPick--disabled' : '']"
                       @click="allDigital ? null : (form.paymentMethod='cod')"
                   >
                     <div class="flex items-start justify-between gap-3">
@@ -359,37 +284,11 @@
                   </button>
                 </div>
 
-                <!-- Coupon -->
-                <div class="mt-4 collapse collapse-arrow border border-base-200 rounded-3xl bg-base-100">
-                  <input type="checkbox" />
-                  <div class="collapse-title font-semibold flex items-center gap-2">
-                    کد تخفیف
-                    <span class="text-xs text-base-content/50 font-normal">اختیاری</span>
-                  </div>
-                  <div class="collapse-content">
-                    <div class="join w-full mt-2">
-                      <input
-                          v-model="form.coupon"
-                          class="input input-bordered join-item rounded-2xl w-full"
-                          placeholder="مثال: OFF10"
-                      />
-                      <button type="button" class="btn btn-primary join-item rounded-2xl" @click="applyCoupon">
-                        اعمال
-                      </button>
-                    </div>
-                    <div v-if="couponMsg" class="mt-2 text-xs text-base-content/70">
-                      {{ couponMsg }}
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Terms -->
                 <label class="mt-4 flex items-center gap-2 cursor-pointer select-none">
                   <input v-model="form.acceptTerms" type="checkbox" class="checkbox checkbox-primary" />
                   <span class="text-sm">قوانین و شرایط خرید را می‌پذیرم.</span>
                 </label>
 
-                <!-- Actions swapped -->
                 <div class="mt-5 flex items-center justify-between gap-3">
                   <button
                       type="button"
@@ -408,15 +307,13 @@
                 <p v-if="!canSubmit" class="text-xs text-base-content/60 mt-2">
                   برای ادامه، اطلاعات ضروری را کامل کنید و قوانین را بپذیرید.
                 </p>
-
-                <!-- ✅ پیام دیجیتال از اینجا حذف شد -->
               </div>
             </div>
           </section>
         </transition>
       </div>
 
-      <!-- RIGHT: Summary -->
+      <!-- RIGHT -->
       <aside class="lg:sticky lg:top-6 h-fit">
         <div class="card bg-base-100 border border-base-300 shadow-sm">
           <div class="card-body">
@@ -428,17 +325,7 @@
             <div class="mt-4 space-y-2 text-sm">
               <div class="flex items-center justify-between">
                 <span class="text-base-content/70">جمع کالاها</span>
-                <strong>{{ price(cart.total) }}</strong>
-              </div>
-
-              <div class="flex items-center justify-between">
-                <span class="text-base-content/70">هزینه ارسال</span>
-                <strong>{{ price(shippingCost) }}</strong>
-              </div>
-
-              <div class="flex items-center justify-between" v-if="discountAmount > 0">
-                <span class="text-base-content/70">تخفیف</span>
-                <strong class="text-error">- {{ price(discountAmount) }}</strong>
+                <strong>{{ price(cartTotal) }}</strong>
               </div>
 
               <div class="divider my-2"></div>
@@ -450,11 +337,7 @@
             </div>
 
             <div class="mt-4 grid grid-cols-2 gap-2">
-              <button
-                  type="button"
-                  class="btn btn-ghost rounded-2xl border border-base-200"
-                  @click="goTo(1)"
-              >
+              <button type="button" class="btn btn-ghost rounded-2xl border border-base-200" @click="goTo(1)" :disabled="savingProfile">
                 مشاهده سبد
               </button>
 
@@ -463,7 +346,6 @@
               </RouterLink>
             </div>
 
-            <!-- ✅ پیام دیجیتال: پایین همه اطلاعات (در خلاصه سفارش) -->
             <div v-if="allDigital && canSubmit" class="summary-note mt-4">
               تحویل آیتم‌های دیجیتال از طریق ایمیل/پنل پس از پرداخت انجام می‌شود.
             </div>
@@ -479,63 +361,188 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, computed, ref } from 'vue'
+import { reactive, computed, ref, watch, onMounted } from 'vue'
 import { useCartStore } from '@/stores/cart'
+import { useAuthStore } from '@/stores/auth'
+import { useToast } from 'vue-toastification'
 import type { Product } from '@/services/types'
 import { formatToman } from '@/services/currency'
+import { getMe, updateMe } from '@/services/user'
 import QuantityInput from '@/components/QuantityInput.vue'
+import { useRouter } from 'vue-router'
+import { getProduct } from '@/services/products'
 
+const router = useRouter()
 const cart = useCartStore()
+const auth = useAuthStore()
+const toast = useToast()
+
 const price = (n: number) => formatToman(n)
 
 const step = ref<1 | 2 | 3>(1)
+const savingProfile = ref(false)
 
-const allDigital = computed(() => cart.detailed.every(l => (l.product as Product).isDigital))
-const hasPhysical = computed(() => !allDigital.value)
+const serverUserSnap = ref<any>(null)
 
+/** -----------------------------
+ * ✅ Cart products via API
+ * ----------------------------- */
+type ProductVM = Product & {
+  image?: string
+  isDigital?: boolean
+  compareAt?: number
+  price?: number
+  title?: string
+}
+
+const productsById = ref<Record<number, ProductVM>>({})
+const loadingProducts = ref(false)
+
+function normalizeImageUrl(u?: string | null) {
+  const s = String(u ?? '').trim()
+  if (!s) return ''
+  if (/^https?:\/\//i.test(s)) return s
+  if (s.startsWith('/')) return s
+  return ''
+}
+
+function normalizeProduct(dto: any): ProductVM {
+  const raw = dto?.data ?? dto?.product ?? dto
+  return {
+    ...(raw as any),
+    id: raw?.id,
+    title: raw?.title ?? 'بدون عنوان',
+    price: Number(raw?.price ?? 0),
+    compareAt: raw?.compare_at_price ?? raw?.compareAt,
+    image: normalizeImageUrl(raw?.image_url || raw?.image) || '',
+    isDigital: raw?.is_digital ?? raw?.isDigital ?? false
+  }
+}
+
+async function ensureCartProductsLoaded() {
+  const numericIds = (cart.items || [])
+      .map((x: any) => Number(String(x.productId)))
+      .filter((n: number) => Number.isFinite(n))
+
+  const missing = numericIds.filter((id) => !productsById.value[id])
+  if (!missing.length) return
+
+  loadingProducts.value = true
+  try {
+    const res = await Promise.all(
+        missing.map(async (id) => {
+          const dto = await getProduct(id)
+          return [id, normalizeProduct(dto)] as const
+        })
+    )
+
+    const next = { ...productsById.value }
+    res.forEach(([id, p]) => (next[id] = p))
+    productsById.value = next
+  } catch (e) {
+    console.error(e)
+    toast.error('خطا در دریافت اطلاعات محصولات سبد خرید')
+  } finally {
+    loadingProducts.value = false
+  }
+}
+
+watch(
+    () => cart.items,
+    () => void ensureCartProductsLoaded(),
+    { deep: true, immediate: true }
+)
+
+const detailed = computed(() => {
+  const items = cart.items || []
+  return items.map((it: any) => {
+    const productKey = String(it.productId) // store key (string)
+    const productId = Number(productKey)    // api id (number)
+    const qty = Number(it.qty ?? 1)
+
+    const product =
+        Number.isFinite(productId) && productsById.value[productId]
+            ? productsById.value[productId]
+            : ({
+              id: productId || productKey,
+              title: 'در حال دریافت...',
+              price: 0,
+              image: '',
+              isDigital: false
+            } as any)
+
+    const lineTotal = (Number((product as any).price ?? 0) || 0) * qty
+    return { productKey, productId, qty, product, lineTotal }
+  })
+})
+
+const cartTotal = computed(() => detailed.value.reduce((sum, l) => sum + (l.lineTotal || 0), 0))
+
+const allDigital = computed(() => {
+  if (!detailed.value.length) return true
+  return detailed.value.every((l) => !!(l.product as any)?.isDigital)
+})
+
+/** -----------------------------
+ * form (بدون ارسال فیزیکی)
+ * ----------------------------- */
 const form = reactive({
   fullName: '',
   email: '',
   phone: '',
   nationalId: '',
   note: '',
-
-  state: '',
-  city: '',
-  postalCode: '',
-  unit: '',
-  address: '',
-  shippingMethod: 'standard' as 'standard' | 'express',
-  deliveryWindow: 'any' as 'any' | 'morning' | 'evening',
-
   paymentMethod: 'online' as 'online' | 'cod',
-  coupon: '',
-  acceptTerms: false,
+  acceptTerms: false
 })
 
-const couponMsg = ref('')
-const discountAmount = ref(0)
+function normalize(v: any) { return String(v ?? '').trim() }
+function isBlank(v: any) { return !normalize(v) }
 
-const shippingCost = computed(() => {
-  if (!hasPhysical.value) return 0
-  return form.shippingMethod === 'express' ? 75000 : 35000
-})
+function splitFullName(fullName: string) {
+  const parts = normalize(fullName).split(/\s+/).filter(Boolean)
+  if (!parts.length) return { name: '', last_name: '' }
+  const name = parts[0] ?? ''
+  const last_name = parts.slice(1).join(' ')
+  return { name, last_name }
+}
 
-const payable = computed(() => Math.max(0, cart.total + shippingCost.value - discountAmount.value))
+function readNationalId(u: any) {
+  return normalize(u?.nationalId ?? u?.national_id ?? u?.national_code ?? u?.nationalCode ?? '')
+}
+
+function fillFromAuthUser(u: any) {
+  if (!u) return
+
+  const name = normalize(u?.name)
+  const last = normalize(u?.lastName ?? u?.last_name)
+  const email = normalize(u?.email)
+  const phone = normalize(u?.phone)
+  const nationalId = readNationalId(u)
+
+  if (isBlank(form.fullName)) form.fullName = [name, last].filter(Boolean).join(' ')
+  if (isBlank(form.email)) form.email = email
+  if (isBlank(form.phone)) form.phone = phone
+  if (isBlank(form.nationalId)) form.nationalId = nationalId
+
+  serverUserSnap.value = { name, last, email, phone, nationalId }
+}
+
+watch(
+    () => auth.user,
+    (u) => { if (u) fillFromAuthUser(u) },
+    { immediate: true }
+)
+
+const payable = computed(() => Math.max(0, cartTotal.value))
 
 const step1Ok = computed(() => cart.items.length > 0)
 
 const step2Ok = computed(() => {
+  // ✅ فقط اطلاعات تماس
   if (!form.fullName.trim()) return false
   if (!form.phone.trim()) return false
   if (!form.email.trim()) return false
-
-  if (hasPhysical.value) {
-    if (!form.state.trim()) return false
-    if (!form.city.trim()) return false
-    if (!form.postalCode.trim()) return false
-    if (!form.address.trim()) return false
-  }
   return true
 })
 
@@ -549,46 +556,85 @@ const canSubmit = computed(() => {
   return true
 })
 
-function goTo(s: 1 | 2 | 3) {
-  if (s === 1) {
-    step.value = 1
-    return
+function buildFillMissingPayload(): Record<string, any> {
+  const snap = serverUserSnap.value
+  if (!snap) return {}
+
+  const { name, last_name } = splitFullName(form.fullName)
+  const payload: Record<string, any> = {}
+
+  if (isBlank(snap.name) && !isBlank(name)) payload.name = normalize(name)
+  if (isBlank(snap.last) && !isBlank(last_name)) payload.last_name = normalize(last_name)
+  if (isBlank(snap.email) && !isBlank(form.email)) payload.email = normalize(form.email)
+  if (isBlank(snap.phone) && !isBlank(form.phone)) payload.phone = normalize(form.phone)
+  if (isBlank(snap.nationalId) && !isBlank(form.nationalId)) payload.national_id = normalize(form.nationalId)
+
+  return payload
+}
+
+async function syncProfileFillMissing() {
+  if (!auth.user) return
+  const payload = buildFillMissingPayload()
+  if (!Object.keys(payload).length) return
+
+  savingProfile.value = true
+  try {
+    const res = await updateMe(payload as any)
+    const newUser = res?.user ?? res
+    if (newUser) {
+      ;(auth as any).user = newUser
+      localStorage.setItem('auth_user', JSON.stringify(newUser))
+      fillFromAuthUser(newUser)
+    }
+    toast.success('اطلاعات خالی پروفایل تکمیل شد')
+  } catch (e: any) {
+    toast.error(e?.response?.data?.error || e?.message || 'خطا در تکمیل اطلاعات پروفایل')
+    throw e
+  } finally {
+    savingProfile.value = false
   }
+}
+
+async function goTo(s: 1 | 2 | 3) {
+  if (savingProfile.value) return
+
+  if (s === 1) { step.value = 1; return }
   if (s === 2) {
     if (!step1Ok.value) return
     step.value = 2
+    if (auth.user) fillFromAuthUser(auth.user)
     return
   }
   if (s === 3) {
     if (!canGoToPayment.value) return
-    step.value = 3
+    try {
+      await syncProfileFillMissing()
+      step.value = 3
+    } catch {}
   }
 }
 
-function nextStep() {
-  if (step.value === 1 && step1Ok.value) step.value = 2
-  else if (step.value === 2 && step2Ok.value) step.value = 3
+async function nextStep() {
+  if (savingProfile.value) return
+
+  if (step.value === 1 && step1Ok.value) {
+    step.value = 2
+    if (auth.user) fillFromAuthUser(auth.user)
+    return
+  }
+
+  if (step.value === 2 && step2Ok.value) {
+    try {
+      await syncProfileFillMissing()
+      step.value = 3
+    } catch {}
+  }
 }
 
 function prevStep() {
+  if (savingProfile.value) return
   if (step.value === 3) step.value = 2
   else if (step.value === 2) step.value = 1
-}
-
-function applyCoupon() {
-  const code = form.coupon.trim().toUpperCase()
-  if (!code) {
-    couponMsg.value = 'کدی وارد نشده.'
-    discountAmount.value = 0
-    return
-  }
-  if (code === 'OFF10') {
-    discountAmount.value = Math.min(Math.floor(cart.total * 0.1), 200000)
-    couponMsg.value = 'کد تخفیف اعمال شد.'
-    return
-  }
-  couponMsg.value = 'کد معتبر نیست.'
-  discountAmount.value = 0
 }
 
 function placeOrder() {
@@ -602,101 +648,62 @@ const clearAll = () => {
   ;(cart as any).reset?.()
   step.value = 1
 }
+
+const loadingMe = ref(false)
+const DEV_BYPASS_AUTH = import.meta.env.DEV && import.meta.env.VITE_DEV_BYPASS_AUTH === 'false'
+
+async function fetchMeOnLoad() {
+  if (DEV_BYPASS_AUTH) return
+  loadingMe.value = true
+  try {
+    const me = await getMe()
+    ;(auth as any).user = me
+    localStorage.setItem('auth_user', JSON.stringify(me))
+
+    // ✅ خیلی مهم: مستقیم فرم رو هم پر کن (وابسته به watch نباش)
+    fillFromAuthUser(me)
+  } catch (err: any) {
+    if (err?.response?.data?.error?.message === 'Invalid token') {
+      router.push('/login')
+      return
+    }
+    toast.error(err?.response?.data?.error || err?.message || 'خطا در دریافت اطلاعات کاربر')
+  } finally {
+    loadingMe.value = false
+  }
+}
+
+onMounted(() => {
+  void fetchMeOnLoad()
+})
 </script>
 
 <style scoped>
-/* stepper */
-.stepper{
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-.stepper__line{
-  height: 2px;
-  width: 96px;            /* ✅ طول بیشتر */
-  border-radius: 999px;
-  background: rgba(0,0,0,.10);
-}
-@media (min-width: 768px){
-  .stepper__line{
-    width: 140px;         /* ✅ دسکتاپ طول بیشتر */
-  }
-}
-.stepper__line--on{
-  background: rgba(99,102,241,.55);
-}
+.stepper{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.stepper__line{ height:2px; width:96px; border-radius:999px; background:rgba(0,0,0,.10); }
+@media (min-width: 768px){ .stepper__line{ width:140px; } }
+.stepper__line--on{ background:rgba(99,102,241,.55); }
 .step{
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  border-radius: 9999px;
-  border: 1px solid rgba(0,0,0,.10);
-  background: rgba(255,255,255,.85);
+  display:inline-flex; align-items:center; gap:10px; padding:10px 12px; border-radius:9999px;
+  border:1px solid rgba(0,0,0,.10); background:rgba(255,255,255,.85);
   transition: transform .12s ease, border-color .12s ease, box-shadow .12s ease, opacity .12s ease;
 }
-.step:disabled{
-  opacity: .55;
-  cursor: not-allowed;
-}
-.step:hover:not(:disabled){
-  transform: translateY(-1px);
-  border-color: rgba(0,0,0,.16);
-  box-shadow: 0 12px 26px rgba(15,23,42,.06);
-}
-.step__num{
-  width: 30px;
-  height: 30px;
-  border-radius: 9999px;
-  display: grid;
-  place-items: center;
-  font-weight: 800;
-  font-size: 12px;
-  background: rgba(0,0,0,.06);
-  color: rgba(0,0,0,.72);
-}
-.step__text{
-  font-size: 13px;
-  font-weight: 700;
-  color: rgba(0,0,0,.70);
-}
-.step--active{
-  border-color: rgba(99,102,241,.55);
-  background: linear-gradient(135deg, rgba(99,102,241,.10), rgba(255,255,255,.92));
-}
-.step--active .step__num{
-  background: rgba(99,102,241,.95);
-  color: white;
-}
-.step--active .step__text{
-  color: rgba(17,24,39,.92);
-}
-.step--done{
-  border-color: rgba(99,102,241,.35);
-}
-.step--done .step__num{
-  background: rgba(99,102,241,.12);
-  color: rgba(55,65,81,.92);
-}
+.step:disabled{ opacity:.55; cursor:not-allowed; }
+.step:hover:not(:disabled){ transform: translateY(-1px); border-color: rgba(0,0,0,.16); box-shadow: 0 12px 26px rgba(15,23,42,.06); }
+.step__num{ width:30px; height:30px; border-radius:9999px; display:grid; place-items:center; font-weight:800; font-size:12px; background:rgba(0,0,0,.06); color:rgba(0,0,0,.72); }
+.step__text{ font-size:13px; font-weight:700; color:rgba(0,0,0,.70); }
+.step--active{ border-color: rgba(99,102,241,.55); background: linear-gradient(135deg, rgba(99,102,241,.10), rgba(255,255,255,.92)); }
+.step--active .step__num{ background: rgba(99,102,241,.95); color:white; }
+.step--active .step__text{ color: rgba(17,24,39,.92); }
+.step--done{ border-color: rgba(99,102,241,.35); }
+.step--done .step__num{ background: rgba(99,102,241,.12); color: rgba(55,65,81,.92); }
 
-/* minimal controls */
 .icon-btn{
-  width: 34px;
-  height: 34px;
-  border-radius: 12px;
-  border: 1px solid rgba(0,0,0,.08);
-  background: transparent;
-  display: grid;
-  place-items: center;
-  opacity: .9;
+  width:34px; height:34px; border-radius:12px; border:1px solid rgba(0,0,0,.08);
+  background:transparent; display:grid; place-items:center; opacity:.9;
   transition: transform .12s ease, border-color .12s ease, opacity .12s ease;
 }
-.icon-btn:hover{
-  transform: translateY(-1px);
-  opacity: 1;
-  border-color: rgba(239,68,68,.30);
-}
+.icon-btn:hover{ transform: translateY(-1px); opacity:1; border-color: rgba(239,68,68,.30); }
 
 .qty-wrap{
   border: 1px solid rgba(0,0,0,.10);
@@ -706,59 +713,34 @@ const clearAll = () => {
   max-width: 160px;
 }
 
-/* payment cards */
 .payPick{
-  text-align: right;
-  border-radius: 24px;
-  border: 1px solid rgba(0,0,0,.10);
-  background: rgba(255,255,255,.9);
-  padding: 14px;
+  text-align:right; border-radius:24px; border:1px solid rgba(0,0,0,.10);
+  background:rgba(255,255,255,.9); padding:14px;
   transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, background .12s ease;
-  position: relative;
-  overflow: hidden;
+  position:relative; overflow:hidden;
 }
-.payPick:hover{
-  transform: translateY(-1px);
-  box-shadow: 0 14px 30px rgba(0,0,0,.08);
-  border-color: rgba(0,0,0,.18);
-}
+.payPick:hover{ transform: translateY(-1px); box-shadow: 0 14px 30px rgba(0,0,0,.08); border-color: rgba(0,0,0,.18); }
 .payPick--active{
   border-color: rgba(99,102,241,.55);
   background: linear-gradient(135deg, rgba(99,102,241,.10), rgba(255,255,255,.92));
   box-shadow: 0 18px 40px rgba(99,102,241,.12);
 }
-.payPick--disabled{
-  opacity: .55;
-  pointer-events: none;
-  filter: grayscale(.2);
-}
+.payPick--disabled{ opacity:.55; pointer-events:none; filter: grayscale(.2); }
 
 .payPick__icon{
-  width: 44px;
-  height: 44px;
-  border-radius: 18px;
-  border: 1px solid rgba(0,0,0,.10);
-  background: rgba(255,255,255,.95);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size: 20px;
+  width:44px; height:44px; border-radius:18px; border:1px solid rgba(0,0,0,.10);
+  background: rgba(255,255,255,.95); display:flex; align-items:center; justify-content:center;
+  font-size:20px;
 }
-
 .payPick__dot{
-  width: 16px;
-  height: 16px;
-  border-radius: 999px;
-  border: 2px solid rgba(0,0,0,.18);
-  margin-top: 2px;
-  flex: 0 0 auto;
+  width:16px; height:16px; border-radius:999px; border:2px solid rgba(0,0,0,.18);
+  margin-top:2px; flex:0 0 auto;
 }
 .payPick__dot--on{
   border-color: rgba(99,102,241,.9);
   box-shadow: inset 0 0 0 4px rgba(99,102,241,.9);
 }
 
-/* summary note (digital delivery text) */
 .summary-note{
   border: 1px solid rgba(99,102,241,.18);
   background: rgba(99,102,241,.06);
@@ -769,14 +751,8 @@ const clearAll = () => {
   color: rgba(17,24,39,.82);
 }
 
-/* transitions */
 .fade-slide-enter-active,
-.fade-slide-leave-active{
-  transition: opacity 180ms ease, transform 180ms ease;
-}
+.fade-slide-leave-active{ transition: opacity 180ms ease, transform 180ms ease; }
 .fade-slide-enter-from,
-.fade-slide-leave-to{
-  opacity: 0;
-  transform: translateY(6px);
-}
+.fade-slide-leave-to{ opacity: 0; transform: translateY(6px); }
 </style>

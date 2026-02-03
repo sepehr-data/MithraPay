@@ -44,10 +44,16 @@
 
         <!-- logo -->
         <RouterLink class="flex items-center gap-2" to="/">
-          <div class="h-13 w-40 overflow-hidden flex items-center">
-            <img :src="mithraLogo" alt="MithraPay" class="h-20 object-cover -translate-x-8 scale-125" />
+          <div class="w-32 h-10 flex items-center overflow-visible">
+            <img
+                :src="mithraLogo"
+                alt="MithraPay"
+                class="h-10 w-auto object-contain -translate-x-10"
+            />
           </div>
         </RouterLink>
+
+
       </div>
 
       <!-- CENTER MENU -->
@@ -384,7 +390,7 @@ function logoutFromMenu() {
     localStorage.removeItem('token')
     localStorage.removeItem('auth')
   }
-  router.push({ name: 'login' })
+  router.push({ name: 'home' })
 }
 
 /* ====== Store mega menu ====== */

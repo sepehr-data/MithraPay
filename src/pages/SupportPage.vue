@@ -43,12 +43,11 @@
       <div
           class="grid gap-6 lg:gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] items-start"
       >
-        <!-- کارت فرم (glass) -->
+        <!-- کارت فرم -->
         <div
             class="card glass bg-base-100/90 border border-base-200/80 shadow-xl shadow-base-300/40"
         >
           <div class="card-body space-y-5">
-            <!-- تیتر کارت + چپ: کوچیک -->
             <div class="flex items-center justify-between gap-3">
               <div class="space-y-1 text-right">
                 <h3 class="text-lg md:text-xl font-bold">
@@ -64,7 +63,7 @@
             </div>
 
             <form class="space-y-4" @submit.prevent="handleSubmit">
-              <!-- ردیف اول -->
+              <!-- ردیف نام و ایمیل -->
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <label class="form-control w-full">
                   <div class="label">
@@ -105,6 +104,37 @@
                 </label>
               </div>
 
+              <!-- شماره سفارش + شماره تلفن -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                <label class="form-control w-full">
+                  <div class="label">
+                    <span class="label-text text-xs md:text-sm">
+                      شماره تلفن
+                    </span>
+                  </div>
+                  <input
+                      v-model="form.phone"
+                      type="tel"
+                      class="input input-bordered input-sm md:input-md ltr:!text-left"
+                      placeholder="09xxxxxxxxx"
+                  />
+                </label>
+
+                <label class="form-control w-full">
+                  <div class="label">
+                    <span class="label-text text-xs md:text-sm">
+                      شماره سفارش (اختیاری)
+                    </span>
+                  </div>
+                  <input
+                      v-model="form.orderNumber"
+                      type="text"
+                      class="input input-bordered input-sm md:input-md ltr:!text-left"
+                      placeholder="مثلاً: 123456"
+                  />
+                </label>
+              </div>
               <!-- موضوع پیام -->
               <label class="form-control">
                 <div class="label">
@@ -156,21 +186,6 @@
                     سایر موارد
                   </button>
                 </div>
-              </label>
-
-              <!-- شماره سفارش (اختیاری) -->
-              <label class="form-control">
-                <div class="label">
-                  <span class="label-text text-xs md:text-sm">
-                    شماره سفارش (اختیاری)
-                  </span>
-                </div>
-                <input
-                    v-model="form.phone"
-                    type="tel"
-                    class="input input-bordered input-sm md:input-md ltr:!text-left"
-                    placeholder="123XXXXXXX"
-                />
               </label>
 
               <!-- پیام -->
@@ -357,10 +372,90 @@
       </div>
     </div>
   </section>
+  <!-- Success Alert (Minimal & Custom) -->
+  <transition name="fade">
+    <div
+        v-if="showSuccessAlert"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4"
+    >
+      <div
+          class="card bg-base-100 w-full max-w-sm shadow-2xl border border-base-200"
+      >
+        <div class="card-body text-center space-y-4">
+          <div
+              class="mx-auto w-12 h-12 rounded-full bg-success/10 flex items-center justify-center text-2xl"
+          >
+            ✅
+          </div>
+
+          <h3 class="text-base font-bold">
+            پیام با موفقیت ارسال شد
+          </h3>
+
+          <p class="text-sm text-base-content/70 leading-relaxed">
+            پیام شما با موفقیت ثبت شد 🌱
+            تیم پشتیبانی به‌زودی با شما تماس می‌گیرد.
+          </p>
+
+          <button
+              class="btn btn-success btn-sm rounded-full px-8 mx-auto"
+              @click="showSuccessAlert = false"
+          >
+            متوجه شدم
+          </button>
+        </div>
+      </div>
+    </div>
+  </transition>
+  <!-- Policy Warning Alert -->
+  <transition name="fade">
+    <div
+        v-if="showPolicyAlert"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4"
+    >
+      <div
+          class="card bg-base-100 w-full max-w-sm shadow-2xl border border-warning/30"
+      >
+        <div class="card-body text-center space-y-4">
+          <div
+              class="mx-auto w-12 h-12 rounded-full bg-warning/15 flex items-center justify-center text-2xl"
+          >
+            ⚠️
+          </div>
+
+          <h3 class="text-base font-bold">
+            نیاز به تأیید قوانین
+          </h3>
+
+          <p class="text-sm text-base-content/70 leading-relaxed">
+            برای ارسال پیام، لطفاً
+            <span class="font-medium text-base-content">
+            قوانین و حریم خصوصی
+          </span>
+            سایت را مطالعه کرده و با آن موافقت کنید.
+          </p>
+
+          <button
+              class="btn btn-warning btn-sm rounded-full px-8 mx-auto"
+              @click="showPolicyAlert = false"
+          >
+            متوجه شدم
+          </button>
+        </div>
+      </div>
+    </div>
+  </transition>
+
+
 </template>
 
 <script setup lang="ts">
 import { reactive, ref } from "vue";
+import { createTicket } from "@/services/ticket.ts";
+
+const showSuccessAlert = ref(false);
+const showPolicyAlert = ref(false);
+
 
 type SubjectType =
     | "order"
@@ -376,6 +471,7 @@ interface ContactForm {
   subject: SubjectType;
   message: string;
   phone: string;
+  orderNumber?: string;
   acceptPolicy: boolean;
 }
 
@@ -392,6 +488,7 @@ const form = reactive<ContactForm>({
   subject: "",
   message: "",
   phone: "",
+  orderNumber: undefined,
   acceptPolicy: false,
 });
 
@@ -420,6 +517,7 @@ const resetForm = () => {
   form.subject = "";
   form.message = "";
   form.phone = "";
+  form.orderNumber = undefined;
   form.acceptPolicy = false;
 };
 
@@ -427,25 +525,44 @@ const handleSubmit = async () => {
   if (!validate()) return;
 
   if (!form.acceptPolicy) {
-    alert("لطفاً ابتدا با قوانین و حریم خصوصی موافقت کنید.");
+    showPolicyAlert.value = true;
     return;
   }
 
   try {
     isSubmitting.value = true;
 
-    // اینجا بعداً API اصلی‌ات را صدا بزن (axios / fetch)
-    // await api.contact.send(form)
+    await createTicket({
+      name: form.name,
+      email: form.email,
+      subject: form.subject,
+      message: form.message,
+      phone: form.phone,
+      orderNumber: form.orderNumber,
+      acceptPolicy: form.acceptPolicy,
+    });
 
-    // دمو: شبیه‌سازی درخواست
-    await new Promise((resolve) => setTimeout(resolve, 900));
+    showSuccessAlert.value = true;
 
-    alert("پیام شما با موفقیت ارسال شد؛ ممنون از اعتمادتون به سپهر باکس 🌱");
     resetForm();
-  } catch (error) {
-    alert("در ارسال پیام خطایی رخ داد؛ لطفاً دوباره تلاش کنید.");
+  } catch (error: any) {
+    console.error(error);
+    alert(
+        error?.response?.data?.error ||
+        "در ارسال پیام خطایی رخ داد؛ لطفاً دوباره تلاش کنید."
+    );
   } finally {
     isSubmitting.value = false;
   }
 };
 </script>
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.25s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>

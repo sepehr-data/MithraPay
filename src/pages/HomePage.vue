@@ -6,33 +6,21 @@
       <HeroAppleOneBanner />
 
       <!-- 4 BANNERS (2x2) -->
-      <section
-          aria-label="ویژگی ها"
-          class="grid gap-4 sm:grid-cols-2 justify-items-center"
-      >
+      <section aria-label="ویژگی ها" class="grid gap-4 sm:grid-cols-2 justify-items-center">
         <RouterLink
             v-for="banner in banners"
             :key="banner.id"
             :to="banner.to"
             class="group relative block w-full max-w-[550px] h-64 sm:h-72 lg:h-80 overflow-hidden rounded-[26px] bg-gradient-to-br from-base-100 to-base-100/80 shadow-sm ring-1 ring-base-300/60 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
-
         >
-          <img
-              :src="banner.image"
-              :alt="banner.alt"
-              class="w-full h-full object-cover"
-          />
-          <div
-              class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 transition group-hover:opacity-60"
-          ></div>
+          <img :src="banner.image" :alt="banner.alt" class="w-full h-full object-cover" />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 transition group-hover:opacity-60"></div>
         </RouterLink>
       </section>
 
       <!-- BANNER SLIDER (AUTOPLAY + SMOOTH FADE) -->
       <section aria-label="بنر اصلی" class="relative">
-        <div
-            class="relative overflow-hidden rounded-[36px] bg-gradient-to-br from-base-100 to-base-100/60 border border-base-300/70 shadow-lg"
-        >
+        <div class="relative overflow-hidden rounded-[36px] bg-gradient-to-br from-base-100 to-base-100/60 border border-base-300/70 shadow-lg">
           <RouterLink :to="slides[current].to" class="block relative overflow-hidden">
             <Transition name="slider-horizontal">
               <img
@@ -53,7 +41,7 @@
           </button>
           <button
               class="absolute top-1/2 -translate-y-1/2 left-4 md:left-6 w-9 h-9 md:w-10 md:h-10 rounded-full bg-base-100/80 backdrop-blur-md shadow-lg flex items-center justify-center text-lg text-base-content/80 border border-base-300/70 transition transform hover:scale-110 hover:bg-primary hover:text-primary-content hover:border-primary/60"
-              @click="next"
+              @click="next()"
           >
             ›
           </button>
@@ -64,11 +52,7 @@
                 v-for="(s, idx) in slides"
                 :key="s.id"
                 class="h-2.5 rounded-full transition-all duration-200 border border-base-300/70"
-                :class="
-          idx === current
-            ? 'w-7 bg-primary shadow-md'
-            : 'w-2.5 bg-base-100/80 hover:bg-primary/70'
-        "
+                :class="idx === current ? 'w-7 bg-primary shadow-md' : 'w-2.5 bg-base-100/80 hover:bg-primary/70'"
                 @click="go(idx)"
             ></button>
           </div>
@@ -86,14 +70,12 @@
             </div>
             <p class="text-sm text-base-content/60">محبوب‌ترین اشتراک‌ها و اکانت‌ها</p>
           </div>
-          <RouterLink
-              to="/category/accounts"
-              class="text-sm text-primary hover:text-primary/80 font-medium flex items-center gap-1"
-          >
+          <RouterLink to="/category/accounts" class="text-sm text-primary hover:text-primary/80 font-medium flex items-center gap-1">
             مشاهده همه
             <span class="text-base">←</span>
           </RouterLink>
         </header>
+
         <div class="rounded-[24px] bg-base-100/80 shadow-sm ring-1 ring-base-300/70 px-3 sm:px-4 py-4">
           <div v-if="topWeeklyLoading" class="text-center py-8 text-sm text-base-content/60">
             در حال بارگذاری پرفروش‌ها...
@@ -117,26 +99,25 @@
               <h2 id="gift-cards" class="text-2xl font-bold">پرفروش‌ترین گیفت کارت‌ها</h2>
               <span class="h-1 w-10 rounded-full bg-primary/70 hidden sm:inline-block"></span>
             </div>
-            <p class="text-sm text-base-content/60">
-              گیفت کارت‌های اپل، پلی‌استیشن، استیم و سرویس‌های محبوب
-            </p>
+            <p class="text-sm text-base-content/60">گیفت کارت‌های اپل، پلی‌استیشن، استیم و سرویس‌های محبوب</p>
           </div>
-          <RouterLink
-              to="/category/gift-cards"
-              class="text-sm text-primary hover:text-primary/80 font-medium flex items-center gap-1"
-          >
+          <RouterLink to="/category/gift-cards" class="text-sm text-primary hover:text-primary/80 font-medium flex items-center gap-1">
             مشاهده همه گیفت‌کارت‌ها
             <span class="text-base">←</span>
           </RouterLink>
         </header>
+
         <div class="rounded-[24px] bg-base-100/80 shadow-sm ring-1 ring-base-300/70 px-3 sm:px-4 py-4">
-          <div v-if="productsLoading" class="text-center py-8 text-sm text-base-content/60">
+          <div v-if="giftCardsLoading" class="text-center py-8 text-sm text-base-content/60">
             در حال بارگذاری گیفت کارت‌ها...
+          </div>
+          <div v-else-if="giftCardsError" class="text-center py-8 text-error text-sm">
+            {{ giftCardsError }}
           </div>
           <div v-else-if="!giftCards.length" class="text-center py-8 text-sm text-base-content/60">
             گیفت کارتی برای نمایش وجود ندارد.
           </div>
-          <div dir="rtl">
+          <div v-else dir="rtl">
             <ProductCarousel :products="giftCards" />
           </div>
         </div>
@@ -158,9 +139,7 @@
               class="bg-base-100 rounded-2xl shadow-sm ring-1 ring-base-300/70 p-5 flex flex-col gap-3"
           >
             <div class="flex items-center gap-3">
-              <div
-                  class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm"
-              >
+              <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
                 {{ r.initials }}
               </div>
               <div>
@@ -244,122 +223,211 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onBeforeUnmount, computed, ref } from 'vue'
-import { storeToRefs } from 'pinia'
-import { listPosts } from '@/services/api'
-import type { BlogPost } from '@/services/types'
-import { useProductsStore } from '@/stores/products'
-import ProductGrid from '@/components/ProductGrid.vue'
+import { onMounted, onBeforeUnmount, ref } from 'vue'
 import HeroAppleOneBanner from '@/components/HeroAppleOneBanner.vue'
 import ProductCarousel from '@/components/ProductCarousel.vue'
 
-/* PRODUCTS STORE */
-const store = useProductsStore()
-const {
-  topWeeklyProducts,
-  topWeeklyLoading,
-  topWeeklyError,
-  loading: productsLoading,
-} = storeToRefs(store)
+/* ✅ API CLIENTS */
+import { getTopWeeklyProducts, listProducts } from '@/services/products'
+import { listBlogPosts } from '@/services/blog'
 
-/* BLOG STATE */
-const blogPosts = ref<BlogPost[]>([])
-const blogLoading = ref(false)
-const blogError = ref<string | null>(null)
+// ✅ فقط همین رو استفاده می‌کنیم (بدون GET تک‌بنر)
+import { adminListBanners } from '@/services/admin'
 
-/* SLIDER STATE */
-const slides = ref([
+/* =============== 4 HOME BANNERS (ACTIVE ONLY) =============== */
+type HomeBannerVM = { id: string | number; image: string; alt: string; to: string }
 
-  {
-    id: 'gemini',
-    image: '/banners/slider-gemini.jpg',
-    alt: 'خرید اشتراک جیمینی',
-    to: '/product/apple-music-3m',
-  },
+function resolveUrl(u: any) {
+  if (!u) return 'https://placehold.co/800x450?text=Product'
 
-  {
-    id: 'grok',
-    image: '/banners/slider-grok.png',
-    alt: 'خرید اشتراک گراک',
-    to: '/product/playstation-plus',
-  },
+  const s = String(u).trim()
+  if (!s) return 'https://placehold.co/800x450?text=Product'
+  if (/^https?:\/\//i.test(s)) return s
 
-  {
-    id: 'chat-gpt',
-    image: '/banners/slider-chat-gpt.jpg',
-    alt: 'خرید اشتراک چت جیبیتی',
-    to: '/product/apple-music-3m',
-  },
+  // اگر آدرس نسبی بود، به API Base بچسبان
+  const base = String(import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '')
+  if (!base) return s // اگر بیس نداری، همون رو برگردون
 
-])
-
-const current = ref(0)
-const AUTOPLAY_DELAY = 5000
-let autoplayTimer: ReturnType<typeof setInterval> | null = null
-
-function startAutoplay() {
-  if (autoplayTimer) return
-  autoplayTimer = setInterval(() => {
-    next(false)
-  }, AUTOPLAY_DELAY)
+  return `${base}${s.startsWith('/') ? '' : '/'}${s}`
 }
 
-function stopAutoplay() {
-  if (autoplayTimer) {
-    clearInterval(autoplayTimer)
-    autoplayTimer = null
+function pickProductImage(p: any) {
+  const raw =
+      p?.image_url ??
+      p?.imageUrl ??
+      p?.image ??
+      p?.thumbnail ??
+      p?.cover_image ??
+      p?.cover ??
+      (Array.isArray(p?.images) ? (p.images[0]?.url ?? p.images[0]) : null)
+
+  return resolveUrl(raw)
+}
+
+
+// ✅ fallback اولیه تا چینش بهم نخوره
+const FALLBACK_BANNERS: HomeBannerVM[] = [
+  { id: 'spotify', image: '/banners/banner-spotify.jpg', alt: 'Spotify', to: '/category/accounts' },
+  { id: 'apple-music', image: '/banners/banner-apple-music.jpg', alt: 'Apple Music', to: '/category/accounts' },
+  { id: 'youtube', image: '/banners/banner-youtube.jpg', alt: 'Youtube Premium', to: '/category/accounts' },
+  { id: 'xbox', image: '/banners/banner-xbox.jpg', alt: 'Xbox Game Pass', to: '/category/accounts' },
+]
+
+const banners = ref<HomeBannerVM[]>([...FALLBACK_BANNERS])
+
+function isActiveStatus(status: any) {
+  const s = String(status ?? '').trim().toLowerCase()
+  return s === 'active' || s === '1' || s === 'true' || s === 'enabled'
+}
+
+async function loadHomeBanners() {
+  try {
+    const data: any = await adminListBanners()
+    const items: any[] =
+        Array.isArray(data) ? data : Array.isArray(data?.items) ? data.items : Array.isArray(data?.banners) ? data.banners : []
+
+    // ✅ فقط بنرهای active
+    const actives: HomeBannerVM[] = items
+        .filter((b: any) => b && isActiveStatus(b.status))
+        .map((b: any) => ({
+          id: b.id,
+          image: b.image_url || 'https://placehold.co/1200x700?text=Banner',
+          alt: b.title || 'Banner',
+          to: '/category/accounts',
+        }))
+        .slice(0, 4)
+
+    // ✅ اگر کمتر از ۴ تا بود با fallback پر می‌کنیم
+    const filled: HomeBannerVM[] = actives.slice()
+    while (filled.length < 4) filled.push(FALLBACK_BANNERS[filled.length])
+
+    banners.value = filled
+  } catch (e) {
+    console.error('loadHomeBanners error:', e)
+    // fallback میمونه
   }
 }
 
-function restartAutoplay() {
-  stopAutoplay()
-  startAutoplay()
+/* =============== TOP WEEKLY =============== */
+const topWeeklyProducts = ref<any[]>([])
+const topWeeklyLoading = ref(false)
+const topWeeklyError = ref<string | null>(null)
+
+async function loadTopWeekly(limit = 8) {
+  topWeeklyLoading.value = true
+  topWeeklyError.value = null
+  try {
+    const data: any = await getTopWeeklyProducts(limit)
+    const items = Array.isArray(data) ? data : Array.isArray(data?.items) ? data.items : []
+    topWeeklyProducts.value = items
+  } catch (e: any) {
+    console.error('getTopWeeklyProducts error:', e)
+    topWeeklyError.value = e?.message || 'خطا در بارگذاری پرفروش‌ها'
+    topWeeklyProducts.value = []
+  } finally {
+    topWeeklyLoading.value = false
+  }
 }
 
-function next(reset = true) {
-  current.value = (current.value + 1) % slides.value.length
-  if (reset) restartAutoplay()
+/* =============== GIFT CARDS =============== */
+const giftCards = ref<any[]>([])
+const giftCardsLoading = ref(false)
+const giftCardsError = ref<string | null>(null)
+
+function isGiftCard(p: any) {
+  if (Number(p?.category_id) === 2 || Number(p?.categoryId) === 2) return true
+
+  const slug = String(p?.category_slug ?? p?.categorySlug ?? p?.category?.slug ?? '').toLowerCase()
+  const name = String(p?.category_name ?? p?.categoryName ?? p?.category?.name ?? '').toLowerCase()
+
+  if (slug === 'gift-card' || slug === 'gift-cards') return true
+  if (name.includes('گیفت') || name.includes('gift')) return true
+
+  const tags = Array.isArray(p?.tags) ? p.tags.map((t: any) => String(t).toLowerCase()) : []
+  if (tags.some((t: string) => t.includes('gift'))) return true
+  if (tags.some((t: string) => t.includes('گیفت'))) return true
+
+  return false
 }
 
-function prev() {
-  current.value = (current.value - 1 + slides.value.length) % slides.value.length
-  restartAutoplay()
+async function loadGiftCards(limit = 8) {
+  giftCardsLoading.value = true
+  giftCardsError.value = null
+  try {
+    const data: any = await listProducts()
+
+    const items = Array.isArray(data)
+        ? data
+        : Array.isArray(data?.items)
+            ? data.items
+            : []
+
+    giftCards.value = items
+        .filter(isGiftCard)
+        .slice(0, limit)
+        .map((p: any) => {
+          const img = pickProductImage(p)
+          return {
+            ...p,
+            // برای هر نوع پیاده‌سازی ProductCarousel مفیده
+            image_url: img,
+            image: img,
+            cover: p?.cover ?? img,
+          }
+        })
+  } catch (e: any) {
+    console.error('listProducts error:', e)
+    giftCardsError.value = e?.message || 'خطا در بارگذاری گیفت کارت‌ها'
+    giftCards.value = []
+  } finally {
+    giftCardsLoading.value = false
+  }
 }
 
-function go(i: number) {
-  current.value = i
-  restartAutoplay()
+
+/* =============== BLOG =============== */
+type BlogPostVM = {
+  slug: string
+  title: string
+  excerpt: string
+  cover?: string
+  date?: string
+  createdAt?: string
+  category?: string
 }
 
-/* GIFT CARDS */
-const giftCards = computed(() =>
-    store.products
-        .filter(
-            (p: any) =>
-                p.categoryId === 'cat-gift' ||
-                p.categoryId === 'gift-cards' ||
-                p?.tags?.includes('gift-card') ||
-                p?.tags?.includes('گیفت‌کارت') ||
-                p?.tags?.includes('گیفت')
-        )
-        .slice(0, 8)
-)
+const blogPosts = ref<BlogPostVM[]>([])
+const blogLoading = ref(false)
+const blogError = ref<string | null>(null)
 
-/* BLOG FETCH */
 const fetchBlogPosts = async () => {
   blogLoading.value = true
   blogError.value = null
   try {
-    const posts = await listPosts()
-    blogPosts.value = [...posts]
+    const data: any = await listBlogPosts()
+    const items: any[] = Array.isArray(data) ? data : Array.isArray(data?.items) ? data.items : []
+
+    blogPosts.value = items
+        .map((p: any) => ({
+          slug: String(p.slug ?? p.id ?? ''),
+          title: String(p.title ?? ''),
+          excerpt: String(p.excerpt ?? p.summary ?? ''),
+          cover: p.cover_image ?? p.cover ?? p.image ?? null,
+          date: p.published_at ?? p.created_at ?? p.date ?? null,
+          createdAt: p.created_at ?? null,
+          category: p.category ?? null,
+        }))
+        .filter((p) => p.slug && p.title)
         .sort((a: any, b: any) => {
           const ad = new Date(a.date || a.createdAt || 0).getTime()
           const bd = new Date(b.date || b.createdAt || 0).getTime()
           return bd - ad
         })
-        .slice(0, 6)
+        .slice(0, 3)
   } catch (error: any) {
+    console.error('listBlogPosts error:', error)
     blogError.value = error?.message || 'خطا در بارگذاری مطالب بلاگ'
+    blogPosts.value = []
   } finally {
     blogLoading.value = false
   }
@@ -372,102 +440,84 @@ function formatDate(val?: string) {
   return d.toLocaleDateString('fa-IR')
 }
 
-/* USER REVIEWS (نمونه ثابت) */
-const reviews = ref([
-  {
-    id: 1,
-    name: 'مهدی ر.',
-    initials: 'م ر',
-    meta: 'خریدار اشتراک اپل موزیک',
-    text: 'سرعت تحویل و راهنمایی برای فعال‌سازی عالی بود. اولین خریدم از میتراپی بود و کاملاً راضی بودم.',
-    stars: 5,
-    date: '۲ روز پیش',
-  },
-  {
-    id: 2,
-    name: 'سارا ک.',
-    initials: 'س ک',
-    meta: 'خریدار گیفت‌کارت استیم',
-    text: 'قیمت‌ها نسبت به بازار خوب بود و کد بدون مشکل روی اکانتم فعال شد. پشتیبانی هم پاسخ‌گو بود.',
-    stars: 4,
-    date: '۱ هفته پیش',
-  },
-  {
-    id: 3,
-    name: 'امیر ح.',
-    initials: 'ا ح',
-    meta: 'خریدار اکانت iCloud+',
-    text: 'برای بکاپ گوشی‌هام به فضای بیشتر نیاز داشتم، خیلی سریع برام فعال شد و راهنمای قدم‌به‌قدم هم داشت.',
-    stars: 5,
-    date: '۱۰ روز پیش',
-  },
+/* =============== SLIDER =============== */
+const slides = ref([
+  // ✅ فقط مقصد کلیک اسلایدرها تغییر کرد
+  { id: 'gemini', image: '/banners/slider-gemini.jpg', alt: 'خرید اشتراک جیمینی', to: '/category/accounts' },
+  { id: 'grok', image: '/banners/slider-grok.png', alt: 'خرید اشتراک گراک', to: '/category/accounts' },
+  { id: 'chat-gpt', image: '/banners/slider-chat-gpt.jpg', alt: 'خرید اشتراک چت جیبیتی', to: '/category/accounts' },
 ])
 
-/* STATIC BANNERS */
-const banners = [
-  {
-    id: 'spotify',
-    image: '/banners/banner-spotify.jpg',
-    alt: 'Spotify',
-    to: '/product/apple-tv',
-  },
-  {
-    id: 'apple-music',
-    image: '/banners/banner-apple-music.jpg',
-    alt: 'Apple Music',
-    to: '/product/apple-music-3m',
-  },
-  {
-    id: 'youtube',
-    image: '/banners/banner-youtube.jpg',
-    alt: 'Youtube Premium',
-    to: '/product/apple-arcade',
-  },
-  {
-    id: 'xbox',
-    image: '/banners/banner-xbox.jpg',
-    alt: 'Xbot Game Pass',
-    to: '/product/icloud',
-  },
-]
+const current = ref(0)
+const AUTOPLAY_DELAY = 5000
+let autoplayTimer: ReturnType<typeof setInterval> | null = null
 
-/* LIFECYCLE */
+function startAutoplay() {
+  if (autoplayTimer) return
+  autoplayTimer = setInterval(() => next(false), AUTOPLAY_DELAY)
+}
+function stopAutoplay() {
+  if (autoplayTimer) {
+    clearInterval(autoplayTimer)
+    autoplayTimer = null
+  }
+}
+function restartAutoplay() {
+  stopAutoplay()
+  startAutoplay()
+}
+function next(reset = true) {
+  current.value = (current.value + 1) % slides.value.length
+  if (reset) restartAutoplay()
+}
+function prev() {
+  current.value = (current.value - 1 + slides.value.length) % slides.value.length
+  restartAutoplay()
+}
+function go(i: number) {
+  current.value = i
+  restartAutoplay()
+}
+
+/* =============== REVIEWS / STATIC =============== */
+const reviews = ref([
+  { id: 1, name: 'مهدی ر.', initials: 'م ر', meta: 'خریدار اشتراک اپل موزیک', text: 'سرعت تحویل و راهنمایی برای فعال‌سازی عالی بود. اولین خریدم از میتراپی بود و کاملاً راضی بودم.', stars: 5, date: '۲ روز پیش' },
+  { id: 2, name: 'سارا ک.', initials: 'س ک', meta: 'خریدار گیفت‌کارت استیم', text: 'قیمت‌ها نسبت به بازار خوب بود و کد بدون مشکل روی اکانتم فعال شد. پشتیبانی هم پاسخ‌گو بود.', stars: 4, date: '۱ هفته پیش' },
+  { id: 3, name: 'امیر ح.', initials: 'ا ح', meta: 'خریدار اکانت iCloud+', text: 'برای بکاپ گوشی‌هام به فضای بیشتر نیاز داشتم، خیلی سریع برام فعال شد و راهنمای قدم‌به‌قدم هم داشت.', stars: 5, date: '۱۰ روز پیش' },
+])
+
+/* =============== LIFECYCLE =============== */
 onMounted(async () => {
-  await store.load()
-  await store.fetchTopWeeklyProducts(8)
-  await fetchBlogPosts()
+  await Promise.all([
+    loadHomeBanners(), // ✅ بنرهای فعال
+    loadTopWeekly(8),
+    loadGiftCards(8),
+    fetchBlogPosts(),
+  ])
   startAutoplay()
 })
 
-onBeforeUnmount(() => {
-  stopAutoplay()
-})
+onBeforeUnmount(() => stopAutoplay())
 </script>
 
 <style scoped>
 .slider-horizontal-enter-active,
 .slider-horizontal-leave-active {
-  transition:
-      transform 380ms ease-in-out,
-      opacity 380ms ease-in-out;
+  transition: transform 380ms ease-in-out, opacity 380ms ease-in-out;
 }
-
 .slider-horizontal-leave-active {
   position: absolute;
   inset: 0;
 }
-
-/* اسلاید جدید از راست وارد می‌شود */
 .slider-horizontal-enter-from {
   transform: translateX(100%);
   opacity: 0.9;
 }
-
-/* اسلاید قبلی به چپ خارج می‌شود */
 .slider-horizontal-leave-to {
   transform: translateX(-100%);
   opacity: 0.9;
 }
+
 .slider-fade-enter-active,
 .slider-fade-leave-active {
   transition: opacity 0.4s ease;

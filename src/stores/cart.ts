@@ -1,13 +1,33 @@
-import { defineStore } from 'pinia'
-import type { ID, Product } from '@/services/types'
-import products from '@/mocks/products.json'
+import { defineStore } from "pinia"
+import type { ID, Product } from "@/services/types"
+import products from "@/mocks/products.json"
 
 type LocalCartItem = { productId: ID; qty: number }
 type DetailedCartItem = LocalCartItem & { product: Product; lineTotal: number }
 
 const list = products as Product[]
 
-export const useCartStore = defineStore('cart', {
+// ✅ تلاش برای پاک کردن کلیدهای احتمالی Persist (بسته به تنظیمات پلاگین)
+function removePersistedCart() {
+    const keys = [
+        "cart",               // اگر خودت دستی گذاشته باشی
+        "pinia-cart",         // رایج
+        "pinia:cart",         // رایج
+        "cart-store",         // احتمالی
+        "auth_cart",          // احتمالی
+    ]
+
+    for (const k of keys) {
+        try {
+            localStorage.removeItem(k)
+        } catch {
+            // ignore
+        }
+    }
+
+}
+
+export const useCartStore = defineStore("cart", {
     state: () => ({
         items: [] as LocalCartItem[],
     }),
@@ -19,7 +39,6 @@ export const useCartStore = defineStore('cart', {
 
         detailed(state): DetailedCartItem[] {
             return state.items.map((i) => {
-                // ✅ امن‌ترین تطبیق برای ID های string/number
                 const p = list.find((x) => String(x.id) === String(i.productId))
 
                 if (!p) {
@@ -30,7 +49,6 @@ export const useCartStore = defineStore('cart', {
             })
         },
 
-        // ✅ دیگر از this.detailed استفاده نمی‌کنیم
         total(state): number {
             return state.items.reduce((sum: number, i) => {
                 const p = list.find((x) => String(x.id) === String(i.productId))
@@ -58,7 +76,17 @@ export const useCartStore = defineStore('cart', {
         },
 
         clear() {
+            // ✅ 1) پاک کردن state
             this.items = []
+
+            // ✅ 2) پاک کردن persisted storage (برای اینکه بعد از logout برنگرده)
+            removePersistedCart()
+        },
+
+        reset() {
+            // اگر خواستی در لاگ‌اوت استفاده کنی
+            this.$reset()
+            removePersistedCart()
         },
     },
 
