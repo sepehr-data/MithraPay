@@ -98,7 +98,7 @@
                         <p class="text-[11px] text-base-content/60">اشتراک، اکانت و گیفت‌کارت دیجیتال</p>
                         <h3 class="text-base font-semibold text-base-content">همه چیز برای خرید بی‌دردسر</h3>
                         <p class="text-xs text-base-content/70 leading-5">
-                          تو سپهر باکس فقط سرویس مورد نظرت رو انتخاب کن؛
+                          تو رد اسکای باکس فقط سرویس مورد نظرت رو انتخاب کن؛
                           بقیه‌ش با ماست؛ پرداخت راحت، تحویل سریع اشتراک و پشتیبانی که واقعاً جواب می‌ده.
                         </p>
                       </div>
@@ -645,7 +645,7 @@ onBeforeUnmount(() => {
   bottom: 0;
   height: 2px;
   border-radius: 9999px;
-  background: linear-gradient(90deg, rgba(59, 130, 246, 0.9), rgba(56, 189, 248, 0.9));
+  background: linear-gradient(90deg, #DC8893, #DC8893);
   transform: scaleX(0);
   transform-origin: right center;
   transition: transform 0.23s ease-out;

@@ -127,7 +127,7 @@
       <section aria-labelledby="reviews" class="space-y-6">
         <div class="flex flex-col items-center text-center gap-2">
           <p class="text-xs text-primary font-semibold">نظر کاربران</p>
-          <h2 id="reviews" class="text-2xl font-bold">تجربه مشتریان میتراپی</h2>
+          <h2 id="reviews" class="text-2xl font-bold">تجربه مشتریان رد اسکای باکس</h2>
           <p class="text-sm text-base-content/60">چند بازخورد واقعی کاربران</p>
           <div class="w-16 h-1 bg-primary/70 rounded-full"></div>
         </div>
@@ -223,77 +223,78 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onBeforeUnmount, ref } from 'vue'
-import HeroAppleOneBanner from '@/components/HeroAppleOneBanner.vue'
-import ProductCarousel from '@/components/ProductCarousel.vue'
+import { onMounted, onBeforeUnmount, ref } from "vue"
+import HeroAppleOneBanner from "@/components/HeroAppleOneBanner.vue"
+import ProductCarousel from "@/components/ProductCarousel.vue"
 
 /* ✅ API CLIENTS */
-import { getTopWeeklyProducts, listProducts } from '@/services/products'
-import { listBlogPosts } from '@/services/blog'
+import { getTopWeeklyProducts, listProducts } from "@/services/products"
+import { listBlogPosts } from "@/services/blog"
 
-// ✅ فقط همین رو استفاده می‌کنیم (بدون GET تک‌بنر)
-import { adminListBanners } from '@/services/admin'
+/* ✅ NEW: public banners api */
+import { listBanners } from "@/services/banner"
+import type { BannerDto } from "@/types/api_client_types/banner.dto"
 
 /* =============== 4 HOME BANNERS (ACTIVE ONLY) =============== */
 type HomeBannerVM = { id: string | number; image: string; alt: string; to: string }
 
 function resolveUrl(u: any) {
-  if (!u) return 'https://placehold.co/800x450?text=Product'
+  if (!u) return "https://placehold.co/1200x700?text=Banner"
 
   const s = String(u).trim()
-  if (!s) return 'https://placehold.co/800x450?text=Product'
+  if (!s) return "https://placehold.co/1200x700?text=Banner"
   if (/^https?:\/\//i.test(s)) return s
 
-  // اگر آدرس نسبی بود، به API Base بچسبان
-  const base = String(import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '')
-  if (!base) return s // اگر بیس نداری، همون رو برگردون
+  const base = String(import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "")
+  if (!base) return s
 
-  return `${base}${s.startsWith('/') ? '' : '/'}${s}`
+  return `${base}${s.startsWith("/") ? "" : "/"}${s}`
 }
 
-function pickProductImage(p: any) {
-  const raw =
-      p?.image_url ??
-      p?.imageUrl ??
-      p?.image ??
-      p?.thumbnail ??
-      p?.cover_image ??
-      p?.cover ??
-      (Array.isArray(p?.images) ? (p.images[0]?.url ?? p.images[0]) : null)
-
-  return resolveUrl(raw)
+function isActiveStatus(status: any) {
+  const s = String(status ?? "").trim().toLowerCase()
+  return s === "active" || s === "1" || s === "true" || s === "enabled"
 }
 
+function isInternalRoute(link: string) {
+  // لینک داخلی vue-router: "/category/accounts" ...
+  return link.startsWith("/") && !/^\/\//.test(link)
+}
+
+function bannerToRoute(b: BannerDto): string {
+  const raw = String(b?.link ?? "").trim()
+  if (!raw) return "/category/accounts"
+
+  // اگر لینک داخلی بود، مستقیم router-link
+  if (isInternalRoute(raw)) return raw
+
+  // اگر لینک خارجی بود، چون RouterLink داری، بهتره fallback بدیم
+  // (اگر خواستی برای external لینک، باید <a target="_blank"> بسازی)
+  return "/category/accounts"
+}
 
 // ✅ fallback اولیه تا چینش بهم نخوره
 const FALLBACK_BANNERS: HomeBannerVM[] = [
-  { id: 'spotify', image: '/banners/banner-spotify.jpg', alt: 'Spotify', to: '/category/accounts' },
-  { id: 'apple-music', image: '/banners/banner-apple-music.jpg', alt: 'Apple Music', to: '/category/accounts' },
-  { id: 'youtube', image: '/banners/banner-youtube.jpg', alt: 'Youtube Premium', to: '/category/accounts' },
-  { id: 'xbox', image: '/banners/banner-xbox.jpg', alt: 'Xbox Game Pass', to: '/category/accounts' },
+  { id: "spotify", image: "/banners/banner-spotify.jpg", alt: "Spotify", to: "/category/accounts" },
+  { id: "apple-music", image: "/banners/banner-apple-music.jpg", alt: "Apple Music", to: "/category/accounts" },
+  { id: "youtube", image: "/banners/banner-youtube.jpg", alt: "Youtube Premium", to: "/category/accounts" },
+  { id: "xbox", image: "/banners/banner-xbox.jpg", alt: "Xbox Game Pass", to: "/category/accounts" },
 ]
 
 const banners = ref<HomeBannerVM[]>([...FALLBACK_BANNERS])
 
-function isActiveStatus(status: any) {
-  const s = String(status ?? '').trim().toLowerCase()
-  return s === 'active' || s === '1' || s === 'true' || s === 'enabled'
-}
-
 async function loadHomeBanners() {
   try {
-    const data: any = await adminListBanners()
-    const items: any[] =
-        Array.isArray(data) ? data : Array.isArray(data?.items) ? data.items : Array.isArray(data?.banners) ? data.banners : []
+    // ✅ اینجا دیگر 401 نداریم چون public است
+    const items = await listBanners()
 
-    // ✅ فقط بنرهای active
-    const actives: HomeBannerVM[] = items
-        .filter((b: any) => b && isActiveStatus(b.status))
-        .map((b: any) => ({
+    const actives: HomeBannerVM[] = (items || [])
+        .filter((b) => b && isActiveStatus(b.status))
+        .map((b) => ({
           id: b.id,
-          image: b.image_url || 'https://placehold.co/1200x700?text=Banner',
-          alt: b.title || 'Banner',
-          to: '/category/accounts',
+          image: resolveUrl(b.image_url),
+          alt: String(b.title || "Banner"),
+          to: bannerToRoute(b),
         }))
         .slice(0, 4)
 
@@ -303,8 +304,9 @@ async function loadHomeBanners() {
 
     banners.value = filled
   } catch (e) {
-    console.error('loadHomeBanners error:', e)
+    console.error("loadHomeBanners error:", e)
     // fallback میمونه
+    banners.value = [...FALLBACK_BANNERS]
   }
 }
 
@@ -321,8 +323,8 @@ async function loadTopWeekly(limit = 8) {
     const items = Array.isArray(data) ? data : Array.isArray(data?.items) ? data.items : []
     topWeeklyProducts.value = items
   } catch (e: any) {
-    console.error('getTopWeeklyProducts error:', e)
-    topWeeklyError.value = e?.message || 'خطا در بارگذاری پرفروش‌ها'
+    console.error("getTopWeeklyProducts error:", e)
+    topWeeklyError.value = e?.message || "خطا در بارگذاری پرفروش‌ها"
     topWeeklyProducts.value = []
   } finally {
     topWeeklyLoading.value = false
@@ -334,18 +336,31 @@ const giftCards = ref<any[]>([])
 const giftCardsLoading = ref(false)
 const giftCardsError = ref<string | null>(null)
 
+function pickProductImage(p: any) {
+  const raw =
+      p?.image_url ??
+      p?.imageUrl ??
+      p?.image ??
+      p?.thumbnail ??
+      p?.cover_image ??
+      p?.cover ??
+      (Array.isArray(p?.images) ? (p.images[0]?.url ?? p.images[0]) : null)
+
+  return resolveUrl(raw)
+}
+
 function isGiftCard(p: any) {
   if (Number(p?.category_id) === 2 || Number(p?.categoryId) === 2) return true
 
-  const slug = String(p?.category_slug ?? p?.categorySlug ?? p?.category?.slug ?? '').toLowerCase()
-  const name = String(p?.category_name ?? p?.categoryName ?? p?.category?.name ?? '').toLowerCase()
+  const slug = String(p?.category_slug ?? p?.categorySlug ?? p?.category?.slug ?? "").toLowerCase()
+  const name = String(p?.category_name ?? p?.categoryName ?? p?.category?.name ?? "").toLowerCase()
 
-  if (slug === 'gift-card' || slug === 'gift-cards') return true
-  if (name.includes('گیفت') || name.includes('gift')) return true
+  if (slug === "gift-card" || slug === "gift-cards") return true
+  if (name.includes("گیفت") || name.includes("gift")) return true
 
   const tags = Array.isArray(p?.tags) ? p.tags.map((t: any) => String(t).toLowerCase()) : []
-  if (tags.some((t: string) => t.includes('gift'))) return true
-  if (tags.some((t: string) => t.includes('گیفت'))) return true
+  if (tags.some((t: string) => t.includes("gift"))) return true
+  if (tags.some((t: string) => t.includes("گیفت"))) return true
 
   return false
 }
@@ -355,12 +370,7 @@ async function loadGiftCards(limit = 8) {
   giftCardsError.value = null
   try {
     const data: any = await listProducts()
-
-    const items = Array.isArray(data)
-        ? data
-        : Array.isArray(data?.items)
-            ? data.items
-            : []
+    const items = Array.isArray(data) ? data : Array.isArray(data?.items) ? data.items : []
 
     giftCards.value = items
         .filter(isGiftCard)
@@ -369,21 +379,19 @@ async function loadGiftCards(limit = 8) {
           const img = pickProductImage(p)
           return {
             ...p,
-            // برای هر نوع پیاده‌سازی ProductCarousel مفیده
             image_url: img,
             image: img,
             cover: p?.cover ?? img,
           }
         })
   } catch (e: any) {
-    console.error('listProducts error:', e)
-    giftCardsError.value = e?.message || 'خطا در بارگذاری گیفت کارت‌ها'
+    console.error("listProducts error:", e)
+    giftCardsError.value = e?.message || "خطا در بارگذاری گیفت کارت‌ها"
     giftCards.value = []
   } finally {
     giftCardsLoading.value = false
   }
 }
-
 
 /* =============== BLOG =============== */
 type BlogPostVM = {
@@ -409,9 +417,9 @@ const fetchBlogPosts = async () => {
 
     blogPosts.value = items
         .map((p: any) => ({
-          slug: String(p.slug ?? p.id ?? ''),
-          title: String(p.title ?? ''),
-          excerpt: String(p.excerpt ?? p.summary ?? ''),
+          slug: String(p.slug ?? p.id ?? ""),
+          title: String(p.title ?? ""),
+          excerpt: String(p.excerpt ?? p.summary ?? ""),
           cover: p.cover_image ?? p.cover ?? p.image ?? null,
           date: p.published_at ?? p.created_at ?? p.date ?? null,
           createdAt: p.created_at ?? null,
@@ -425,8 +433,8 @@ const fetchBlogPosts = async () => {
         })
         .slice(0, 3)
   } catch (error: any) {
-    console.error('listBlogPosts error:', error)
-    blogError.value = error?.message || 'خطا در بارگذاری مطالب بلاگ'
+    console.error("listBlogPosts error:", error)
+    blogError.value = error?.message || "خطا در بارگذاری مطالب بلاگ"
     blogPosts.value = []
   } finally {
     blogLoading.value = false
@@ -434,18 +442,17 @@ const fetchBlogPosts = async () => {
 }
 
 function formatDate(val?: string) {
-  if (!val) return ''
+  if (!val) return ""
   const d = new Date(val)
   if (isNaN(d.getTime())) return val
-  return d.toLocaleDateString('fa-IR')
+  return d.toLocaleDateString("fa-IR")
 }
 
 /* =============== SLIDER =============== */
 const slides = ref([
-  // ✅ فقط مقصد کلیک اسلایدرها تغییر کرد
-  { id: 'gemini', image: '/banners/slider-gemini.jpg', alt: 'خرید اشتراک جیمینی', to: '/category/accounts' },
-  { id: 'grok', image: '/banners/slider-grok.png', alt: 'خرید اشتراک گراک', to: '/category/accounts' },
-  { id: 'chat-gpt', image: '/banners/slider-chat-gpt.jpg', alt: 'خرید اشتراک چت جیبیتی', to: '/category/accounts' },
+  { id: "gemini", image: "/banners/slider-gemini.jpg", alt: "خرید اشتراک جیمینی", to: "/category/accounts" },
+  { id: "grok", image: "/banners/slider-grok.png", alt: "خرید اشتراک گراک", to: "/category/accounts" },
+  { id: "chat-gpt", image: "/banners/slider-chat-gpt.jpg", alt: "خرید اشتراک چت جیبیتی", to: "/category/accounts" },
 ])
 
 const current = ref(0)
@@ -481,15 +488,15 @@ function go(i: number) {
 
 /* =============== REVIEWS / STATIC =============== */
 const reviews = ref([
-  { id: 1, name: 'مهدی ر.', initials: 'م ر', meta: 'خریدار اشتراک اپل موزیک', text: 'سرعت تحویل و راهنمایی برای فعال‌سازی عالی بود. اولین خریدم از میتراپی بود و کاملاً راضی بودم.', stars: 5, date: '۲ روز پیش' },
-  { id: 2, name: 'سارا ک.', initials: 'س ک', meta: 'خریدار گیفت‌کارت استیم', text: 'قیمت‌ها نسبت به بازار خوب بود و کد بدون مشکل روی اکانتم فعال شد. پشتیبانی هم پاسخ‌گو بود.', stars: 4, date: '۱ هفته پیش' },
-  { id: 3, name: 'امیر ح.', initials: 'ا ح', meta: 'خریدار اکانت iCloud+', text: 'برای بکاپ گوشی‌هام به فضای بیشتر نیاز داشتم، خیلی سریع برام فعال شد و راهنمای قدم‌به‌قدم هم داشت.', stars: 5, date: '۱۰ روز پیش' },
+  { id: 1, name: "مهدی ر.", initials: "م ر", meta: "خریدار اشتراک اپل موزیک", text: "سرعت تحویل و راهنمایی برای فعال‌سازی عالی بود. اولین خریدم از رد اسکای بود و کاملاً راضی بودم.", stars: 5, date: "۲ روز پیش" },
+  { id: 2, name: "سارا ک.", initials: "س ک", meta: "خریدار گیفت‌کارت استیم", text: "قیمت‌ها نسبت به بازار خوب بود و کد بدون مشکل روی اکانتم فعال شد. پشتیبانی هم پاسخ‌گو بود.", stars: 4, date: "۱ هفته پیش" },
+  { id: 3, name: "امیر ح.", initials: "ا ح", meta: "خریدار اکانت iCloud+", text: "برای بکاپ گوشی‌هام به فضای بیشتر نیاز داشتم، خیلی سریع برام فعال شد و راهنمای قدم‌به‌قدم هم داشت.", stars: 5, date: "۱۰ روز پیش" },
 ])
 
 /* =============== LIFECYCLE =============== */
 onMounted(async () => {
   await Promise.all([
-    loadHomeBanners(), // ✅ بنرهای فعال
+    loadHomeBanners(), // ✅ public banners
     loadTopWeekly(8),
     loadGiftCards(8),
     fetchBlogPosts(),
@@ -525,6 +532,10 @@ onBeforeUnmount(() => stopAutoplay())
 .slider-fade-enter-from,
 .slider-fade-leave-to {
   opacity: 0;
+}
+.slider-fade-enter-to,
+.slider-fade-leave-from {
+  opacity: 1;
 }
 .slider-fade-enter-to,
 .slider-fade-leave-from {

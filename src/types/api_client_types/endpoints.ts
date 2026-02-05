@@ -13,6 +13,10 @@ export const endpoints = {
     },
 
     admin: {
+
+        // Admins
+        admins: "/admin/admins",
+
         // Products
         products: "/admin/products",
         productById: (id: number) => `/admin/products/${id}`,
@@ -42,6 +46,10 @@ export const endpoints = {
         list: "/orders/",
         my: "/orders/my",
         byId: (orderId: number) => `/orders/${orderId}`,
+    },
+    banners: {
+        list: "/banners",
+        byId: (id: number) => `/banners/${id}`,
     },
 
     products: {

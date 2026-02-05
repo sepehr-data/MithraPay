@@ -6,7 +6,7 @@
         <div class="space-y-1.5">
           <p class="text-[10px] uppercase tracking-[0.25em] text-primary-content/70">USERS</p>
           <h2 class="text-lg sm:text-2xl font-extrabold">مدیریت کاربران</h2>
-          <p class="mt-1 text-xs sm:text-sm text-primary-content/80">مشاهده، جستجو و مدیریت کاربران ثبت‌نام‌شده در سپهر‌باکس.</p>
+          <p class="mt-1 text-xs sm:text-sm text-primary-content/80">مشاهده، جستجو و مدیریت کاربران ثبت‌نام‌شده در رد اسکای.</p>
         </div>
 
         <!-- باکس‌های آماری کنار هم -->

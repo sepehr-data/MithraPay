@@ -51,33 +51,6 @@ export type ProductDto = {
     updated_at?: string | null
 }
 
-// POST /products/
-export type CreateProductPayload = {
-    title: string
-    slug?: string | null
-    category_id?: number | null
-    price: number
-    compare_at_price?: number | null
-    delivery_type?: string | null
-    platform?: string | null
-
-    duration_type_id?: number | null
-    subscription_type_id?: number | null
-    personal_account?: boolean
-
-    duration?: string | null
-    subscription_type?: string | null
-
-    region?: string | null
-    stock?: number | null
-    is_active?: boolean
-    image_url?: string | null
-    short_description?: string | null
-    description?: string | null
-}
-
-export type CreateProductResponse = ProductDto
-
 // GET /products/?category=&search=&duration_type_id=&subscription_type_id=&personal_account=
 export type ListProductsQuery = Partial<{
     category: string

@@ -29,7 +29,13 @@ import type {
     UpdateTicketResponse,
     GetAllOrdersResponse,
     UpdateOrderAdminStatusRequest,
-    UpdateOrderAdminStatusResponse
+    UpdateOrderAdminStatusResponse,
+    AdminListAdminsResponse,
+    AdminPromoteByPhonePayload,
+    AdminPromoteByPhoneResponse,
+    AdminRemoveAdminByPhonePayload,
+    AdminRemoveAdminByPhoneResponse,
+
 } from "@/types/api_client_types/admin.dto.ts"
 
 /* ===================== PRODUCTS ===================== */
@@ -237,4 +243,52 @@ export async function updateOrderAdminStatus(
     const { data: response } = await http.patch<UpdateOrderAdminStatusResponse>(
         endpoints.admin.orderById(orderId), data);
     return response;
+}
+
+// GET /admin/admins
+export async function adminListAdmins(params?: { limit?: number; offset?: number }) {
+    try {
+        const resp = await http.get<AdminListAdminsResponse>(endpoints.admin.admins, {
+            params: {
+                limit: params?.limit ?? 200,
+                offset: params?.offset ?? 0,
+            },
+        })
+        return resp.data
+    } catch (err) {
+        console.error("adminListAdmins error:", err)
+        throw err
+    }
+}
+
+// POST /admin/admins
+export async function adminPromoteToAdminByPhone(
+    payload: AdminPromoteByPhonePayload
+): Promise<AdminPromoteByPhoneResponse> {
+    try {
+        const { data } = await http.post<AdminPromoteByPhoneResponse>(
+            endpoints.admin.admins,
+            payload
+        )
+        return data
+    } catch (err) {
+        console.error("adminPromoteToAdminByPhone error:", err)
+        throw err
+    }
+}
+
+// DELETE /admin/admins  (با body)
+export async function adminRemoveAdminByPhone(
+    payload: AdminRemoveAdminByPhonePayload
+): Promise<AdminRemoveAdminByPhoneResponse> {
+    try {
+        const { data } = await http.delete<AdminRemoveAdminByPhoneResponse>(
+            endpoints.admin.admins,
+            { data: payload }
+        )
+        return data
+    } catch (err) {
+        console.error("adminRemoveAdminByPhone error:", err)
+        throw err
+    }
 }

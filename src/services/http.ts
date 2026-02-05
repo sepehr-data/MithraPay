@@ -6,13 +6,24 @@ export const http = axios.create({
 })
 
 http.interceptors.request.use((config) => {
-    const token = localStorage.getItem('auth_token')
+    let token = localStorage.getItem('access_token')
+
+    if (token) token = token.replace(/^"+|"+$/g, '').trim()
+
     if (token) {
-        config.headers = config.headers || {}
-        config.headers.Authorization = `Bearer ${token}`
+        if (typeof (config.headers as any)?.set === 'function') {
+            ;(config.headers as any).set('Authorization', `Bearer ${token}`)
+        } else {
+            config.headers = config.headers ?? {}
+            ;(config.headers as any).Authorization = `Bearer ${token}`
+        }
     }
+
+    console.log('Interceptor token?', !!token)
+    console.log('Auth header:', (config.headers as any)?.Authorization ?? '(not set)')
     return config
 })
+
 
 export class HttpError extends Error {
     constructor(

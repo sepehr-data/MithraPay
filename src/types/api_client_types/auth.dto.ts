@@ -1,6 +1,8 @@
 // src/types/auth.dto.ts
 
 // POST /auth/register
+// src/types/auth.dto.ts
+
 export type RegisterPayload = {
     phone: string
     email?: string
@@ -11,8 +13,15 @@ export type RegisterResponse = {
     id: number
     phone: string
     email: string | null
-    full_name: string | null
+
+    // بک‌اند فعلی
+    full_name?: string | null
+
+    // اگر بعداً خروجی رو تغییر دادی
+    first_name?: string | null
+    last_name?: string | null
 }
+
 
 // POST /auth/request-otp
 export type RequestOtpPayload = {

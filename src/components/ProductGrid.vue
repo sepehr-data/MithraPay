@@ -1,17 +1,37 @@
 <template>
-  <div class="w-full min-w-0 grid-wrap">
-    <div class="product-grid">
-      <ProductCard v-for="p in products" :key="p.id" :product="p" />
-    </div>
+  <div>
 
-    <div
-        v-if="!products?.length"
-        class="mt-4 rounded-2xl border border-base-300 bg-base-100 p-6 text-center"
-    >
-      <p class="text-sm text-base-content/70">فعلاً محصولی برای نمایش نداریم.</p>
+    <div class="w-full min-w-0 grid-wrap">
+      <div class="product-grid">
+        <ProductCard
+            v-for="p in products"
+            :key="p.id"
+            :product="p"
+            :highlight="highlight"
+        />
+      </div>
+
+      <div
+          v-if="!products?.length"
+          class="mt-4 rounded-2xl border border-base-300 bg-base-100 p-6 text-center"
+      >
+        <p class="text-sm text-base-content/70">فعلاً محصولی برای نمایش نداریم.</p>
+      </div>
     </div>
   </div>
 </template>
+
+<script setup lang="ts">
+import { defineProps, ref } from 'vue'
+import ProductCard from './ProductCard.vue'
+import type { ProductDto } from '@/types/api_client_types/products.dto.ts'
+
+const props = defineProps<{
+  products: ProductDto[]
+  highlight?: string
+}>()
+
+</script>
 
 <style scoped>
 .grid-wrap{
@@ -47,4 +67,3 @@
   height: 100%;
 }
 </style>
-

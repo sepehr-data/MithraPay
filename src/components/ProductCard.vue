@@ -2,7 +2,7 @@
   <div class="card bg-base-100 shadow-md hover:shadow-lg transition overflow-hidden">
     <figure class="relative aspect-[1/1] overflow-hidden bg-base-200">
       <img
-          :src="product.image || 'https://placehold.co/600x400?text=Product'"
+          :src="product.image_url || 'https://placehold.co/600x400?text=Product'"
           :alt="product.title"
           class="w-full h-full object-cover"
           loading="lazy"
@@ -63,12 +63,12 @@
 </template>
 
 <script setup lang="ts">
-import type { Product } from '@/services/types'
+import type { ProductDto } from '@/types/api_client_types/products.dto.ts'
 import { computed } from 'vue'
 import { useCartStore } from '@/stores/cart'
 import RatingStars from './RatingStars.vue'
 
-const props = defineProps<{ product: Product }>()
+const props = defineProps<{ product: ProductDto }>()
 const cart = useCartStore()
 
 /** ✅ عددسازی مقاوم */

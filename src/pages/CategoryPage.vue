@@ -176,7 +176,7 @@
         <div class="space-y-2">
           <p class="text-xs font-extrabold text-primary">چرا ما؟</p>
           <div class="flex items-center gap-3">
-            <h2 class="text-xl font-extrabold">چرا {{ catTitle }} از میتراپی؟</h2>
+            <h2 class="text-xl font-extrabold">چرا {{ catTitle }} از رد اسکای؟</h2>
             <span class="hidden sm:inline h-1 w-10 rounded-full bg-primary/70"></span>
           </div>
           <p class="text-sm text-base-content/70 leading-relaxed max-w-3xl">

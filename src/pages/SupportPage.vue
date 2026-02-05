@@ -35,7 +35,7 @@
         </h2>
         <p class="max-w-2xl text-sm md:text-[15px] text-base-content/70">
           در مورد خرید، فعال‌سازی اشتراک، یا حتی قبل از ثبت سفارش سوالی دارید؟
-          فرم زیر را پر کنید تا تیم سپهر باکس به‌صورت اختصاصی راهنمایتان کند.
+          فرم زیر را پر کنید تا تیم رد اسکای باکس به‌صورت اختصاصی راهنمایتان کند.
         </p>
       </div>
 
@@ -280,10 +280,10 @@
                       ایمیل پشتیبانی
                     </span>
                     <a
-                        href="mailto:support@mithrapay.ir"
+                        href="mailto:support@redskybox.ir"
                         class="link link-hover text-xs md:text-sm ltr:!text-left"
                     >
-                      support@sepehrbox.ir
+                      support@redskybox.ir
                     </a>
                   </div>
                 </div>

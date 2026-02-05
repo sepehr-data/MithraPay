@@ -6,7 +6,7 @@
         <div class="space-y-1.5">
           <p class="text-[10px] uppercase tracking-[0.25em] text-primary-content/70">PRODUCTS</p>
           <h2 class="text-lg sm:text-2xl font-extrabold">مدیریت محصولات</h2>
-          <p class="mt-1 text-xs sm:text-sm text-primary-content/80">مشاهده، جستجو و مدیریت محصولات فعال فروشگاه سپهر‌باکس.</p>
+          <p class="mt-1 text-xs sm:text-sm text-primary-content/80">مشاهده، جستجو و مدیریت محصولات فعال فروشگاه رد اسکای.</p>
         </div>
 
         <div class="flex flex-col items-end gap-2 text-[11px] sm:text-xs">

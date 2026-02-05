@@ -9,7 +9,9 @@
     }"
   >
     <!-- overlay (prettier + safe for clicks) -->
-    <div class="pointer-events-none absolute inset-0 bg-gradient-to-br from-base-200/70 via-base-200/35 to-base-300/60"></div>
+    <div
+        class="pointer-events-none absolute inset-0 bg-gradient-to-br from-base-200/70 via-base-200/35 to-base-300/60"
+    ></div>
     <div class="pointer-events-none absolute inset-0 backdrop-blur-[2px]"></div>
 
     <div
@@ -25,14 +27,14 @@
         <div class="absolute -bottom-24 -right-24 w-72 h-72 rounded-full bg-base-100/10 blur-2xl"></div>
 
         <div class="relative">
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-base-100/10 border border-base-100/15 text-xs mb-5">
+          <div
+              class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-base-100/10 border border-base-100/15 text-xs mb-5"
+          >
             <span class="w-2 h-2 rounded-full bg-success"></span>
             ورود امن با کد یکبار مصرف
           </div>
 
-          <h2 class="text-2xl md:text-3xl font-extrabold leading-9 mb-3">
-            خوش آمدید به SepehrBox
-          </h2>
+          <h2 class="text-2xl md:text-3xl font-extrabold leading-9 mb-3">خوش آمدید به RedSkyBox</h2>
 
           <p class="text-sm md:text-base text-base-100/80 leading-7 max-w-sm">
             فقط شماره موبایل را وارد کنید و بدون رمز عبور، سریع وارد شوید.
@@ -43,17 +45,14 @@
             <img
                 :src="loginIllustration"
                 alt="login illustration"
-                class="w-full max-w-sm mx-auto lg:mx-0 select-none pointer-events-none
-                     object-contain max-h-56
-                     drop-shadow-[0_18px_40px_rgba(0,0,0,0.25)]
-                     opacity-95"
+                class="w-full max-w-sm mx-auto lg:mx-0 select-none pointer-events-none object-contain max-h-56 drop-shadow-[0_18px_40px_rgba(0,0,0,0.25)] opacity-95"
             />
           </div>
         </div>
 
         <div class="relative text-xs text-base-100/80 flex items-center justify-between">
           <span>پشتیبانی: 09171004008</span>
-          <span class="opacity-80">SepehrBox ©</span>
+          <span class="opacity-80">RedSkyBox ©</span>
         </div>
       </div>
 
@@ -75,7 +74,8 @@
             <span
                 class="w-6 h-6 rounded-full grid place-items-center text-xs font-bold"
                 :class="step === 1 ? 'bg-primary text-primary-content' : 'bg-base-300 text-base-content/70'"
-            >1</span>
+            >1</span
+            >
             <span class="text-xs font-semibold">شماره</span>
           </div>
 
@@ -88,7 +88,8 @@
             <span
                 class="w-6 h-6 rounded-full grid place-items-center text-xs font-bold"
                 :class="step === 2 ? 'bg-primary text-primary-content' : 'bg-base-300 text-base-content/70'"
-            >2</span>
+            >2</span
+            >
             <span class="text-xs font-semibold">کد</span>
           </div>
         </div>
@@ -109,9 +110,7 @@
                 />
               </div>
 
-              <span class="text-[11px] opacity-60 mt-2">
-                مثال: 09123456789
-              </span>
+              <span class="text-[11px] opacity-60 mt-2"> مثال: 09123456789 </span>
             </label>
 
             <button
@@ -128,17 +127,11 @@
           <div v-else key="s2" class="space-y-5">
             <div class="rounded-2xl bg-base-200/60 border border-base-300 p-4">
               <p class="text-sm opacity-75">
-                کد ۶ رقمی ارسال شده به
-                <strong dir="ltr" class="font-mono">{{ prettyPhone }}</strong>
-                را وارد کنید.
+                کد ۶ رقمی ارسال شده به <strong dir="ltr" class="font-mono">{{ prettyPhone }}</strong> را وارد کنید.
               </p>
             </div>
 
-            <div
-                class="flex gap-2 justify-center otp-boxes"
-                dir="ltr"
-                @paste.prevent="onOtpPaste"
-            >
+            <div class="flex gap-2 justify-center otp-boxes" dir="ltr" @paste.prevent="onOtpPaste">
               <input
                   v-for="(_, idx) in 6"
                   :key="idx"
@@ -146,8 +139,7 @@
                   maxlength="1"
                   type="text"
                   inputmode="numeric"
-                  class="input input-bordered w-12 h-12 md:w-13 md:h-13 text-center text-lg rounded-2xl otp-input
-                       focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  class="input input-bordered w-12 h-12 md:w-13 md:h-13 text-center text-lg rounded-2xl otp-input focus:outline-none focus:ring-2 focus:ring-primary/30"
                   v-model="otp[idx]"
                   @input="onOtpInput(idx)"
                   @keydown.backspace.prevent="onBackspace(idx)"
@@ -166,14 +158,10 @@
             <div class="flex items-center justify-between text-xs opacity-75">
               <button class="link link-hover" @click="reset">اصلاح شماره</button>
 
-              <button
-                  class="link link-hover"
-                  :disabled="resendSeconds > 0 || loading"
-                  @click="sendCode"
-              >
+              <button class="link link-hover" :disabled="resendSeconds > 0 || loading" @click="sendCode">
                 <span v-if="resendSeconds > 0">
-                  ارسال مجدد در
-                  <span class="font-mono">{{ resendSeconds }}</span>ث
+                  ارسال مجدد در <span class="font-mono">{{ resendSeconds }}</span
+                >ث
                 </span>
                 <span v-else>ارسال مجدد کد</span>
               </button>
@@ -181,9 +169,7 @@
           </div>
         </transition>
 
-        <p class="text-xs opacity-60 mt-7 leading-6">
-          با ورود، قوانین و حریم خصوصی را می‌پذیرید.
-        </p>
+        <p class="text-xs opacity-60 mt-7 leading-6">با ورود، قوانین و حریم خصوصی را می‌پذیرید.</p>
       </div>
     </div>
 
@@ -195,7 +181,10 @@
 import { ref, computed, nextTick, onBeforeUnmount } from "vue"
 import authBg from "@/assets/auth-bg.png"
 import loginIllustration from "@/assets/branding-bg.png"
-import { requestOtp, verifyOtp } from "@/services/api"
+
+// ✅ از api client جدید
+import { requestOtp, verifyOtp } from "@/services/auth"
+
 import { useAuthStore } from "@/stores/auth"
 import { useToast } from "vue-toastification"
 import AdminKnockModal from "@/components/AdminKnockModal.vue"
@@ -218,9 +207,7 @@ const resendSeconds = ref(0)
 const otpInputs = ref<HTMLInputElement[]>([] as any)
 
 const isPhoneValid = computed(() => /^09\d{9}$/.test(phone.value))
-const prettyPhone = computed(() =>
-    phone.value.replace(/(\d{4})(\d{3})(\d{4})/, "$1-$2-$3")
-)
+const prettyPhone = computed(() => phone.value.replace(/(\d{4})(\d{3})(\d{4})/, "$1-$2-$3"))
 
 let resendTimer: number | null = null
 
@@ -241,7 +228,6 @@ onBeforeUnmount(() => {
 })
 
 function normalizeErrMessage(err: any) {
-  // اگر axios interceptor داشته باشی ممکنه مستقیم data رو reject کنه
   return (
       err?.message ||
       err?.msg ||
@@ -258,8 +244,7 @@ async function sendCode() {
   loading.value = true
 
   try {
-    // API expects: { phone }
-    await requestOtp(phone.value)
+    await requestOtp({ phone: phone.value })
 
     step.value = 2
     startResendTimer()
@@ -295,9 +280,7 @@ function onBackspace(idx: number) {
 }
 
 function onOtpPaste(e: ClipboardEvent) {
-  const text = (e.clipboardData?.getData("text") || "")
-      .replace(/\D/g, "")
-      .slice(0, 6)
+  const text = (e.clipboardData?.getData("text") || "").replace(/\D/g, "").slice(0, 6)
   if (text.length === 0) return
 
   otp.value = text.split("").concat(Array(6 - text.length).fill(""))
@@ -320,20 +303,16 @@ async function verify() {
 
   verifying.value = true
   try {
-    // backend returns: { access_token }
-    const data = await verifyOtp(phone.value, code)
+    const data = await verifyOtp({ phone: phone.value, code })
 
     const token = data?.access_token
     if (!token) throw new Error("توکن از سرور برنگشت")
 
-    // چون بک‌اند فعلاً user برنمی‌گردونه، حداقل user رو بسازیم
-    const user = { phone: phone.value }
-
-    // مهم: auth.login باید توکن رو جایی ذخیره کنه (pinia + localStorage)
-    auth.login({ token, user })
+    // ✅ store خودش token + roles رو ذخیره می‌کنه
+    auth.login({ token, user: { phone: phone.value } })
 
     toast.success("ورود با موفقیت انجام شد")
-    afterLoginSuccess()
+    await afterLoginSuccess()
   } catch (err: any) {
     console.error(err)
     toast.error(normalizeErrMessage(err) || "کد وارد شده صحیح نیست")

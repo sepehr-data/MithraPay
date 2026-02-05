@@ -9,7 +9,7 @@
           <p class="text-[10px] uppercase tracking-[0.25em] text-primary-content/70">ARTICLES</p>
           <h2 class="text-lg sm:text-2xl font-extrabold">مدیریت مقالات</h2>
           <p class="mt-1 text-xs sm:text-sm text-primary-content/80">
-            مدیریت و ویرایش مقالات آموزشی و محتوای وبلاگ سپهر‌باکس.
+            مدیریت و ویرایش مقالات آموزشی و محتوای وبلاگ رد اسکای.
           </p>
         </div>
 

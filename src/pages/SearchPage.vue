@@ -81,7 +81,7 @@
         <div class="text-4xl">🔎</div>
         <h3 class="font-bold">جستجو کن تا نتایج رو ببینی</h3>
         <p class="text-sm text-base-content/70">
-          محصولات از API دریافت شده‌اند، ولی تا وقتی چیزی تایپ نکنی نمایش داده نمی‌شن.
+          ولی تا وقتی چیزی تایپ نکنی نمایش داده نمی‌شن.
         </p>
       </div>
     </div>
@@ -163,37 +163,21 @@ async function loadAllProducts() {
   errorMsg.value = ''
 
   try {
-    const limit = 200
-    let offset = 0
-    let out: any[] = []
-    let safety = 0
-
-    while (safety < 200) {
-      safety++
-      const data: any = await listProducts({ limit, offset } as any)
-
-      const items: any[] =
-          (data?.items as any[]) ??
-          (data?.products as any[]) ??
-          (data?.data as any[]) ??
-          (Array.isArray(data) ? data : [])
-
-      out = out.concat(items)
-
-      const total = Number(data?.total ?? data?.count ?? data?.meta?.total ?? data?.pagination?.total ?? NaN)
-      offset += items.length || limit
-
-      if (Number.isFinite(total)) {
-        if (out.length >= total) break
-      } else {
-        if (items.length < limit) break
-      }
-      if (!items.length) break
+    console.log('درحال دریافت محصولات...')
+    const params = {
+      limit: 200,
+      offset: 0
     }
 
-    allProducts.value = out
+    const products = await listProducts(params as any)
+    console.log('محصولات دریافت شده:', products)
+    console.log('تعداد محصولات:', products?.length || 0)
+
+    allProducts.value = products || []
+
   } catch (e: any) {
     errorMsg.value = e?.message || 'خطا در دریافت محصولات'
+    console.error('خطا در دریافت محصولات:', e)
   } finally {
     loading.value = false
   }
@@ -201,18 +185,37 @@ async function loadAllProducts() {
 
 onMounted(() => {
   loadAllProducts()
+
+  // تست: بعد از لود شدن، یک جستجوی تستی انجام دهید
+  setTimeout(() => {
+    if (allProducts.value.length > 0) {
+      console.log('محصولات لود شده:', allProducts.value)
+      // تست جستجوی یک کلمه موجود
+      const testProduct = allProducts.value[0]
+      if (testProduct?.title) {
+        const testWord = testProduct.title.split(' ')[0]
+        console.log('تست جستجو برای:', testWord)
+        localQ.value = testWord
+      }
+    }
+  }, 1000)
 })
 
 /** ---- Search helpers (title + category فقط) ---- */
 function normalizeFa(input: string) {
   return String(input || '')
-      .toLowerCase()
-      .replace(/[\u200c\u200d\u200e\u200f]/g, ' ')
-      .replace(/[ي]/g, 'ی')
+      .normalize('NFKD') // نرمال‌سازی یونیکد
+      .replace(/[\u064B-\u065F]/g, '') // حذف اعراب
+      .replace(/[\u200c\u200d\u200e\u200f]/g, '')
+      .replace(/[يى]/g, 'ی')
       .replace(/[ك]/g, 'ک')
-      .replace(/[ۀ]/g, 'ه')
-      .replace(/[\s]+/g, ' ')
+      .replace(/[ۀة]/g, 'ه')
+      .replace(/[ؤ]/g, 'و')
+      .replace(/[أإآ]/g, 'ا')
+      .replace(/[ً-ِ]/g, '') // حذف حرکات عربی
+      .replace(/[\s\u2000-\u200A]+/g, ' ') // تبدیل همه فاصله‌ها به فضای معمولی
       .trim()
+      .toLowerCase()
 }
 
 function tokenize(q: string) {
@@ -245,14 +248,40 @@ const results = computed(() => {
   if (!q) return []
 
   const all = allProducts.value || []
+  console.log('Search - کل محصولات:', all)
   const tokens = tokenize(q)
   if (!tokens.length) return []
 
-  const filtered = all.filter((p: any) => {
-    const hay = normalizeFa([p.title, p.category?.title ?? p.category].filter(Boolean).join(' '))
-    return includesAllTokens(hay, tokens)
+  console.log('جستجو در محصولات:', {
+    query: q,
+    tokens,
+    totalProducts: all.length
   })
 
+  const filtered = all.filter((p: any) => {
+    // جستجو در title, category, description
+    const fields = [
+      p.title || '',
+      p.category?.title || p.category || '',
+      p.description || '',
+      p.short_description || ''
+    ].join(' ')
+
+    const hay = normalizeFa(fields)
+    const result = includesAllTokens(hay, tokens)
+
+    if (result) {
+      console.log('محصول یافت شد:', {
+        title: p.title,
+        hay,
+        tokens
+      })
+    }
+
+    return result
+  })
+
+  console.log('تعداد نتایج:', filtered.length)
   return applySort(filtered, tokens, q)
 })
 

@@ -6,7 +6,7 @@
         <div class="space-y-1.5">
           <p class="text-[10px] uppercase tracking-[0.25em] text-primary-content/70">BANNERS</p>
           <h2 class="text-lg sm:text-2xl font-extrabold">مدیریت بنرها</h2>
-          <p class="mt-1 text-xs sm:text-sm text-primary-content/80">مدیریت بنرهای اسلایدر و بخش‌های ویژه‌ی صفحه اصلی سپهر‌باکس.</p>
+          <p class="mt-1 text-xs sm:text-sm text-primary-content/80">مدیریت بنرهای اسلایدر و بخش‌های ویژه‌ی صفحه اصلی رد اسکای.</p>
         </div>
 
         <!-- آمار و دکمه افزودن بنر -->

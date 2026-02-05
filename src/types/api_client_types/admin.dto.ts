@@ -21,11 +21,6 @@ export type AdminProductListItem = {
 export type PlanType = 'individual' | 'family'
 export type PlanDuration = '1m' | '3m' | '6m' | '12m'
 
-// ✅ برای create/update (ارسال)
-export type AdminUpsertProductPayload = AdminCreateProductPayload & {
-    plan_type?: PlanType[] | null
-    plan_duration?: PlanDuration[] | null
-}
 
 // ✅ برای get (دریافت)
 export type AdminGetProductResponse = {
@@ -59,16 +54,6 @@ export type AdminDeleteProductResponse = {
     deleted_id?: number
 }
 
-// Pagination wrapper (اگر توی فرانت استفاده می‌کنی)
-export type AdminProductListResponse = {
-    items: AdminProductListItem[]
-    pagination: {
-        limit: number
-        offset: number
-        count: number
-        total: number
-    }
-}
 
 // POST /admin/products
 export type AdminCreateProductPayload = {
@@ -333,3 +318,39 @@ export interface UpdateOrderAdminStatusResponse {
         admin_status: AdminOrderStatus;
     };
 }
+
+export type AdminRoleName = string
+
+export type AdminUserDTO = {
+    id: number
+    name: string | null
+    first_name: string | null
+    last_name: string | null
+    phone: string
+    email: string | null
+    roles: AdminRoleName[]
+    is_active: boolean
+    created_at: string | null
+    updated_at: string | null
+}
+
+export type AdminPromoteByPhonePayload = {
+    phone: string // 09xxxxxxxxx
+}
+
+export type AdminPromoteByPhoneResponse = {
+    ok: true
+    admin: AdminUserDTO
+}
+
+export type AdminRemoveAdminByPhonePayload = {
+    phone: string // 09xxxxxxxxx
+}
+
+export type AdminRemoveAdminByPhoneResponse = {
+    ok: true
+    removed: true
+    user: AdminUserDTO
+}
+
+export type AdminListAdminsResponse = AdminUserDTO[]

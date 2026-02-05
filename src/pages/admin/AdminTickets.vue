@@ -9,7 +9,7 @@
   <p class="text-[10px] uppercase tracking-[0.25em] text-primary-content/70">TICKETS</p>
       <h2 class="text-lg sm:text-2xl font-extrabold">مدیریت تیکت‌های پشتیبانی</h2>
   <p class="mt-1 text-xs sm:text-sm text-primary-content/80">
-      بررسی، مدیریت و پاسخ‌گویی به تیکت‌های کاربران سپهر‌باکس.
+      بررسی، مدیریت و پاسخ‌گویی به تیکت‌های کاربران رد اسکای.
   </p>
   </div>
 

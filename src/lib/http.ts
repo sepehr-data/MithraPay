@@ -33,10 +33,7 @@ http.interceptors.request.use((config) => {
 http.interceptors.response.use(
     (res) => res,
     (err) => {
-        const status = err?.response?.status
-        if (status === 401) {
-            clearToken()
-        }
         return Promise.reject(err)
     }
 )
+

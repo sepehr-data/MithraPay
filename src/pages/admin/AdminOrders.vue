@@ -1,4 +1,4 @@
-<template>
+asdaq]ddqwdqwdqdqwd<template>
   <div class="space-y-6" dir="rtl">
     <!-- HERO بالا برای سفارشات -->
     <section
@@ -9,7 +9,7 @@
           <p class="text-[10px] uppercase tracking-[0.25em] text-primary-content/70">ORDERS</p>
           <h2 class="text-lg sm:text-2xl font-extrabold">مدیریت سفارشات</h2>
           <p class="mt-1 text-xs sm:text-sm text-primary-content/80">
-            مشاهده، جستجو و مدیریت سفارشات پرداخت‌شده ثبت‌شده در سپهر‌باکس.
+            مشاهده، جستجو و مدیریت سفارشات پرداخت‌شده ثبت‌شده در رد اسکای.
           </p>
         </div>
 

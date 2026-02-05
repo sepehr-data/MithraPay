@@ -2,8 +2,6 @@
 import { http } from "@/lib/http"
 import { endpoints } from "@/types/api_client_types/endpoints.ts"
 import type {
-    CreateProductPayload,
-    CreateProductResponse,
     ListProductsQuery,
     ListProductsResponse,
     TopWeeklyProductsResponse,

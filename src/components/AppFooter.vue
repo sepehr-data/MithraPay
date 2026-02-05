@@ -17,13 +17,13 @@
             >
               <img
                   src="/src/assets/logo3.png"
-                  alt="لوگوی SepehrBox"
+                  alt="لوگوی RedSkyBox"
                   class="h-10 w-auto object-contain"
               />
             </div>
             <div class="space-y-0.5">
               <p class="font-semibold text-base">
-                SepehrBox
+                RedSkyBox
               </p>
               <p class="text-[11px] text-base-100/60">
                 فروش اکانت و گیفت‌کارت قانونی
@@ -50,7 +50,7 @@
                   style="filter: brightness(1.2) saturate(1.25);"
               />
               <span class="font-medium">ایمیل:</span>
-              <span class="ltr:ml-1 break-all">support@sepehrbox.ir</span>
+              <span class="ltr:ml-1 break-all">support@redskybox.ir</span>
             </p>
           </div>
 
@@ -179,7 +179,7 @@
               </li>
               <li>
                 <a href="/instagram" class="hover:text-primary transition-colors">
-                  اینستاگرام سپهر‌باکس
+                  اینستاگرام رد اسکای باکس
                 </a>
               </li>
               <li>
