@@ -65,10 +65,17 @@
                     v-if="cart.items.length"
                     type="button"
                     class="btn btn-ghost btn-sm rounded-2xl border border-base-200"
-                    @click="clearAll()"
+                    @click="clearAllServer()"
+                    :disabled="clearing || busyAny"
                 >
-                  خالی کردن سبد
+                  <span v-if="!clearing">خالی کردن سبد</span>
+                  <span v-else class="loading loading-spinner loading-sm"></span>
                 </button>
+              </div>
+
+              <!-- Sync loading -->
+              <div v-if="syncingCart" class="mt-3 text-xs text-base-content/60">
+                در حال دریافت سبد خرید از سرور...
               </div>
 
               <!-- loading products -->
@@ -77,7 +84,7 @@
               </div>
 
               <!-- Empty -->
-              <div v-if="cart.items.length === 0" class="mt-4 rounded-3xl border border-base-200 p-4">
+              <div v-if="cart.items.length === 0 && !syncingCart" class="mt-4 rounded-3xl border border-base-200 p-4">
                 <div class="text-sm font-semibold">سبد خرید خالی است</div>
                 <div class="text-xs text-base-content/60 mt-1">
                   برای ادامه، حداقل یک محصول اضافه کنید.
@@ -89,8 +96,8 @@
               </div>
 
               <!-- Items -->
-              <div v-else class="mt-4 divide-y divide-base-200">
-                <div v-for="line in detailed" :key="line.productKey" class="py-4">
+              <div v-else-if="cart.items.length" class="mt-4 divide-y divide-base-200">
+                <div v-for="line in detailed" :key="line.itemId ?? line.productKey" class="py-4">
                   <div class="flex gap-3">
                     <img
                         :src="line.product.image || 'https://placehold.co/96x96'"
@@ -105,7 +112,7 @@
                             {{ line.product.title }}
                           </div>
                           <div class="text-xs text-base-content/60 mt-1">
-                            {{ price(line.product.price || 0) }}
+                            {{ price(line.unitPrice) }}
                             <span class="opacity-60"> / واحد</span>
                           </div>
                         </div>
@@ -113,11 +120,13 @@
                         <button
                             type="button"
                             class="icon-btn"
-                            @click="cart.remove(line.productKey)"
+                            @click="removeLineServer(line)"
                             aria-label="remove"
                             title="حذف"
+                            :disabled="removingId === line.itemId || busyAny"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <span v-if="removingId === line.itemId" class="loading loading-spinner loading-sm"></span>
+                          <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M4 7h16" />
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M10 11v6" />
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M14 11v6" />
@@ -131,7 +140,8 @@
                         <div class="qty-wrap">
                           <QuantityInput
                               :model-value="line.qty"
-                              @update:model-value="cart.setQty(line.productKey, $event)"
+                              :disabled="updatingId === line.itemId || busyAny"
+                              @update:model-value="(v) => updateQtyServer(line, v)"
                           />
                         </div>
 
@@ -147,6 +157,10 @@
                         <span v-if="line.product.isDigital">دیجیتال</span>
                         <span v-else>فیزیکی</span>
                       </div>
+
+                      <div v-if="line.itemId == null" class="mt-2 text-[11px] text-warning/80">
+                        شناسه آیتم سبد موجود نیست؛ ابتدا سبد از سرور sync می‌شود.
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -157,7 +171,7 @@
                       class="btn btn-primary rounded-2xl"
                       :class="cart.items.length ? '' : 'btn-disabled'"
                       @click="nextStep()"
-                      :disabled="savingProfile"
+                      :disabled="savingProfile || syncingCart || busyAny"
                   >
                     ادامه
                   </button>
@@ -372,6 +386,10 @@ import QuantityInput from '@/components/QuantityInput.vue'
 import { useRouter } from 'vue-router'
 import { getProduct } from '@/services/products'
 
+// ✅ cart api clients
+import { getCart, clearCart, removeCartItem, updateCartItemQty } from '@/services/cart'
+import type { UpdateCartItemQtyPayload } from '@/types/api_client_types/cart.dto'
+
 const router = useRouter()
 const cart = useCartStore()
 const auth = useAuthStore()
@@ -383,6 +401,16 @@ const step = ref<1 | 2 | 3>(1)
 const savingProfile = ref(false)
 
 const serverUserSnap = ref<any>(null)
+
+/** -----------------------------
+ * ✅ Cart sync state
+ * ----------------------------- */
+const syncingCart = ref(false)
+const updatingId = ref<number | null>(null)
+const removingId = ref<number | null>(null)
+const clearing = ref(false)
+
+const busyAny = computed(() => syncingCart.value || updatingId.value != null || removingId.value != null || clearing.value)
 
 /** -----------------------------
  * ✅ Cart products via API
@@ -419,10 +447,16 @@ function normalizeProduct(dto: any): ProductVM {
   }
 }
 
+function getProductIdFromCartItem(it: any): number | null {
+  const pid = it?.product_id ?? it?.productId ?? it?.productID
+  const n = Number(pid)
+  return Number.isFinite(n) && n > 0 ? n : null
+}
+
 async function ensureCartProductsLoaded() {
   const numericIds = (cart.items || [])
-      .map((x: any) => Number(String(x.productId)))
-      .filter((n: number) => Number.isFinite(n))
+      .map((x: any) => getProductIdFromCartItem(x))
+      .filter((n: any): n is number => Number.isFinite(n))
 
   const missing = numericIds.filter((id) => !productsById.value[id])
   if (!missing.length) return
@@ -453,26 +487,36 @@ watch(
     { deep: true, immediate: true }
 )
 
+/** -----------------------------
+ * ✅ detailed (server-cart based)
+ * ----------------------------- */
 const detailed = computed(() => {
   const items = cart.items || []
   return items.map((it: any) => {
-    const productKey = String(it.productId) // store key (string)
-    const productId = Number(productKey)    // api id (number)
-    const qty = Number(it.qty ?? 1)
+    const itemId = Number(it?.id) || null
+    const productId = getProductIdFromCartItem(it)
+    const productKey = String(productId ?? it?.product_id ?? it?.productId ?? '') || String(itemId ?? Math.random())
+
+    const qty = Number(it?.quantity ?? it?.qty ?? 1) || 1
 
     const product =
-        Number.isFinite(productId) && productsById.value[productId]
+        productId != null && productsById.value[productId]
             ? productsById.value[productId]
             : ({
-              id: productId || productKey,
-              title: 'در حال دریافت...',
-              price: 0,
+              id: productId ?? 0,
+              title: it?.title ?? 'در حال دریافت...',
+              price: Number(it?.unit_price ?? 0),
               image: '',
               isDigital: false
             } as any)
 
-    const lineTotal = (Number((product as any).price ?? 0) || 0) * qty
-    return { productKey, productId, qty, product, lineTotal }
+    const unitPrice =
+        Number.isFinite(Number(it?.unit_price)) ? Number(it.unit_price) : Number((product as any).price ?? 0) || 0
+
+    const lineTotal =
+        Number.isFinite(Number(it?.line_total)) ? Number(it.line_total) : unitPrice * qty
+
+    return { itemId, productKey, productId, qty, product, unitPrice, lineTotal }
   })
 })
 
@@ -482,6 +526,111 @@ const allDigital = computed(() => {
   if (!detailed.value.length) return true
   return detailed.value.every((l) => !!(l.product as any)?.isDigital)
 })
+
+/** -----------------------------
+ * ✅ API: sync cart when step 1 opens
+ * ----------------------------- */
+async function syncCartFromServer() {
+  if (!auth.token) return
+  syncingCart.value = true
+  try {
+    const res = await getCart()
+    cart.setCart(res)
+  } catch (e: any) {
+    console.error(e)
+    toast.error(e?.response?.data?.error || e?.message || 'خطا در دریافت سبد خرید')
+  } finally {
+    syncingCart.value = false
+  }
+}
+
+watch(
+    () => step.value,
+    (s) => {
+      if (s === 1) void syncCartFromServer()
+    },
+    { immediate: true }
+)
+
+/** -----------------------------
+ * ✅ API: update qty / remove / clear
+ * ----------------------------- */
+function clampQty(v: any) {
+  const n = Number(v)
+  if (!Number.isFinite(n)) return 1
+  // اجازه‌ی 0 برای حذف از طریق PATCH
+  return Math.max(0, Math.floor(n))
+}
+
+async function updateQtyServer(line: { itemId: number | null }, newQty: number) {
+  if (!auth.token) return
+
+  const itemId = line.itemId
+  if (!itemId) {
+    // اگر آیتم id ندارد، یعنی state لوکال است -> یکبار sync کن
+    await syncCartFromServer()
+    return
+  }
+
+  const qty = clampQty(newQty)
+
+  // جلوگیری از چند درخواست همزمان برای یک آیتم
+  if (updatingId.value === itemId) return
+
+  updatingId.value = itemId
+  try {
+    const payload: UpdateCartItemQtyPayload = { quantity: qty }
+    const res = await updateCartItemQty(itemId, payload)
+    cart.setCart(res)
+  } catch (e: any) {
+    console.error(e)
+    toast.error(e?.response?.data?.error || e?.message || 'خطا در بروزرسانی تعداد')
+    // برای اینکه UI خراب نشه
+    await syncCartFromServer()
+  } finally {
+    updatingId.value = null
+  }
+}
+
+async function removeLineServer(line: { itemId: number | null }) {
+  if (!auth.token) return
+
+  const itemId = line.itemId
+  if (!itemId) {
+    await syncCartFromServer()
+    return
+  }
+
+  if (removingId.value === itemId) return
+
+  removingId.value = itemId
+  try {
+    const res = await removeCartItem(itemId)
+    cart.setCart(res)
+  } catch (e: any) {
+    console.error(e)
+    toast.error(e?.response?.data?.error || e?.message || 'خطا در حذف آیتم')
+    await syncCartFromServer()
+  } finally {
+    removingId.value = null
+  }
+}
+
+async function clearAllServer() {
+  if (!auth.token) return
+  clearing.value = true
+  try {
+    const res = await clearCart()
+    cart.setCart(res)
+    step.value = 1
+  } catch (e: any) {
+    console.error(e)
+    toast.error(e?.response?.data?.error || e?.message || 'خطا در خالی کردن سبد')
+    await syncCartFromServer()
+  } finally {
+    clearing.value = false
+  }
+}
 
 /** -----------------------------
  * form (بدون ارسال فیزیکی)
@@ -539,7 +688,6 @@ const payable = computed(() => Math.max(0, cartTotal.value))
 const step1Ok = computed(() => cart.items.length > 0)
 
 const step2Ok = computed(() => {
-  // ✅ فقط اطلاعات تماس
   if (!form.fullName.trim()) return false
   if (!form.phone.trim()) return false
   if (!form.email.trim()) return false
@@ -642,6 +790,7 @@ function placeOrder() {
   alert('این یک دموی فرانت‌اند است. پرداخت واقعی متصل نشده است.')
 }
 
+/** ✅ فقط برای fallback لوکال (الان بیشتر از سرور استفاده می‌کنیم) */
 const clearAll = () => {
   ;(cart as any).clear?.()
   ;(cart as any).clearCart?.()
@@ -659,8 +808,6 @@ async function fetchMeOnLoad() {
     const me = await getMe()
     ;(auth as any).user = me
     localStorage.setItem('auth_user', JSON.stringify(me))
-
-    // ✅ خیلی مهم: مستقیم فرم رو هم پر کن (وابسته به watch نباش)
     fillFromAuthUser(me)
   } catch (err: any) {
     if (err?.response?.data?.error?.message === 'Invalid token') {
@@ -675,6 +822,8 @@ async function fetchMeOnLoad() {
 
 onMounted(() => {
   void fetchMeOnLoad()
+  // اگر صفحه مستقیم روی step=1 میاد، همینجا هم sync کن
+  if (step.value === 1) void syncCartFromServer()
 })
 </script>
 

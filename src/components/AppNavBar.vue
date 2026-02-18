@@ -179,12 +179,17 @@
         </div>
 
         <!-- cart -->
-        <button class="btn btn-ghost btn-circle cart-btn" @click="openCart" aria-label="cart">
+        <button
+            class="btn btn-ghost btn-circle cart-btn"
+            @click.stop="openCart"
+            aria-label="cart"
+        >
           <div class="indicator">
             <img src="@/assets/icons/card.png" alt="سبد" class="cart-icon-img" />
             <span v-if="cartCount" class="badge badge-sm indicator-item">{{ cartCount }}</span>
           </div>
         </button>
+
 
         <!-- ✅ USER MENU (کلیک محور + شرطی) -->
         <div class="relative hidden md:block" ref="userMenuRef">

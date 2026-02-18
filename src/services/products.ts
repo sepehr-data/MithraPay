@@ -6,6 +6,7 @@ import type {
     ListProductsResponse,
     TopWeeklyProductsResponse,
     GetProductResponse,
+    GetProductQuery,
 } from "@/types/api_client_types/products.dto.ts"
 
 export async function listProducts(query?: ListProductsQuery) {
@@ -20,7 +21,10 @@ export async function getTopWeeklyProducts(limit = 8) {
     return data
 }
 
-export async function getProduct(productId: number) {
-    const { data } = await http.get<GetProductResponse>(endpoints.products.byId(productId))
+// ✅ NEW: allow query params to resolve matrix price on backend
+export async function getProduct(productId: number, query?: GetProductQuery) {
+    const { data } = await http.get<GetProductResponse>(endpoints.products.byId(productId), {
+        params: query,
+    })
     return data
 }

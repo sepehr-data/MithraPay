@@ -1,16 +1,16 @@
 <template>
-  <div class="min-h-screen flex flex-col">
+  <div>
     <AppNavBar />
-    <main class="container max-w-7xl py-6 grow">
+    <main>
       <slot />
     </main>
-    <AppFooter />
+
+    <!-- ✅ همیشه mount باشد -->
     <CartDrawer />
   </div>
 </template>
 
 <script setup lang="ts">
-import AppNavBar from '@/components/AppNavBar.vue'
-import AppFooter from '@/components/AppFooter.vue'
-import CartDrawer from '@/components/CartDrawer.vue'
+import AppNavBar from "@/components/AppNavBar.vue"
+import CartDrawer from "@/components/CartDrawer.vue"  // مسیر را مطابق پروژه‌ات تنظیم کن
 </script>

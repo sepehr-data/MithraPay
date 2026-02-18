@@ -41,276 +41,172 @@
         </div>
       </div>
     </section>
-
-    <!-- ردیف: افزودن ادمین + تنظیمات کلی پنل -->
     <section class="grid gap-4 lg:grid-cols-2">
-      <!-- افزودن ادمین -->
-      <article class="rounded-2xl border border-base-300 bg-base-100 p-4 sm:p-5 space-y-4">
-        <h3 class="font-semibold text-sm sm:text-base">
-          افزودن ادمین
-        </h3>
+      <article class="rounded-2xl border border-base-300 bg-base-100 p-4 space-y-4">
+        <h3 class="font-semibold">افزودن ادمین</h3>
 
-        <div class="space-y-3 text-xs sm:text-sm">
-          <label class="form-control">
-            <span class="label-text text-[11px] sm:text-xs">
-              نام نمایشی
-            </span>
-            <input
-                v-model="newAdminName"
-                type="text"
-                class="input input-bordered input-sm rounded-2xl text-[11px] w-full"
-                placeholder="نامی که در پنل نمایش داده می‌شود"
-            />
-          </label>
+        <input
+            v-model="newAdminName"
+            class="input input-bordered input-sm w-full"
+            placeholder="نام نمایشی (اختیاری)"
+        />
 
-          <label class="form-control">
-            <span class="label-text text-[11px] sm:text-xs">
-              شماره تلفن
-            </span>
-            <input
-                v-model="newAdminPhone"
-                type="tel"
-                class="input input-bordered input-sm rounded-2xl text-[11px] w-full ltr text-left"
-                placeholder="09xxxxxxxxx"
-            />
-          </label>
-        </div>
+        <input
+            v-model="newAdminPhone"
+            class="input input-bordered input-sm w-full ltr"
+            placeholder="09xxxxxxxxx"
+        />
 
-        <!-- دکمه ثبت ادمین - راست‌چین -->
-        <div class="flex justify-end pt-2 gap-2 text-[11px] sm:text-xs" dir="ltr">
-          <button
-              class="btn btn-sm btn-primary"
-              type="button"
-              @click="registerAdmin"
-          >
+        <div class="flex justify-end">
+          <button class="btn btn-primary btn-sm" @click="registerAdmin">
             ثبت ادمین
           </button>
         </div>
       </article>
 
-      <!-- تنظیمات کلی پنل (بدون دکمه، ذخیره خودکار) -->
-      <article class="rounded-2xl border border-base-300 bg-base-100 p-4 sm:p-5 space-y-4">
-        <h3 class="font-semibold text-sm sm:text-base">
-          تنظیمات پنل
-        </h3>
+      <!-- PANEL SETTINGS -->
+      <article class="rounded-2xl border border-base-300 bg-base-100 p-4 space-y-3">
+        <h3 class="font-semibold">تنظیمات پنل</h3>
 
-        <div class="space-y-3 text-xs sm:text-sm">
-          <label class="flex items-center justify-between gap-3">
-            <span>ارسال نوتیفیکیشن برای تیکت‌های جدید</span>
-            <input type="checkbox" class="toggle toggle-sm" v-model="notifyTickets" />
-          </label>
+        <label class="flex justify-between">
+          <span>نوتیفیکیشن تیکت</span>
+          <input type="checkbox" v-model="notifyTickets" class="toggle toggle-sm" />
+        </label>
 
-          <label class="flex items-center justify-between gap-3">
-            <span>نمایش سفارش‌های امروز در بالای داشبورد</span>
-            <input type="checkbox" class="toggle toggle-sm" v-model="showTodayOrders" />
-          </label>
+        <label class="flex justify-between">
+          <span>سفارش‌های امروز</span>
+          <input type="checkbox" v-model="showTodayOrders" class="toggle toggle-sm" />
+        </label>
 
-          <label class="flex items-center justify-between gap-3">
-            <span>فعال‌سازی حالت فشرده جدول‌ها</span>
-            <input type="checkbox" class="toggle toggle-sm" v-model="compactTables" />
-          </label>
-        </div>
+        <label class="flex justify-between">
+          <span>حالت فشرده</span>
+          <input type="checkbox" v-model="compactTables" class="toggle toggle-sm" />
+        </label>
       </article>
     </section>
 
-    <!-- لیست ادمین‌ها (همیشه نمایش داده می‌شود) -->
-    <section class="rounded-3xl border border-base-300 bg-base-100 p-4 sm:p-5 space-y-4">
-      <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div class="space-y-1">
-          <h3 class="font-semibold text-sm sm:text-base">
-            لیست ادمین‌ها
-          </h3>
-        </div>
+    <!-- ADMIN LIST -->
+    <section class="rounded-3xl border border-base-300 bg-base-100 p-4 space-y-4">
+      <h3 class="font-semibold">لیست ادمین‌ها</h3>
+
+      <div v-if="loading" class="text-center text-sm">
+        در حال بارگذاری...
       </div>
 
-      <!-- کارت‌های ادمین -->
-      <div v-if="filteredAdmins.length" class="grid gap-3 sm:gap-4 md:grid-cols-2">
+      <div v-else class="grid gap-3 md:grid-cols-2">
         <article
             v-for="a in filteredAdmins"
             :key="a.id"
-            class="group rounded-2xl border border-base-300 bg-base-100/90 px-3.5 py-3 sm:px-4 sm:py-3.5 flex flex-col gap-2 hover:-translate-y-0.5 hover:shadow-md hover:border-primary/40 transition-all"
+            class="rounded-2xl border border-base-300 p-3 flex justify-between items-center"
         >
-          <!-- نمایش معمولی -->
-          <div v-if="editingAdminId !== a.id" class="flex items-center justify-between gap-3">
-            <div class="flex items-center gap-3">
-              <div
-                  class="h-9 w-9 rounded-full bg-gradient-to-br from-primary/90 to-secondary/80 text-primary-content flex items-center justify-center text-xs font-bold shadow-sm"
-              >
-                {{ a.name.charAt(0) || a.username.charAt(0) }}
-              </div>
-              <div class="flex flex-col gap-0.5">
-                <span class="text-xs sm:text-sm font-medium text-base-content">
-                  {{ a.name || 'بدون نام' }}
-                </span>
-                <span
-                    class="text-[11px] sm:text-xs ltr font-mono bg-base-200/70 px-2 py-0.5 rounded-full"
-                >
-                  {{ a.username }}
-                </span>
-              </div>
+          <div>
+            <div class="font-medium">
+              {{ a.name || 'بدون نام' }}
             </div>
-
-            <div class="flex flex-col items-end gap-1 text-[10px] sm:text-[11px]">
-              <span
-                  class="inline-flex items-center px-2 py-0.5 rounded-full"
-                  :class="
-                  a.role === 'owner'
-                    ? 'bg-primary/10 text-primary'
-                    : 'bg-base-200/80 text-base-content/80'
-                "
-              >
-                {{ a.role === 'owner' ? 'Owner' : 'Admin' }}
-              </span>
-              <div class="flex gap-1" dir="ltr">
-                <button
-                    v-if="a.role !== 'owner'"
-                    class="btn btn-xs btn-error"
-                    type="button"
-                    @click="removeAdmin(a.id)"
-                >
-                  حذف
-                </button>
-              </div>
+            <div class="text-xs ltr font-mono">
+              {{ a.phone }}
             </div>
           </div>
-        </article>
-      </div>
 
-      <div v-else class="py-8 text-center text-[11px] sm:text-xs text-base-content/60">
-        هیچ ادمینی با این فیلتر پیدا نشد.
+          <div class="flex items-center gap-2">
+            <span
+                class="badge"
+                :class="a.roles.includes('owner') ? 'badge-primary' : 'badge-ghost'"
+            >
+              {{ a.roles.includes('owner') ? 'Owner' : 'Admin' }}
+            </span>
+
+            <button
+                v-if="!a.roles.includes('owner')"
+                class="btn btn-xs btn-error"
+                @click="removeAdmin(a)"
+            >
+              حذف
+            </button>
+          </div>
+        </article>
       </div>
     </section>
   </div>
 </template>
-
 <script setup lang="ts">
-import { ref, computed, reactive, watch } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import {
+  adminListAdmins,
+  adminPromoteToAdminByPhone,
+  adminRemoveAdminByPhone,
+} from '@/services/admin'
 
-type AdminRole = 'owner' | 'admin'
+import type {
+  AdminUserDTO,
+  AdminPromoteByPhonePayload,
+} from '@/types/api_client_types/admin.dto.ts'
 
-interface Admin {
-  id: string
-  name: string
-  username: string
-  role: AdminRole
-  active: boolean
-}
+// state
+const admins = ref<AdminUserDTO[]>([])
+const loading = ref(false)
 
-// دیتای نمونه ادمین‌ها
-const admins = ref<Admin[]>([
-  {
-    id: 'a1',
-    name: 'ادمین اصلی',
-    username: 'main_admin',
-    role: 'owner',
-    active: true,
-  },
-  {
-    id: 'a2',
-    name: 'ادمین محتوا',
-    username: 'content_admin',
-    role: 'admin',
-    active: true,
-  },
-])
-
-// فرم افزودن ادمین (ساده: نام نمایشی + شماره تلفن)
+// form
 const newAdminName = ref('')
 const newAdminPhone = ref('')
 
-function registerAdmin() {
-  if (!newAdminName.value.trim() || !newAdminPhone.value.trim()) {
-    alert('نام نمایشی و شماره تلفن الزامی است.')
-    return
-  }
-
-  // فعلاً فقط نمونه: اینجا بعداً می‌تونی API بزنی
-  alert('ادمین ثبت شد.')
-
-  newAdminName.value = ''
-  newAdminPhone.value = ''
-}
-
-// تنظیمات کلی پنل (با ذخیره‌ی خودکار)
+// panel settings (فعلاً لوکال)
 const notifyTickets = ref(true)
 const showTodayOrders = ref(true)
 const compactTables = ref(false)
 
-// آمار ادمین‌ها
-const adminsCount = computed(() => admins.value.length)
-
-// سرچ ادمین‌ها (الان استفاده نمی‌شه ولی نگه‌داشته شده برای آینده)
-const adminSearch = ref('')
-
-const filteredAdmins = computed(() => {
-  const t = adminSearch.value.trim().toLowerCase()
-  if (!t) return admins.value
-  return admins.value.filter(
-      a =>
-          a.name.toLowerCase().includes(t) ||
-          a.username.toLowerCase().includes(t),
-  )
-})
-
-// ویرایش ادمین‌ها
-const editingAdminId = ref<string | null>(null)
-const editForm = reactive<{
-  name: string
-  username: string
-  role: AdminRole
-  password: string
-}>({
-  name: '',
-  username: '',
-  role: 'admin',
-  password: '',
-})
-
-function startEdit(a: Admin) {
-  editingAdminId.value = a.id
-  editForm.name = a.name
-  editForm.username = a.username
-  editForm.role = a.role
-  editForm.password = ''
+// fetch admins
+async function fetchAdmins() {
+  loading.value = true
+  try {
+    admins.value = await adminListAdmins()
+  } finally {
+    loading.value = false
+  }
 }
 
-function cancelEdit() {
-  editingAdminId.value = null
-}
-
-function saveEdit() {
-  if (!editingAdminId.value) return
-  const target = admins.value.find(a => a.id === editingAdminId.value)
-  if (!target) return
-
-  target.name = editForm.name
-  target.username = editForm.username
-  target.role = editForm.role
-
-  editingAdminId.value = null
-  alert('تغییرات ادمین ذخیره شد.')
-}
-
-function removeAdmin(id: string) {
-  const target = admins.value.find(a => a.id === id)
-  if (!target) return
-  if (target.role === 'owner') {
-    alert('حذف Owner در این حالت مجاز نیست.')
+// register admin
+async function registerAdmin() {
+  if (!newAdminPhone.value.trim()) {
+    alert('شماره تلفن الزامی است')
     return
   }
-  admins.value = admins.value.filter(a => a.id !== id)
+
+  const payload: AdminPromoteByPhonePayload = {
+    phone: newAdminPhone.value,
+  }
+
+  try {
+    const res = await adminPromoteToAdminByPhone(payload)
+    admins.value.unshift(res.admin)
+    newAdminName.value = ''
+    newAdminPhone.value = ''
+  } catch {
+    alert('خطا در ثبت ادمین')
+  }
 }
 
-// ذخیره خودکار تنظیمات پنل
-function savePanelSettings() {
-  console.log('panel settings changed', {
-    notifyTickets: notifyTickets.value,
-    showTodayOrders: showTodayOrders.value,
-    compactTables: compactTables.value,
-  })
+// remove admin
+async function removeAdmin(admin: AdminUserDTO) {
+  if (admin.roles.includes('owner')) {
+    alert('حذف Owner مجاز نیست')
+    return
+  }
+
+  if (!confirm('آیا از حذف این ادمین مطمئن هستید؟')) return
+
+  try {
+    await adminRemoveAdminByPhone({ phone: admin.phone })
+    admins.value = admins.value.filter(a => a.id !== admin.id)
+  } catch {
+    alert('خطا در حذف ادمین')
+  }
 }
 
-watch([notifyTickets, showTodayOrders, compactTables], () => {
-  savePanelSettings()
-})
+// computed
+const adminsCount = computed(() => admins.value.length)
+
+const filteredAdmins = computed(() => admins.value)
+
+onMounted(fetchAdmins)
 </script>

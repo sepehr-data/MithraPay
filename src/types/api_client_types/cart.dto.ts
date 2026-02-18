@@ -1,44 +1,44 @@
-// src/types/cart.dto.ts
+// src/types/api_client_types/cart.dto.ts
 
 export type CartItemDto = {
     id: number
     product_id: number
+    title?: string
     quantity: number
+    line_total: number
+    unit_price: number
 
-    // اگر بک اطلاعات محصول رو هم embed کنه:
-    product?: any
-
-    [key: string]: any
+    duration_type_id?: number | null
+    subscription_type_id?: number | null
+    personal_account?: boolean
 }
 
-export type CartDto = {
-    id?: number
-    user_id: number
-    items?: CartItemDto[]
-    total_amount?: number
-
-    [key: string]: any
+export type CartResponse = {
+    cart_id: number
+    status: string
+    items: CartItemDto[]
+    count: number
+    total: number
 }
 
-// GET /cart/:user_id
-export type GetCartResponse = CartDto
+export type GetCartResponse = CartResponse
 
-// POST /cart/items
 export type AddCartItemPayload = {
-    user_id: number
     product_id: number
     quantity?: number
+    duration_type_id?: number | null
+    subscription_type_id?: number | null
+    personal_account?: boolean
 }
-export type AddCartItemResponse = CartDto
 
-// PUT /cart/items/:item_id
-export type UpdateCartItemPayload = {
+export type AddCartItemResponse = CartResponse
+export type RemoveCartItemResponse = CartResponse
+export type ClearCartResponse = CartResponse
+
+// ✅ new: update qty
+export type UpdateCartItemQtyPayload = {
     quantity: number
 }
-export type UpdateCartItemResponse = CartDto
 
-// DELETE /cart/items/:item_id
-export type RemoveCartItemResponse = CartDto
-
-// DELETE /cart/:user_id
-export type ClearCartResponse = CartDto
+// بک‌اند بعد از update هم Cart کامل برمی‌گرداند
+export type UpdateCartItemQtyResponse = CartResponse

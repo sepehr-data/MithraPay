@@ -5,14 +5,14 @@ import type {
     GetCartResponse,
     AddCartItemPayload,
     AddCartItemResponse,
-    UpdateCartItemPayload,
-    UpdateCartItemResponse,
     RemoveCartItemResponse,
     ClearCartResponse,
-} from "@/types/api_client_types/cart.dto.ts"
+    UpdateCartItemQtyPayload,
+    UpdateCartItemQtyResponse,
+} from "@/types/api_client_types/cart.dto"
 
-export async function getCart(userId: number) {
-    const { data } = await http.get<GetCartResponse>(endpoints.cart.byUserId(userId))
+export async function getCart() {
+    const { data } = await http.get<GetCartResponse>(endpoints.cart.getCart)
     return data
 }
 
@@ -21,17 +21,21 @@ export async function addCartItem(payload: AddCartItemPayload) {
     return data
 }
 
-export async function updateCartItem(itemId: number, payload: UpdateCartItemPayload) {
-    const { data } = await http.put<UpdateCartItemResponse>(endpoints.cart.itemById(itemId), payload)
-    return data
-}
-
 export async function removeCartItem(itemId: number) {
-    const { data } = await http.delete<RemoveCartItemResponse>(endpoints.cart.itemById(itemId))
+    const { data } = await http.delete<RemoveCartItemResponse>(endpoints.cart.removeItem(itemId))
     return data
 }
 
-export async function clearCart(userId: number) {
-    const { data } = await http.delete<ClearCartResponse>(endpoints.cart.clearByUserId(userId))
+export async function clearCart() {
+    const { data } = await http.post<ClearCartResponse>(endpoints.cart.clear)
+    return data
+}
+
+// ✅ new: update qty (PATCH /carts/items/:id)
+export async function updateCartItemQty(itemId: number, payload: UpdateCartItemQtyPayload) {
+    const { data } = await http.patch<UpdateCartItemQtyResponse>(
+        endpoints.cart.updateItemQty(itemId),
+        payload
+    )
     return data
 }

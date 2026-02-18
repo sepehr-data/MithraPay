@@ -16,22 +16,18 @@
         ]"
       />
 
-      <!-- optional: error -->
       <div v-if="errorMsg" class="alert alert-error">
         {{ errorMsg }}
       </div>
 
-      <!-- skeleton -->
       <div v-if="!product" class="grid gap-5 lg:grid-cols-12">
         <div class="lg:col-span-7 skeleton h-[420px] rounded-3xl"></div>
         <div class="lg:col-span-5 skeleton h-[420px] rounded-3xl"></div>
       </div>
 
-      <!-- content -->
       <div v-else class="grid gap-5 lg:grid-cols-12">
-        <!-- LEFT: Gallery + Content -->
+        <!-- LEFT -->
         <section class="lg:col-span-7 space-y-4">
-          <!-- Gallery card -->
           <div class="rounded-3xl border border-base-300/70 bg-base-100/80 shadow-sm overflow-hidden">
             <div class="relative">
               <img
@@ -43,20 +39,15 @@
               />
               <div class="absolute inset-0 bg-gradient-to-t from-black/35 via-black/5 to-transparent"></div>
 
-              <!-- chips -->
               <div class="absolute top-4 right-4 flex flex-wrap gap-2">
                 <span v-if="product.isDigital" class="badge badge-outline bg-base-100/70 backdrop-blur">محصول دیجیتال</span>
                 <span v-if="selectedOffer?.instant" class="badge badge-outline bg-base-100/70 backdrop-blur">فوری</span>
                 <span v-if="selectedOffer?.region" class="badge badge-outline bg-base-100/70 backdrop-blur">
                   ریجن: {{ selectedOffer.region }}
                 </span>
-                <span v-if="selectedOffer?._duration" class="badge badge-outline bg-base-100/70 backdrop-blur">
-                  مدت: {{ selectedOffer._duration }}
-                </span>
               </div>
             </div>
 
-            <!-- thumbs -->
             <div v-if="galleryImages.length > 1" class="p-3 sm:p-4">
               <div class="flex gap-2 overflow-x-auto scrollbar-none py-1">
                 <button
@@ -74,7 +65,6 @@
             </div>
           </div>
 
-          <!-- Title + trust row + Tabs -->
           <div class="rounded-3xl border border-base-300/70 bg-base-100/70 shadow-sm p-4 sm:p-5">
             <h1 class="text-xl sm:text-2xl font-black leading-9">
               {{ product.title }}
@@ -91,7 +81,6 @@
               </div>
             </div>
 
-            <!-- trust strip -->
             <div class="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
               <div class="rounded-2xl border border-base-300/60 bg-base-100/60 p-3">
                 <p class="text-[11px] text-base-content/60">تحویل</p>
@@ -111,11 +100,14 @@
               </div>
             </div>
 
+            <div v-if="product?.planChips?.length" class="mt-4 flex flex-wrap gap-2">
+              <span v-for="c in product.planChips" :key="c" class="badge badge-ghost">{{ c }}</span>
+            </div>
+
             <div v-if="product.tags?.length" class="mt-4 flex flex-wrap gap-2">
               <span v-for="t in product.tags" :key="t" class="badge badge-ghost">{{ t }}</span>
             </div>
 
-            <!-- Tabs container -->
             <div ref="detailsRef" class="mt-5 border-t border-base-300/60 pt-4">
               <div class="tabs tabs-boxed bg-base-100/60 p-1 rounded-2xl">
                 <button class="tab flex-1" :class="tab === 'desc' ? 'tab-active' : ''" @click="tab='desc'">
@@ -162,7 +154,7 @@
           </div>
         </section>
 
-        <!-- RIGHT: Buy box -->
+        <!-- RIGHT -->
         <aside class="lg:col-span-5">
           <div class="sticky top-5 space-y-4">
             <div class="rounded-3xl border border-base-300/70 bg-base-100/80 shadow-sm p-4 sm:p-5">
@@ -172,7 +164,6 @@
                 {{ selectedTitle }}
               </p>
 
-              <!-- انتخاب پلن -->
               <div class="mt-4 rounded-2xl border border-base-300/60 bg-base-100/60 p-4">
                 <p class="text-sm font-black mb-3">انتخاب پلن</p>
 
@@ -181,29 +172,30 @@
                     <div class="label py-0 mb-1">
                       <span class="label-text text-xs text-base-content/60">نوع اشتراک</span>
                     </div>
-                    <select
-                        v-model="selectedPlanType"
-                        class="select select-bordered w-full bg-base-100/60"
-                        :disabled="planTypes.length <= 1"
-                    >
-                      <option v-for="t in planTypes" :key="t" :value="t">{{ t }}</option>
+
+                    <!-- ✅ placeholder اضافه شد -->
+                    <select v-model="selectedPlanType" class="select select-bordered w-full bg-base-100/60">
+                      <option disabled value="">انتخاب نوع اشتراک</option>
+                      <option v-for="t in planTypes" :key="t.id" :value="t.slug">
+                        {{ t.title }}
+                      </option>
                     </select>
                   </label>
 
                   <label class="form-control">
                     <div class="label py-0 mb-1">
-                      <span class="label-text text-xs text-base-content/60">مدت زمان پلن</span>
+                      <span class="label-text text-xs text-base-content/60">مدت زمان اشتراک</span>
                     </div>
-                    <select
-                        v-model="selectedPlanDuration"
-                        class="select select-bordered w-full bg-base-100/60"
-                        :disabled="planDurations.length <= 1"
-                    >
-                      <option v-for="d in planDurations" :key="d" :value="d">{{ d }}</option>
+
+                    <!-- ✅ placeholder اضافه شد -->
+                    <select v-model="selectedPlanDuration" class="select select-bordered w-full bg-base-100/60">
+                      <option disabled value="">انتخاب مدت زمان</option>
+                      <option v-for="d in planDurations" :key="d.id" :value="d.slug">
+                        {{ d.title }}
+                      </option>
                     </select>
                   </label>
 
-                  <!-- ✅ فعال‌سازی برای اکانت شخصی -->
                   <label class="flex items-start gap-2 text-xs pt-1">
                     <input
                         v-model="personalActivation"
@@ -217,7 +209,6 @@
                     </span>
                   </label>
 
-                  <!-- اگر با انتخاب پلن، هیچ آیتمی پیدا نشود -->
                   <div v-if="product && normalizedOptions.length && !selectedOffer" class="alert alert-warning text-xs">
                     پلن انتخاب‌شده موجود نیست. لطفاً نوع/مدت را تغییر دهید.
                   </div>
@@ -231,14 +222,8 @@
                 </div>
               </div>
 
-              <div class="mt-4 flex flex-wrap gap-2">
-                <span v-if="selectedOffer?.region" class="badge badge-ghost">ریجن: {{ selectedOffer.region }}</span>
-                <span v-if="selectedOffer?._duration" class="badge badge-ghost">مدت: {{ selectedOffer._duration }}</span>
-                <span v-if="selectedOffer?.instant" class="badge badge-success badge-outline">فوری</span>
-              </div>
-
               <div class="mt-5 grid gap-3">
-                <button class="btn btn-primary w-full" :disabled="loading || !selectedOffer" @click="add">
+                <button class="btn btn-primary w-full" :disabled="loading || !selectedOffer" @click="handleAddToCart">
                   افزودن به سبد
                 </button>
                 <button class="btn btn-ghost w-full" @click="scrollToDetails">جزئیات محصول</button>
@@ -272,7 +257,7 @@
               <PriceTag :price="displayPrice" :compareAt="displayCompareAt" />
             </div>
           </div>
-          <button class="btn btn-primary" :disabled="loading || !selectedOffer" @click="add">خرید</button>
+          <button class="btn btn-primary" :disabled="loading || !selectedOffer" @click="handleAddToCart">خرید</button>
           <button class="btn btn-ghost" @click="scrollToDetails">جزئیات</button>
         </div>
       </div>
@@ -294,258 +279,99 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { ref, computed, onMounted, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
+import { useAuthStore } from '@/stores/auth'
+
 import Breadcrumbs from '@/components/Breadcrumbs.vue'
 import PriceTag from '@/components/PriceTag.vue'
 import RatingStars from '@/components/RatingStars.vue'
 import QuantityInput from '@/components/QuantityInput.vue'
+
 import { getProduct } from '@/services/products'
+import { addCartItem, getCart } from '@/services/cart'
 
-/**
- * نکته:
- * چون گفتی تایپ‌های api client برای getProduct عوض شده،
- * این صفحه را طوری نوشتم که با چند ساختار رایج جواب بدهد:
- * - dto.data / dto.product / dto.data.product
- * - buy_items / buyItems / offers / plans / variants / options
- * - price به شکل number یا string یا object (amount/value)
- *
- * اگر تایپ دقیق جنریت‌شده‌ات را اینجا ایمپورت کنی، فقط نوع DTO را جایگزین کن.
- */
-
-type ReviewVM = { name?: string; date?: string; rating?: number; text?: string; comment?: string }
-
-type OfferVM = {
-  id: number | string
-  title?: string
-  price?: number
-  compareAt?: number
-
-  // meta / delivery
-  region?: string
-  instant?: boolean
-  deliveryTime?: string
-  support?: string
-  warranty?: string
-  deliveryMethod?: string
-
-  // plan selection
-  _type: string
-  _duration: string
-
-  // personal activation
-  personalActivationSupported?: boolean
-  personalActivationPrice?: number
-  personalActivationCompareAt?: number
-
-  // raw passthrough
-  [k: string]: any
-}
-
-type ProductVM = {
-  id: number | string
-  title: string
-  description: string
-  slug?: string
-  price?: number
-  compareAt?: number
-  image: string
-  images: string[]
-  isDigital?: boolean
-  rating?: number
-  reviewCount?: number
-  reviews?: ReviewVM[]
-  tags?: string[]
-  offers: OfferVM[]
-  personalActivationSupported?: boolean
-}
+import type { GetProductResponse, ProductDto } from '@/types/api_client_types/products.dto.ts'
+import type { AddCartItemPayload } from '@/types/api_client_types/cart.dto.ts'
 
 const route = useRoute()
+const router = useRouter()
 const cart = useCartStore()
+const auth = useAuthStore()
 
 const qty = ref(1)
 const product = ref<ProductVM | null>(null)
 const loading = ref(false)
 const errorMsg = ref<string | null>(null)
-
 const tab = ref<'desc' | 'reviews'>('desc')
 const detailsRef = ref<HTMLElement | null>(null)
-
-/** ✅ ID فقط از Route */
-const productId = computed(() => {
-  const n = Number(route.params.id)
-  return Number.isFinite(n) ? n : null
-})
-
-/** ✅ گزینه فعالسازی اکانت شخصی */
+const productId = computed(() => Number(route.params.id) || null)
 const personalActivation = ref(false)
 
-/** ---------- helpers ---------- */
-function normalizeImageUrl(u?: string | null) {
-  const s = (u ?? '').trim()
-  if (!s) return ''
-  if (/^https?:\/\//i.test(s)) return s
-  if (s.startsWith('/')) return s
-  return ''
+// برای هدایت بعد از لاگین
+const pendingAddToCartPayload = ref<AddCartItemPayload | null>(null)
+
+/* -----------------------------
+   Types
+----------------------------- */
+type ProductVM = {
+  id: number
+  title: string
+  description: string
+  image?: string
+  images?: string[]
+  planTypeOptions?: OptionVM[]
+  planDurationOptions?: OptionVM[]
+  offers?: OfferVM[]
+  planChips?: string[]
+  tags?: string[]
+  rating?: number
+  reviewCount?: number
+  reviews?: { name?: string; text?: string; comment?: string; date?: string; rating?: number }[]
+  price?: number | null
+  basePrice?: number | null
+  compareAt?: number | null
+  isDigital?: boolean
+  personalActivationSupported?: boolean
+  slug?: string
 }
 
-function asNumber(v: any): number | undefined {
-  if (v == null) return undefined
-  if (typeof v === 'number' && Number.isFinite(v)) return v
-  if (typeof v === 'string') {
-    const n = Number(v.replaceAll(',', '').trim())
-    return Number.isFinite(n) ? n : undefined
-  }
-  // price object: { amount, value, price }
-  if (typeof v === 'object') {
-    const cand = v.amount ?? v.value ?? v.price ?? v.final ?? v.total
-    return asNumber(cand)
-  }
-  return undefined
+type OptionVM = { id: number; slug: string; title: string }
+
+type OfferVM = {
+  id: number
+  title: string
+
+  typeId?: number
+  typeSlug?: string
+  typeTitle?: string
+
+  durationId?: number
+  durationSlug?: string
+  durationTitle?: string
+
+  price?: number | null
+  compareAt?: number | null
+
+  instant?: boolean
+  region?: string
+  deliveryTime?: string
+  support?: string
+  warranty?: string
+  deliveryMethod?: string
+  personalActivationSupported?: boolean
 }
 
-function pick<T = any>(obj: any, keys: string[]): T | undefined {
-  for (const k of keys) {
-    if (obj?.[k] != null) return obj[k]
-  }
-  return undefined
-}
-
-function getPlanTypeLabel(o: any) {
-  return (
-      pick(o, ['subscription_type', 'subscriptionType', 'plan_type', 'planType', 'type', 'kind', 'tier', 'package']) ||
-      'استاندارد'
-  )
-}
-function getDurationLabel(o: any) {
-  const d =
-      pick(o, ['duration', 'period', 'term', 'months', 'days', 'length', 'time', 'plan_duration', 'planDuration']) || ''
-  return String(d ?? '').trim()
-}
-
-function normalizeOffers(raw: any): OfferVM[] {
-  // ساختارهای مختلفی که ممکنه از API بیاد
-  const list =
-      (Array.isArray(raw?.buy_items) && raw.buy_items) ||
-      (Array.isArray(raw?.buyItems) && raw.buyItems) ||
-      (Array.isArray(raw?.offers) && raw.offers) ||
-      (Array.isArray(raw?.plans) && raw.plans) ||
-      (Array.isArray(raw?.variants) && raw.variants) ||
-      (Array.isArray(raw?.options) && raw.options) ||
-      []
-
-  return (list as any[]).map((o: any, idx: number) => {
-    const price = asNumber(pick(o, ['price', 'amount', 'final_price', 'finalPrice', 'unit_price', 'unitPrice']))
-    const compareAt = asNumber(pick(o, ['compare_at_price', 'compareAt', 'compare_at', 'compareAtPrice']))
-
-    // پشتیبانی از personal activation (چند نام ممکن)
-    const paSupported =
-        Boolean(
-            pick(o, [
-              'personal_activation_supported',
-              'personalActivationSupported',
-              'allow_personal_activation',
-              'allowPersonalActivation'
-            ])
-        ) || false
-
-    const paPrice = asNumber(pick(o, ['personal_activation_price', 'personalActivationPrice', 'price_personal']))
-    const paCompareAt = asNumber(pick(o, ['personal_activation_compare_at', 'personalActivationCompareAt']))
-
-    return {
-      ...o,
-      id: o?.id ?? idx,
-      title: o?.title ?? o?.name ?? raw?.title ?? 'پلن',
-      price,
-      compareAt,
-
-      region: pick(o, ['region', 'region_name', 'regionName']),
-      instant: Boolean(pick(o, ['instant', 'is_instant', 'isInstant'])),
-      deliveryTime: pick(o, ['delivery_time', 'deliveryTime', 'delivery_eta', 'eta']),
-      support: pick(o, ['support', 'support_status', 'supportStatus']),
-      warranty: pick(o, ['warranty', 'guarantee']),
-      deliveryMethod: pick(o, ['delivery_method', 'deliveryMethod', 'method']),
-
-      _type: String(getPlanTypeLabel(o) || 'استاندارد'),
-      _duration: String(getDurationLabel(o) || '').trim(),
-
-      personalActivationSupported: paSupported,
-      personalActivationPrice: paPrice,
-      personalActivationCompareAt: paCompareAt
-    }
-  })
-}
-
-function normalizeProduct(dto: any): ProductVM {
-  // dto ممکنه data داشته باشه یا مستقیم محصول باشه
-  const raw = dto?.data?.product ?? dto?.product ?? dto?.data ?? dto
-
-  const main = normalizeImageUrl(raw?.image_url || raw?.image)
-  const gallery =
-      Array.isArray(raw?.images)
-          ? raw.images.map((x: any) => normalizeImageUrl(String(x))).filter(Boolean)
-          : Array.isArray(raw?.gallery)
-              ? raw.gallery.map((x: any) => normalizeImageUrl(String(x))).filter(Boolean)
-              : main
-                  ? [main]
-                  : []
-
-  const offers = normalizeOffers(raw)
-
-  const productPersonalActivationSupported =
-      Boolean(
-          pick(raw, [
-            'personal_activation_supported',
-            'personalActivationSupported',
-            'allow_personal_activation',
-            'allowPersonalActivation'
-          ])
-      ) || offers.some(o => o.personalActivationSupported)
-
-  return {
-    id: raw?.id,
-    title: raw?.title ?? 'بدون عنوان',
-    description: raw?.description ?? '',
-    slug: raw?.slug,
-
-    price: asNumber(raw?.price) ?? undefined,
-    compareAt: asNumber(raw?.compare_at_price ?? raw?.compareAt ?? raw?.compare_at) ?? undefined,
-
-    image: gallery[0] || 'https://placehold.co/1200x700',
-    images: gallery.length ? gallery : ['https://placehold.co/1200x700'],
-
-    isDigital: raw?.is_digital ?? raw?.isDigital ?? true,
-    rating: raw?.rating,
-    reviewCount: raw?.reviewCount ?? raw?.review_count,
-    reviews: raw?.reviews,
-    tags: raw?.tags,
-
-    offers,
-    personalActivationSupported: productPersonalActivationSupported
-  }
-}
-
-/** ---------- options (based on API response) ---------- */
-const normalizedOptions = computed<OfferVM[]>(() => {
-  return product.value?.offers ?? []
-})
-
+/* -----------------------------
+   Computeds
+----------------------------- */
+const normalizedOptions = computed(() => product.value?.offers ?? [])
 const selectedPlanType = ref<string>('')
 const selectedPlanDuration = ref<string>('')
 
-const planTypes = computed(() => {
-  const set = new Set(normalizedOptions.value.map(o => o._type).filter(Boolean))
-  return Array.from(set)
-})
-
-const planDurations = computed(() => {
-  const pool = selectedPlanType.value
-      ? normalizedOptions.value.filter(o => o._type === selectedPlanType.value)
-      : normalizedOptions.value
-  const set = new Set(pool.map(o => o._duration).filter(Boolean))
-  return Array.from(set)
-})
+const planTypes = computed<OptionVM[]>(() => product.value?.planTypeOptions ?? [])
+const planDurations = computed<OptionVM[]>(() => product.value?.planDurationOptions ?? [])
 
 const selectedOffer = computed<OfferVM | null>(() => {
   const opts = normalizedOptions.value
@@ -553,8 +379,8 @@ const selectedOffer = computed<OfferVM | null>(() => {
 
   const found =
       opts.find(o => {
-        const typeOk = selectedPlanType.value ? o._type === selectedPlanType.value : true
-        const durOk = selectedPlanDuration.value ? o._duration === selectedPlanDuration.value : true
+        const typeOk = selectedPlanType.value ? o.typeSlug === selectedPlanType.value : true
+        const durOk = selectedPlanDuration.value ? o.durationSlug === selectedPlanDuration.value : true
         return typeOk && durOk
       }) || null
 
@@ -563,79 +389,185 @@ const selectedOffer = computed<OfferVM | null>(() => {
 
 const selectedTitle = computed(() => (selectedOffer.value?.title || product.value?.title || '').trim())
 const selectedSubline = computed(() => {
-  const o: any = selectedOffer.value
-  const bits = [o?._type, o?._duration].filter(Boolean)
+  const o = selectedOffer.value
+  const bits = [o?.typeTitle, o?.durationTitle].filter(Boolean)
   return bits.length ? bits.join(' • ') : ''
 })
 
-/** personal activation availability per selected offer */
 const personalActivationSupported = computed(() => {
-  // اگر API این قابلیت را فقط روی محصول داده باشد:
-  if (selectedOffer.value?.personalActivationSupported != null) return !!selectedOffer.value.personalActivationSupported
-  return !!product.value?.personalActivationSupported
+  return selectedOffer.value?.personalActivationSupported ?? !!product.value?.personalActivationSupported
 })
-
 watch(personalActivationSupported, (ok) => {
   if (!ok) personalActivation.value = false
 })
 
-function getOfferPrice(o: OfferVM | null, personal: boolean) {
-  if (!o) return { price: undefined as number | undefined, compareAt: undefined as number | undefined }
+const displayPrice = computed(() => selectedOffer.value?.price ?? product.value?.price ?? 0)
+const displayCompareAt = computed(() => selectedOffer.value?.compareAt ?? product.value?.compareAt ?? 0)
 
-  if (personal) {
-    const p = o.personalActivationPrice ?? o.price
-    const c = o.personalActivationCompareAt ?? o.compareAt
-    return { price: p, compareAt: c }
-  }
-
-  return { price: o.price ?? product.value?.price, compareAt: o.compareAt ?? product.value?.compareAt }
-}
-
-const displayPrice = computed(() => getOfferPrice(selectedOffer.value, personalActivation.value).price)
-const displayCompareAt = computed(() => getOfferPrice(selectedOffer.value, personalActivation.value).compareAt)
-
-/** ---------- gallery ---------- */
-const galleryImages = computed<string[]>(() => {
-  const imgs = product.value?.images
-  if (Array.isArray(imgs) && imgs.length) return imgs.filter(Boolean)
+const galleryImages = computed(() => {
+  const imgs = product.value?.images?.filter(Boolean)
+  if (imgs?.length) return imgs
   return [product.value?.image || 'https://placehold.co/1200x700']
 })
 
 const activeImage = ref<string>('')
-
 const zoomRef = ref<HTMLDialogElement | null>(null)
-function openZoom() {
-  zoomRef.value?.showModal?.()
-}
-function closeZoom() {
-  zoomRef.value?.close?.()
-}
+
+function openZoom() { zoomRef.value?.showModal?.() }
+function closeZoom() { zoomRef.value?.close?.() }
 
 watch(galleryImages, (imgs) => {
-  if (!imgs?.length) return
   if (!imgs.includes(activeImage.value)) activeImage.value = imgs[0]
 })
 
-watch([planTypes, planDurations], () => {
-  // ست کردن پیش‌فرض‌ها از روی پاسخ API
-  if (planTypes.value.length && !planTypes.value.includes(selectedPlanType.value)) {
-    selectedPlanType.value = planTypes.value[0]
-  }
-
-  if (planDurations.value.length) {
-    if (!planDurations.value.includes(selectedPlanDuration.value)) {
-      selectedPlanDuration.value = planDurations.value[0]
-    }
-  } else {
-    selectedPlanDuration.value = ''
-  }
+watch(product, (p) => {
+  if (!p) return
+  // ✅ اگر گزینه‌ها هست، پیش‌فرض را ست کن
+  selectedPlanType.value = p.planTypeOptions?.[0]?.slug ?? ''
+  selectedPlanDuration.value = p.planDurationOptions?.[0]?.slug ?? ''
 })
 
-/** ✅ load by id (مثل بک‌اند) */
+/* -----------------------------
+   Helpers
+----------------------------- */
+function priceKey(stId: number, dtId: number) {
+  return `${stId}:${dtId}`
+}
+
+/**
+ * normalize محصول:
+ * - dropdown ها از subscription_types / duration_types
+ * - قیمت ترکیبی از dto.prices
+ * - fallback از legacy
+ */
+function normalizeProduct(dto: ProductDto): ProductVM {
+  const mainImage = dto.image_url ?? 'https://placehold.co/1200x700'
+  const gallery = [mainImage]
+
+  let planTypeOptions: OptionVM[] =
+      (dto.subscription_types?.map(t => ({ id: t.id, slug: t.slug, title: t.title })) ?? [])
+
+  let planDurationOptions: OptionVM[] =
+      (dto.duration_types?.map(d => ({ id: d.id, slug: d.slug, title: d.title })) ?? [])
+
+  const basePrice = (dto as any).base_price ?? dto.price ?? null
+  const compareAt = dto.compare_at_price ?? null
+
+  // price map from dto.prices
+  const priceRows = ((dto as any).prices ?? []) as Array<{ subscription_type_id: number; duration_type_id: number; price: number }>
+  const priceMap = new Map<string, number>()
+  for (const row of priceRows) {
+    if (row?.subscription_type_id && row?.duration_type_id && row?.price != null) {
+      priceMap.set(priceKey(row.subscription_type_id, row.duration_type_id), row.price)
+    }
+  }
+
+  // fallback options from prices if arrays empty
+  if ((!planTypeOptions.length || !planDurationOptions.length) && priceRows.length) {
+    const stIds = new Set<number>()
+    const dtIds = new Set<number>()
+    for (const row of priceRows) {
+      stIds.add(row.subscription_type_id)
+      dtIds.add(row.duration_type_id)
+    }
+
+    if (!planTypeOptions.length) {
+      planTypeOptions = Array.from(stIds).map(id => ({
+        id,
+        slug: id === 2 ? 'individual' : id === 1 ? 'family' : String(id),
+        title: id === 2 ? 'شخصی' : id === 1 ? 'خانوادگی' : `پلن ${id}`,
+      }))
+    }
+
+    if (!planDurationOptions.length) {
+      planDurationOptions = Array.from(dtIds).map(id => ({
+        id,
+        slug: id === 1 ? '1_month' : id === 2 ? '3_month' : id === 3 ? '6_month' : id === 4 ? '1_year' : String(id),
+        title: id === 1 ? '1 ماهه' : id === 2 ? '3 ماهه' : id === 3 ? '6 ماهه' : id === 4 ? '1 ساله' : `مدت ${id}`,
+      }))
+    }
+  }
+
+  // legacy fallback
+  if (!planTypeOptions.length && (dto as any).subscription_type_id) {
+    const id = (dto as any).subscription_type_id as number
+    planTypeOptions = [{
+      id,
+      slug: id === 2 ? 'individual' : id === 1 ? 'family' : String(id),
+      title: id === 2 ? 'شخصی' : id === 1 ? 'خانوادگی' : `پلن ${id}`,
+    }]
+  }
+
+  if (!planDurationOptions.length && (dto as any).duration_type_id) {
+    const id = (dto as any).duration_type_id as number
+    planDurationOptions = [{
+      id,
+      slug: id === 1 ? '1_month' : id === 2 ? '3_month' : id === 3 ? '6_month' : id === 4 ? '1_year' : String(id),
+      title: id === 1 ? '1 ماهه' : id === 2 ? '3 ماهه' : id === 3 ? '6 ماهه' : id === 4 ? '1 ساله' : `مدت ${id}`,
+    }]
+  }
+
+  // build offers
+  const offers: OfferVM[] = []
+  if (planTypeOptions.length && planDurationOptions.length) {
+    for (const t of planTypeOptions) {
+      for (const d of planDurationOptions) {
+        const p = priceMap.get(priceKey(t.id, d.id))
+        offers.push({
+          id: Number(`${dto.id}${t.id}${d.id}`),
+          title: `${dto.title} • ${t.title} • ${d.title}`,
+          typeId: t.id,
+          typeSlug: t.slug,
+          typeTitle: t.title,
+          durationId: d.id,
+          durationSlug: d.slug,
+          durationTitle: d.title,
+          price: p ?? basePrice,
+          compareAt,
+          personalActivationSupported: dto.personal_account ?? false,
+        })
+      }
+    }
+  } else {
+    offers.push({
+      id: dto.id,
+      title: dto.title,
+      price: basePrice,
+      compareAt,
+      personalActivationSupported: dto.personal_account ?? false,
+    })
+  }
+
+  const planChips = [...planTypeOptions.map(p => p.title), ...planDurationOptions.map(d => d.title)]
+
+  return {
+    id: dto.id,
+    title: dto.title,
+    description: dto.description ?? '',
+    slug: dto.slug ?? undefined,
+    image: mainImage,
+    images: gallery,
+    planTypeOptions,
+    planDurationOptions,
+    offers,
+    planChips,
+    tags: [],
+    rating: 4.5,
+    reviewCount: 24,
+    reviews: [],
+    price: basePrice,
+    basePrice,
+    compareAt,
+    isDigital: true,
+    personalActivationSupported: dto.personal_account ?? false,
+  }
+}
+
+/* -----------------------------
+   Load product
+----------------------------- */
 async function loadProduct() {
   const id = productId.value
-  console.log('[ProductPage] params:', route.params, 'resolved id:', id)
-
   if (!id) {
     product.value = null
     errorMsg.value = 'شناسه محصول در آدرس وجود ندارد یا معتبر نیست.'
@@ -647,23 +579,9 @@ async function loadProduct() {
   product.value = null
 
   try {
-    const dto = await getProduct(id) // ✅ /products/:id
-    const vm = normalizeProduct(dto)
-    product.value = vm
-
+    const dto: GetProductResponse = await getProduct(id)
+    product.value = normalizeProduct(dto as any)
     activeImage.value = galleryImages.value[0]
-
-    // پیش‌فرض نوع/مدت
-    const first = vm.offers?.[0]
-    if (first) {
-      selectedPlanType.value = first._type
-      selectedPlanDuration.value = first._duration || ''
-    }
-
-    // اگر قابلیت personal activation روی محصول/پلن نیست، خاموشش کن
-    if (!vm.personalActivationSupported && !first?.personalActivationSupported) {
-      personalActivation.value = false
-    }
   } catch (e) {
     console.error('load product error:', e)
     errorMsg.value = 'خطا در دریافت اطلاعات محصول'
@@ -676,35 +594,76 @@ async function loadProduct() {
 onMounted(loadProduct)
 watch(() => route.params.id, loadProduct)
 
-function add() {
-  if (!product.value || !selectedOffer.value) return
-
-  const offerId = selectedOffer.value.id
-
-  // متادیتا برای اینکه توی سبد خرید دقیقاً مشخص باشه کاربر چه پلنی انتخاب کرده
-  const meta = {
-    productId: product.value.id,
-    productTitle: product.value.title,
-    planType: selectedOffer.value._type,
-    planDuration: selectedOffer.value._duration,
-    personalActivation: personalActivation.value,
-    // اگر خواستی این‌ها رو هم نگه دار:
-    region: selectedOffer.value.region,
-    price: displayPrice.value
-  }
-
-  // اگر cart.add شما پارامتر سوم را پشتیبانی کند، ارسال می‌شود؛ در غیر اینصورت fallback:
-  try {
-    ;(cart as any).add(offerId as any, qty.value, meta)
-  } catch {
-    cart.add(offerId as any, qty.value)
-  }
-}
-
 function scrollToDetails() {
   detailsRef.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
+
+/* -----------------------------
+   Cart ops
+----------------------------- */
+async function refreshCart() {
+  try {
+    const fresh = await getCart()
+    cart.setCart(fresh)
+  } catch (e) {
+    console.error('refresh cart error:', e)
+  }
+}
+
+async function handleAddToCart() {
+  if (!product.value || !selectedOffer.value) return
+
+  // ✅ همیشه از offer.id ها استفاده کن (نه جستجو با slug)
+  const payload: AddCartItemPayload = {
+    product_id: product.value.id,
+    quantity: qty.value,
+    subscription_type_id: selectedOffer.value.typeId ?? undefined,
+    duration_type_id: selectedOffer.value.durationId ?? undefined,
+    personal_account: personalActivation.value || undefined,
+  }
+
+  if (!auth.isAuthenticated) {
+    pendingAddToCartPayload.value = payload
+    router.push({ name: 'login', query: { redirect: route.fullPath } })
+    return
+  }
+
+  loading.value = true
+  try {
+    await addCartItem(payload)
+    await refreshCart()
+  } catch (err) {
+    console.error('add to cart error:', err)
+  } finally {
+    loading.value = false
+  }
+}
+
+// ✅ پس از لاگین: payload معلق را اجرا کن و بعد cart را sync کن
+watch(
+    () => auth.isAuthenticated,
+    (ok) => {
+      if (!ok) return
+      const payload = pendingAddToCartPayload.value
+      if (!payload) return
+
+      pendingAddToCartPayload.value = null
+
+      ;(async () => {
+        loading.value = true
+        try {
+          await addCartItem(payload)
+          await refreshCart()
+        } catch (err) {
+          console.error('add to cart error:', err)
+        } finally {
+          loading.value = false
+        }
+      })()
+    }
+)
 </script>
+
 
 <style scoped>
 .scrollbar-none::-webkit-scrollbar { display: none; }

@@ -1,15 +1,19 @@
-// src/types/products.dto.ts
+// src/types/products.dto.ts (UPDATED)
 
-export type DurationTypeDto = {
+export type PlanRefDto = {
     id: number
     title: string
     slug: string
 }
 
-export type SubscriptionTypeDto = {
-    id: number
-    title: string
-    slug: string
+export type DurationTypeDto = PlanRefDto
+export type SubscriptionTypeDto = PlanRefDto
+
+// ✅ NEW: matrix price rows coming from backend
+export type ProductPriceDto = {
+    subscription_type_id: number
+    duration_type_id: number
+    price: number
 }
 
 export type ProductDto = {
@@ -19,27 +23,43 @@ export type ProductDto = {
     category_id?: number | null
     category_slug?: string | null
 
-    price: number
+    // ✅ backend now can return resolved price for a combination
+    price: number | null
+
+    // ✅ NEW: base price always available if backend sends it
+    base_price?: number | null
+
     compare_at_price?: number | null
 
     delivery_type?: string | null
     platform?: string | null
 
-    // ✅ NEW id-based fields
+    // -------------------------
+    // Legacy single-value fields (optional)
+    // -------------------------
     duration_type_id?: number | null
     subscription_type_id?: number | null
     personal_account?: boolean
 
-    // ⚠️ legacy (backward compatibility)
     duration?: string | null
     subscription_type?: string | null
 
-    // ✅ expanded objects (if backend returns them)
+    // -------------------------
+    // ✅ M2M arrays
+    // -------------------------
+    duration_types?: DurationTypeDto[] | null
+    subscription_types?: SubscriptionTypeDto[] | null
+
+    // -------------------------
+    // ✅ NEW: matrix prices (optional)
+    // -------------------------
+    prices?: ProductPriceDto[] | null
+
+    // Optional expanded objects (if backend returns them)
     duration_type_detail?: DurationTypeDto | null
     subscription_type_detail?: SubscriptionTypeDto | null
 
     region?: string | null
-
     stock?: number | null
     is_active?: boolean
 
@@ -60,6 +80,7 @@ export type ListProductsQuery = Partial<{
     subscription_type_id: number
     personal_account: boolean
 }>
+
 export type ListProductsResponse = ProductDto[]
 
 // GET /products/top-weekly?limit=
@@ -67,6 +88,12 @@ export type TopWeeklyProductsResponse = {
     items: ProductDto[]
     count: number
 }
+
+// ✅ NEW: query for GET /products/:id
+export type GetProductQuery = Partial<{
+    duration_type_id: number
+    subscription_type_id: number
+}>
 
 // GET /products/:id
 export type GetProductResponse = ProductDto

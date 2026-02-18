@@ -66,25 +66,17 @@
                   برای ادامه یک محصول اضافه کنید.
                 </div>
 
-                <button
-                    class="btn btn-primary w-full rounded-xl mt-4"
-                    @click="ui.closeCart()"
-                    type="button"
-                >
+                <button class="btn btn-primary w-full rounded-xl mt-4" @click="ui.closeCart()" type="button">
                   شروع خرید
                 </button>
               </div>
             </div>
           </div>
 
-          <!-- Items list via API -->
+          <!-- Items -->
           <div v-else>
             <div class="divide-y divide-base-200">
-              <div
-                  v-for="line in detailed"
-                  :key="line.productKey"
-                  class="py-3"
-              >
+              <div v-for="line in detailed" :key="line.key" class="py-3">
                 <div class="flex gap-3">
                   <img
                       :src="line.product.image || 'https://placehold.co/160x160'"
@@ -111,7 +103,8 @@
 
                       <button
                           class="icon-btn"
-                          @click="cart.remove(line.productKey)"
+                          :disabled="removingId === line.itemId || clearing || isUpdatingQty(line.itemId)"
+                          @click="removeLine(line)"
                           aria-label="remove"
                           title="حذف"
                           type="button"
@@ -128,10 +121,11 @@
 
                     <div class="mt-2 flex items-end justify-between gap-3">
                       <div class="qty-wrap">
-                        <!-- ✅ v-model روی computed حذف شد -->
                         <QuantityInput
                             :model-value="line.qty"
-                            @update:model-value="cart.setQty(line.productKey, $event)"
+                            :disabled="clearing || isUpdatingQty(line.itemId)"
+                            @update:model-value="onQtyInput(line, $event)"
+                            @update:modelValue="onQtyInput(line, $event)"
                         />
                       </div>
 
@@ -144,9 +138,8 @@
                       </div>
                     </div>
 
-                    <div v-if="line.product.isDigital !== undefined" class="mt-2 text-[11px] text-base-content/55">
-                      <span v-if="line.product.isDigital">دیجیتال</span>
-                      <span v-else>فیزیکی</span>
+                    <div v-if="line.itemId == null" class="mt-2 text-[10px] text-warning/80">
+                      شناسه آیتم سبد موجود نیست؛ آپدیت با API انجام نمی‌شود (فقط تغییر محلی).
                     </div>
                   </div>
                 </div>
@@ -156,7 +149,8 @@
             <!-- Clear cart -->
             <button
                 class="btn btn-ghost w-full rounded-xl border border-base-200 mt-3"
-                @click="clearAll()"
+                :disabled="clearing || cart.items.length === 0"
+                @click="clearAll"
                 type="button"
             >
               خالی کردن سبد
@@ -199,80 +193,74 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { useUiStore } from '@/stores/ui'
-import { useCartStore } from '@/stores/cart'
-import { useAuthStore } from '@/stores/auth'
-import { formatToman } from '@/services/currency'
-import QuantityInput from './QuantityInput.vue'
-import { getProduct } from '@/services/products' // ✅ API client: /products/:id
-import type { Product } from '@/services/types'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue"
+import { useUiStore } from "@/stores/ui"
+import { useCartStore } from "@/stores/cart"
+import { useAuthStore } from "@/stores/auth"
+import { formatToman } from "@/services/currency"
+import QuantityInput from "./QuantityInput.vue"
+import { getProduct } from "@/services/products"
+import type { Product } from "@/services/types"
+import { removeCartItem, clearCart, getCart, updateCartItemQty } from "@/services/cart"
 
 const auth = useAuthStore()
 const ui = useUiStore()
 const cart = useCartStore()
 
 const isLoggedIn = computed(() => Boolean(auth.token))
-
-const payTo = computed(() => {
-  return isLoggedIn.value
-      ? '/checkout'
-      : { path: '/auth/login', query: { redirect: '/checkout' } }
-})
+const payTo = computed(() => (isLoggedIn.value ? "/checkout" : { path: "/auth/login", query: { redirect: "/checkout" } }))
 
 function onPayClick(e: MouseEvent) {
-  if (cart.items.length === 0) {
-    e.preventDefault()
-    return
-  }
+  if (cart.items.length === 0) e.preventDefault()
   ui.closeCart()
 }
 
-const money = (n: number) => String(formatToman(Number(n || 0))).replace(/تومان/g, '').trim()
+const money = (n: number) => String(formatToman(Number(n || 0))).replace(/تومان/g, "").trim()
 
 const onKey = (e: KeyboardEvent) => {
-  if (e.key === 'Escape') ui.closeCart()
+  if (e.key === "Escape") ui.closeCart()
 }
 
 watch(
     () => ui.isCartOpen,
-    (v) => {
-      document.documentElement.style.overflow = v ? 'hidden' : ''
+    async (open) => {
+      if (!open) return
+
+      if (!auth.token) {
+        cart.reset?.()
+        return
+      }
+
+      try {
+        const res = await getCart()
+        cart.setCart(res)
+      } catch (e) {
+        console.error("getCart failed:", e)
+      }
     },
     { immediate: true }
 )
 
-onMounted(() => window.addEventListener('keydown', onKey))
+onMounted(() => window.addEventListener("keydown", onKey))
 onBeforeUnmount(() => {
-  window.removeEventListener('keydown', onKey)
-  document.documentElement.style.overflow = ''
+  window.removeEventListener("keydown", onKey)
+  document.documentElement.style.overflow = ""
 })
 
-const clearAll = () => {
-  ;(cart as any).clear?.()
-  ;(cart as any).clearCart?.()
-  ;(cart as any).reset?.()
-}
-
 /** --------------------------------
- * ✅ Load product info for cart via API
+ * Product loading
  * -------------------------------- */
-type ProductVM = Product & {
-  image?: string
-  isDigital?: boolean
-  title?: string
-  price?: number
-}
+type ProductVM = Product & { image?: string; isDigital?: boolean; title?: string; price?: number }
 
 const productsById = ref<Record<number, ProductVM>>({})
 const loadingProducts = ref(false)
 
 function normalizeImageUrl(u?: string | null) {
-  const s = String(u ?? '').trim()
-  if (!s) return ''
+  const s = String(u ?? "").trim()
+  if (!s) return ""
   if (/^https?:\/\//i.test(s)) return s
-  if (s.startsWith('/')) return s
-  return ''
+  if (s.startsWith("/")) return s
+  return ""
 }
 
 function normalizeProduct(dto: any): ProductVM {
@@ -280,19 +268,25 @@ function normalizeProduct(dto: any): ProductVM {
   return {
     ...(raw as any),
     id: raw?.id,
-    title: raw?.title ?? 'بدون عنوان',
+    title: raw?.title ?? "بدون عنوان",
     price: Number(raw?.price ?? 0),
-    image: normalizeImageUrl(raw?.image_url || raw?.image) || '',
-    isDigital: raw?.is_digital ?? raw?.isDigital
+    image: normalizeImageUrl(raw?.image_url || raw?.image) || "",
+    isDigital: raw?.is_digital ?? raw?.isDigital,
   }
 }
 
-async function ensureCartProductsLoaded() {
-  const numericIds = (cart.items || [])
-      .map((x: any) => Number(String(x.productId)))
-      .filter((n: number) => Number.isFinite(n))
+function getProductIdFromItem(it: any): number | null {
+  const pid = it?.product_id ?? it?.productId ?? it?.productID
+  const n = Number(pid)
+  return Number.isFinite(n) ? n : null
+}
 
-  const missing = numericIds.filter((id) => !productsById.value[id])
+async function ensureCartProductsLoaded() {
+  const ids = (cart.items || [])
+      .map((it: any) => getProductIdFromItem(it))
+      .filter((n: any): n is number => Number.isFinite(n))
+
+  const missing = ids.filter((id) => !productsById.value[id])
   if (!missing.length) return
 
   loadingProducts.value = true
@@ -314,42 +308,159 @@ async function ensureCartProductsLoaded() {
   }
 }
 
-watch(
-    () => cart.items,
-    () => void ensureCartProductsLoaded(),
-    { deep: true, immediate: true }
-)
+watch(() => cart.items, () => void ensureCartProductsLoaded(), { deep: true, immediate: true })
 
-/**
- * ✅ detailed با دیتاهای API
- * - productKey: برای store (string)
- * - productId: برای lookup عددی
- */
-const detailed = computed(() => {
+/** --------------------------------
+ * detailed
+ * -------------------------------- */
+function getItemId(it: any): number | null {
+  const n = Number(it?.id)
+  return Number.isFinite(n) && n > 0 ? n : null
+}
+
+function getQty(it: any): number {
+  const raw = it?.quantity ?? it?.qty ?? 1
+  const n = Number(raw)
+  return Number.isFinite(n) && n > 0 ? n : 1
+}
+
+type LineVM = {
+  key: string
+  itemId: number | null
+  productId: number
+  qty: number
+  product: ProductVM
+  lineTotal: number
+}
+
+const detailed = computed<LineVM[]>(() => {
   const items = cart.items || []
-  return items.map((it: any) => {
-    const productKey = String(it.productId)
-    const productId = Number(productKey)
-    const qty = Number(it.qty ?? 1)
+  return items
+      .map((it: any) => {
+        const productId = getProductIdFromItem(it)
+        if (productId == null) return null
 
-    const product =
-        Number.isFinite(productId) && productsById.value[productId]
-            ? productsById.value[productId]
-            : ({
-              id: productId || productKey,
-              title: 'در حال دریافت...',
-              price: 0,
-              image: '',
-              isDigital: undefined
+        const qty = getQty(it)
+        const itemId = getItemId(it)
+
+        const product =
+            productsById.value[productId] ??
+            ({
+              id: productId,
+              title: it?.title ?? "در حال دریافت...",
+              price: Number(it?.unit_price ?? 0),
+              image: "",
+              isDigital: undefined,
             } as any)
 
-    const lineTotal = (Number((product as any).price ?? 0) || 0) * qty
+        const lineTotal = Number.isFinite(Number(it?.line_total))
+            ? Number(it.line_total)
+            : (Number((product as any).price ?? 0) || 0) * qty
 
-    return { productKey, productId, qty, product, lineTotal }
-  })
+        return {
+          key: String(itemId ?? productId),
+          itemId,
+          productId,
+          qty,
+          product,
+          lineTotal,
+        }
+      })
+      .filter((x): x is LineVM => Boolean(x))
 })
 
 const cartTotal = computed(() => detailed.value.reduce((sum, l) => sum + (l.lineTotal || 0), 0))
+
+/** --------------------------------
+ * Remove/Clear
+ * -------------------------------- */
+const removingId = ref<number | null>(null)
+const clearing = ref(false)
+
+/** --------------------------------
+ * ✅ Update Qty (PATCH)
+ * -------------------------------- */
+const pendingQtyByItemId = ref<Record<number, boolean>>({})
+
+function isUpdatingQty(itemId: number | null) {
+  if (!itemId) return false
+  return Boolean(pendingQtyByItemId.value[itemId])
+}
+
+function coerceQty(v: unknown): number {
+  const n = Number(String(v ?? "").trim())
+  if (!Number.isFinite(n)) return 1
+  return Math.max(1, Math.floor(n))
+}
+
+async function onQtyInput(line: LineVM, v: unknown) {
+  // اگر itemId نداریم، فقط لوکال
+  if (line.itemId == null) {
+    cart.setQty(String(line.productId), coerceQty(v))
+    return
+  }
+
+  // جلوگیری از ریکوئست همزمان برای یک آیتم
+  if (isUpdatingQty(line.itemId)) return
+
+  const qty = coerceQty(v)
+
+  // optimistic local
+  cart.setQty(String(line.productId), qty)
+
+  pendingQtyByItemId.value = { ...pendingQtyByItemId.value, [line.itemId]: true }
+  try {
+    // ✅ API جدید
+    const res = await updateCartItemQty(line.itemId, { quantity: qty })
+    cart.setCart(res) // ✅ منبع حقیقت
+  } catch (e) {
+    console.error("updateCartItemQty failed:", e)
+    // اگر خطا شد، از سرور sync کن تا لوکال خراب نمونه
+    try {
+      const fresh = await getCart()
+      cart.setCart(fresh)
+    } catch (e2) {
+      console.error("getCart after update failed:", e2)
+    }
+  } finally {
+    const next = { ...pendingQtyByItemId.value }
+    delete next[line.itemId]
+    pendingQtyByItemId.value = next
+  }
+}
+
+async function removeLine(line: { itemId: number | null; productId: number }) {
+  if (line.itemId == null) {
+    ;(cart as any).remove?.(String(line.productId))
+    return
+  }
+
+  // جلوگیری از درخواست تکراری
+  if (removingId.value === line.itemId) return
+
+  removingId.value = line.itemId
+  try {
+    const res = await removeCartItem(line.itemId)
+    cart.setCart(res)
+  } catch (e) {
+    console.error(e)
+  } finally {
+    removingId.value = null
+  }
+}
+
+async function clearAll() {
+  if (cart.items.length === 0) return
+  clearing.value = true
+  try {
+    const res = await clearCart()
+    cart.setCart(res)
+  } catch (e) {
+    console.error(e)
+  } finally {
+    clearing.value = false
+  }
+}
 </script>
 
 <style scoped>
@@ -374,7 +485,7 @@ const cartTotal = computed(() => detailed.value.reduce((sum, l) => sum + (l.line
   border-radius: 999px;
 }
 .cart-scroll::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.20);
+  background: rgba(0, 0, 0, 0.2);
 }
 
 .icon-btn {
@@ -391,11 +502,16 @@ const cartTotal = computed(() => detailed.value.reduce((sum, l) => sum + (l.line
 .icon-btn:hover {
   transform: translateY(-1px);
   opacity: 1;
-  border-color: rgba(239, 68, 68, 0.30);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+.icon-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .qty-wrap {
-  border: 1px solid rgba(0, 0, 0, 0.10);
+  border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 14px;
   padding: 6px 8px;
   background: rgba(255, 255, 255, 0.9);

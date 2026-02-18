@@ -46,7 +46,7 @@
         </div>
 
         <div class="flex flex-col gap-0.5">
-          <span class="text-base-content/60">قیمت</span>
+          <span class="text-base-content/60">قیمت پایه</span>
           <span class="font-semibold text-primary">
             {{ form.price ? formatPreviewPrice(form.price) : '—' }}
           </span>
@@ -76,6 +76,26 @@
           </label>
         </div>
 
+        <div class="grid gap-3 md:grid-cols-2">
+          <label class="form-control">
+            <span class="label-text text-[11px]">توضیحات کوتاه</span>
+            <input
+                v-model="form.short_description"
+                class="input input-bordered input-sm"
+                placeholder="یک جمله کوتاه برای کارت محصول..."
+            />
+          </label>
+
+          <label class="form-control">
+            <span class="label-text text-[11px]">آدرس تصویر محصول</span>
+            <input
+                v-model="form.image_url"
+                class="input input-bordered input-sm ltr text-left"
+                placeholder="/images/product.png"
+            />
+          </label>
+        </div>
+
         <label class="form-control">
           <span class="label-text text-[11px]">توضیحات</span>
           <textarea
@@ -93,7 +113,7 @@
 
         <div class="grid gap-3 md:grid-cols-2">
           <label class="form-control">
-            <span class="label-text text-[11px]">قیمت (تومان)</span>
+            <span class="label-text text-[11px]">قیمت پایه (تومان)</span>
             <input
                 v-model.number="form.price"
                 type="number"
@@ -115,46 +135,29 @@
 
           <label class="form-control">
             <span class="label-text text-[11px]">دسته‌بندی</span>
-            <select v-model="form.category_id" class="select select-bordered select-sm">
-              <option value="" disabled>انتخاب دسته‌بندی</option>
+            <select v-model.number="form.category_id" class="select select-bordered select-sm">
+              <option :value="undefined" disabled>انتخاب دسته‌بندی</option>
               <option v-for="cat in categories" :key="cat.id" :value="cat.id">
                 {{ cat.title }}
               </option>
             </select>
           </label>
-
-          <label class="form-control">
-            <span class="label-text text-[11px]">آدرس تصویر محصول</span>
-            <input
-                v-model="form.image_url"
-                class="input input-bordered input-sm ltr text-left"
-                placeholder="/images/product.png"
-            />
-          </label>
         </div>
       </div>
 
-      <!-- ✅ اطلاعات پلن (چند انتخابی / checkbox) -->
+      <!-- اطلاعات پلن -->
       <div class="space-y-3">
-        <div class="flex items-center justify-between gap-2">
-          <h3 class="text-sm font-semibold text-base-content">اطلاعات پلن</h3>
-
-          <span class="text-[11px] text-base-content/60">
-            {{ planSummary }}
-          </span>
-        </div>
+        <h3 class="text-sm font-semibold text-base-content">اطلاعات پلن</h3>
 
         <div class="grid gap-3 md:grid-cols-2">
           <!-- نوع اشتراک -->
           <div class="form-control">
             <span class="label-text text-[11px] mb-1">نوع اشتراک</span>
-
             <div class="flex flex-wrap gap-2">
               <label class="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-base-300 bg-base-100 cursor-pointer">
                 <input v-model="form.plan_type" class="checkbox checkbox-sm" type="checkbox" value="individual" />
                 <span class="text-xs">شخصی / Individual</span>
               </label>
-
               <label class="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-base-300 bg-base-100 cursor-pointer">
                 <input v-model="form.plan_type" class="checkbox checkbox-sm" type="checkbox" value="family" />
                 <span class="text-xs">خانوادگی / Family</span>
@@ -165,27 +168,43 @@
           <!-- مدت زمان -->
           <div class="form-control">
             <span class="label-text text-[11px] mb-1">مدت زمان اشتراک</span>
-
             <div class="flex flex-wrap gap-2">
               <label class="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-base-300 bg-base-100 cursor-pointer">
                 <input v-model="form.plan_duration" class="checkbox checkbox-sm" type="checkbox" value="1m" />
                 <span class="text-xs">1 ماهه</span>
               </label>
-
               <label class="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-base-300 bg-base-100 cursor-pointer">
                 <input v-model="form.plan_duration" class="checkbox checkbox-sm" type="checkbox" value="3m" />
                 <span class="text-xs">3 ماهه</span>
               </label>
-
               <label class="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-base-300 bg-base-100 cursor-pointer">
                 <input v-model="form.plan_duration" class="checkbox checkbox-sm" type="checkbox" value="6m" />
                 <span class="text-xs">6 ماهه</span>
               </label>
-
               <label class="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-base-300 bg-base-100 cursor-pointer">
                 <input v-model="form.plan_duration" class="checkbox checkbox-sm" type="checkbox" value="12m" />
                 <span class="text-xs">یک ساله</span>
               </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- جدول قیمت‌ها -->
+      <div v-if="form.plan_type.length && form.plan_duration.length" class="space-y-3">
+        <h3 class="text-sm font-semibold text-base-content">قیمت برای هر ترکیب</h3>
+        <div v-for="type in form.plan_type" :key="type" class="space-y-2">
+          <h4 class="text-xs font-semibold">{{ type === 'individual' ? 'شخصی' : 'خانوادگی' }}</h4>
+          <div class="grid grid-cols-4 gap-2">
+            <div v-for="dur in form.plan_duration" :key="dur" class="flex flex-col">
+              <span class="text-[10px]">{{ durationLabel(dur) }}</span>
+              <input
+                  type="number"
+                  v-model.number="form.price_matrix[type][dur]"
+                  class="input input-bordered input-sm ltr text-left"
+                  min="0"
+                  placeholder="قیمت"
+              />
             </div>
           </div>
         </div>
@@ -219,39 +238,79 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, computed, onMounted } from 'vue'
+import { reactive, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { adminCreateProduct, adminUpdateProduct, adminGetProduct } from '@/services/admin.ts'
 import type { AdminCreateProductPayload, AdminGetProductResponse } from '@/types/api_client_types/admin.dto.ts'
 
-/**
- * ✅ رفع Type Error ها:
- * بک در برخی فیلدها null برمی‌گرداند ولی تایپ‌ها optional هستند (undefined).
- * پس هنگام ست کردن روی فرم، null را به undefined تبدیل می‌کنیم.
- */
-
+/* -----------------------------
+   Static Data
+----------------------------- */
 const categories = [
   { id: 1, title: 'اکانت' },
   { id: 2, title: 'گیفت کارت' },
   { id: 3, title: 'خدمات' },
 ]
 
+/* -----------------------------
+   Routing
+----------------------------- */
 const route = useRoute()
 const router = useRouter()
 const isEdit = computed(() => !!route.params.id)
 
+/* -----------------------------
+   Plan Types
+----------------------------- */
 type PlanType = 'individual' | 'family'
 type PlanDuration = '1m' | '3m' | '6m' | '12m'
 
-type ProductForm = AdminCreateProductPayload & {
+type PriceMatrix = Record<PlanType, Partial<Record<PlanDuration, number>>>
+
+/* -----------------------------
+   DB Mapping
+----------------------------- */
+const SUBSCRIPTION_TYPE_ID_BY_SLUG: Record<PlanType, number> = {
+  individual: 2,
+  family: 1,
+}
+
+const PLAN_TYPE_BY_SUBSCRIPTION_ID: Record<number, PlanType | undefined> = {
+  2: 'individual',
+  1: 'family',
+}
+
+const DURATION_TYPE_ID_BY_UI: Record<PlanDuration, number> = {
+  '1m': 1,
+  '3m': 2,
+  '6m': 3,
+  '12m': 4,
+}
+
+const DURATION_UI_BY_ID: Record<number, PlanDuration | undefined> = {
+  1: '1m',
+  2: '3m',
+  3: '6m',
+  4: '12m',
+}
+
+/* -----------------------------
+   Form
+----------------------------- */
+type ProductForm = Omit<
+    AdminCreateProductPayload,
+    'subscription_type_ids' | 'duration_type_ids'
+> & {
   plan_type: PlanType[]
   plan_duration: PlanDuration[]
+  price_matrix: PriceMatrix
 }
 
 const form = reactive<ProductForm>({
   title: '',
   slug: '',
   description: '',
+  short_description: '',
   price: undefined,
   compare_at_price: undefined,
   category_id: undefined,
@@ -262,124 +321,219 @@ const form = reactive<ProductForm>({
 
   delivery_type: undefined,
   platform: undefined,
-  duration: undefined,
   region: undefined,
   stock: undefined,
 
   plan_type: [],
   plan_duration: [],
+
+  price_matrix: {
+    individual: {},
+    family: {},
+  },
 })
 
 const loading = reactive({ value: false })
-
-function normalizeToArray<T extends string>(val: any): T[] {
-  if (Array.isArray(val)) return val as T[]
-  if (typeof val === 'string' && val.length) return [val as T]
-  return []
-}
-
-function nullToUndef<T>(v: T | null | undefined): T | undefined {
-  return v === null ? undefined : v
-}
-
-const planSummary = computed(() => {
-  const t = form.plan_type?.length ? form.plan_type.join('، ') : 'بدون نوع'
-  const d = form.plan_duration?.length ? form.plan_duration.join('، ') : 'بدون مدت'
-  return `${t} • ${d}`
-})
-
-function buildPayload(): AdminCreateProductPayload {
-  const payload: any = {
-    ...form,
-    // ✅ اگر خالی بود اصلاً ارسال نشود
-    plan_type: form.plan_type?.length ? form.plan_type : undefined,
-    plan_duration: form.plan_duration?.length ? form.plan_duration : undefined,
-  }
-
-  // ✅ حذف undefined ها
-  Object.keys(payload).forEach((k) => payload[k] === undefined && delete payload[k])
-  return payload as AdminCreateProductPayload
-}
-
-onMounted(async () => {
-  if (!isEdit.value) return
-
-  loading.value = true
-  try {
-    const productId = Number(route.params.id)
-    if (isNaN(productId)) {
-      alert('شناسه محصول نامعتبر است')
-      router.push('/admin/products')
-      return
-    }
-
-    const data: AdminGetProductResponse = await adminGetProduct(productId)
-    const anyData = data as any
-
-    form.title = data.title ?? ''
-    form.slug = data.slug ?? ''
-    form.description = nullToUndef(data.description) ?? ''
-    form.price = nullToUndef(data.price)
-    form.compare_at_price = nullToUndef(data.compare_at_price)
-    form.category_id = nullToUndef(data.category_id)
-    form.image_url = nullToUndef(data.image_url) ?? ''
-
-    form.is_active = (data.is_active ?? true) as any
-
-    // ✅ این‌ها در بک ممکنه null باشند
-    form.delivery_type = nullToUndef(anyData.delivery_type)
-    form.platform = nullToUndef(anyData.platform)
-    form.duration = nullToUndef(anyData.duration)
-    form.region = nullToUndef(anyData.region)
-    form.stock = nullToUndef(anyData.stock)
-
-    // ✅ فیلدهای جدید پلن
-    form.plan_type = normalizeToArray<PlanType>(anyData.plan_type)
-    form.plan_duration = normalizeToArray<PlanDuration>(anyData.plan_duration)
-
-    // اگر بک جدیداً is_digital هم داد
-    form.is_digital = (anyData?.is_digital ?? true) as any
-  } catch (err: any) {
-    console.error('خطا در دریافت اطلاعات محصول:', err)
-    alert('خطا در بارگذاری محصول برای ویرایش')
-    router.push('/admin/products')
-  } finally {
-    loading.value = false
-  }
-})
-
-async function save() {
-  loading.value = true
-  try {
-    const payload = buildPayload()
-
-    if (isEdit.value) {
-      const productId = Number(route.params.id)
-      if (isNaN(productId)) {
-        alert('شناسه محصول نامعتبر است')
-        return
-      }
-      await adminUpdateProduct(productId, payload)
-    } else {
-      await adminCreateProduct(payload)
-    }
-
-    router.push('/admin/products')
-  } catch (err: any) {
-    console.error('خطا در ذخیره محصول:', err)
-    alert(err?.message || 'مشکلی در ذخیره محصول رخ داد.')
-  } finally {
-    loading.value = false
-  }
-}
 
 function formatPreviewPrice(val?: number) {
   if (!val) return '—'
   return new Intl.NumberFormat('fa-IR').format(val) + ' تومان'
 }
 
+/* -----------------------------
+   Utils
+----------------------------- */
+const durationLabel = (d: PlanDuration) =>
+    d === '1m' ? '1 ماهه'
+        : d === '3m' ? '3 ماهه'
+            : d === '6m' ? '6 ماهه'
+                : '1 ساله'
+
+function uniq<T>(arr: T[]) {
+  return Array.from(new Set(arr))
+}
+
+/* -----------------------------
+   Edit: load product and map to form
+----------------------------- */
+function resetMatrix() {
+  form.price_matrix.individual = {}
+  form.price_matrix.family = {}
+}
+
+function applyServerProductToForm(p: AdminGetProductResponse) {
+  form.title = p.title ?? ''
+  form.slug = p.slug ?? ''
+  form.description = p.description ?? ''
+  form.short_description = p.short_description ?? ''
+  form.price = p.price ?? undefined
+  form.compare_at_price = p.compare_at_price ?? undefined
+  form.category_id = p.category_id ?? undefined
+  form.image_url = p.image_url ?? ''
+  form.is_active = (p.is_active ?? true) as boolean
+  form.is_digital = (p.is_digital ?? true) as boolean
+
+  form.delivery_type = p.delivery_type ?? undefined
+  form.platform = p.platform ?? undefined
+  form.region = p.region ?? undefined
+  form.stock = p.stock ?? undefined
+
+  // map subscription_types -> plan_type
+  const planTypes: PlanType[] = []
+  for (const st of (p.subscription_types ?? [])) {
+    // اولویت: id mapping (سریع و دقیق)
+    const t = PLAN_TYPE_BY_SUBSCRIPTION_ID[st.id]
+    if (t) planTypes.push(t)
+    else if (st.slug === 'individual') planTypes.push('individual')
+    else if (st.slug === 'family') planTypes.push('family')
+  }
+  form.plan_type = uniq(planTypes)
+
+  // map duration_types -> plan_duration
+  const planDurs: PlanDuration[] = []
+  for (const dt of (p.duration_types ?? [])) {
+    const d = DURATION_UI_BY_ID[dt.id]
+    if (d) planDurs.push(d)
+    else {
+      // اگر slugها دقیقاً همون‌هایی باشن که بک می‌فرسته
+      if (dt.slug === '1_month') planDurs.push('1m')
+      if (dt.slug === '3_month') planDurs.push('3m')
+      if (dt.slug === '6_month') planDurs.push('6m')
+      if (dt.slug === '1_year') planDurs.push('12m')
+    }
+  }
+  form.plan_duration = uniq(planDurs)
+
+  // map prices -> price_matrix
+  resetMatrix()
+  for (const row of (p.prices ?? [])) {
+    const type = PLAN_TYPE_BY_SUBSCRIPTION_ID[row.subscription_type_id]
+    const dur = DURATION_UI_BY_ID[row.duration_type_id]
+    if (!type || !dur) continue
+    form.price_matrix[type][dur] = row.price
+  }
+
+  // اگر بک personal_account داده باشه ولی آرایه‌ها خالی باشن، به صورت fallback:
+  if (!form.plan_type.length && p.personal_account === true) {
+    form.plan_type = ['individual']
+  }
+}
+
+onMounted(async () => {
+  if (!isEdit.value) return
+  loading.value = true
+  try {
+    const id = Number(route.params.id)
+    const p = await adminGetProduct(id)
+    applyServerProductToForm(p)
+  } catch (err: any) {
+    console.error(err)
+    alert(err?.message || 'خطا در دریافت محصول')
+  } finally {
+    loading.value = false
+  }
+})
+
+/* -----------------------------
+   Keep matrix clean when checkboxes change
+----------------------------- */
+watch(
+    () => form.plan_type.slice(),
+    (newTypes, oldTypes) => {
+      const removed = oldTypes.filter(x => !newTypes.includes(x))
+      for (const t of removed) {
+        form.price_matrix[t] = {}
+      }
+    }
+)
+
+watch(
+    () => form.plan_duration.slice(),
+    (newDurs, oldDurs) => {
+      const removed = oldDurs.filter(x => !newDurs.includes(x))
+      if (!removed.length) return
+      for (const t of (['individual', 'family'] as PlanType[])) {
+        for (const d of removed) {
+          if (form.price_matrix[t] && form.price_matrix[t][d] != null) {
+            delete form.price_matrix[t][d]
+          }
+        }
+      }
+    }
+)
+
+/* -----------------------------
+   Payload Builder
+----------------------------- */
+function buildPayload(): AdminCreateProductPayload {
+  const payload: AdminCreateProductPayload = {
+    title: form.title,
+    slug: form.slug,
+    description: form.description,
+    short_description: form.short_description,
+    price: form.price,
+    compare_at_price: form.compare_at_price,
+    category_id: form.category_id,
+    image_url: form.image_url,
+    is_active: form.is_active,
+    is_digital: form.is_digital,
+
+    delivery_type: form.delivery_type,
+    platform: form.platform,
+    region: form.region,
+    stock: form.stock,
+
+    personal_account: form.plan_type.includes('individual'),
+  }
+
+  payload.subscription_type_ids = uniq(
+      form.plan_type.map(p => SUBSCRIPTION_TYPE_ID_BY_SLUG[p])
+  )
+
+  payload.duration_type_ids = uniq(
+      form.plan_duration.map(d => DURATION_TYPE_ID_BY_UI[d])
+  )
+
+  payload.prices = []
+  for (const type of form.plan_type) {
+    for (const dur of form.plan_duration) {
+      const price = form.price_matrix[type]?.[dur]
+      if (price != null) {
+        payload.prices.push({
+          subscription_type_id: SUBSCRIPTION_TYPE_ID_BY_SLUG[type],
+          duration_type_id: DURATION_TYPE_ID_BY_UI[dur],
+          price,
+        })
+      }
+    }
+  }
+
+  return payload
+}
+
+/* -----------------------------
+   Save
+----------------------------- */
+async function save() {
+  loading.value = true
+  try {
+    const payload = buildPayload()
+    if (isEdit.value) {
+      await adminUpdateProduct(Number(route.params.id), payload)
+    } else {
+      await adminCreateProduct(payload)
+    }
+    router.push('/admin/products')
+  } catch (err: any) {
+    console.error(err)
+    alert(err?.message || 'خطا در ذخیره محصول')
+  } finally {
+    loading.value = false
+  }
+}
+
 function getCategoryTitle(id?: number) {
-  const cat = categories.find((c) => c.id === id)
+  const cat = categories.find(c => c.id === id)
   return cat?.title ?? ''
 }
 </script>
