@@ -1,3 +1,22 @@
+// ==============================
+// admin.dto.ts (UPDATED for M2M)
+// ==============================
+
+export type PlanType = 'individual' | 'family'
+export type PlanDuration = '1m' | '3m' | '6m' | '12m'
+
+export type PlanRef = {
+    id: number
+    title: string
+    slug: string
+}
+
+export type ProductPriceDto = {
+    subscription_type_id: number
+    duration_type_id: number
+    price: number
+}
+
 // GET /admin/products
 export type AdminProductListItem = {
     id: number
@@ -8,43 +27,54 @@ export type AdminProductListItem = {
     image_url?: string
     created_at?: string | null
 
-    // ✅ NEW (id-based)
-    duration_type_id?: number | null
-    subscription_type_id?: number | null
-    personal_account?: boolean
+    subscription_types?: PlanRef[]
+    duration_types?: PlanRef[]
 
-    // ⚠️ legacy (optional for backward compatibility)
-    duration?: string | null
-    subscription_type?: string | null
+    // ✅ NEW: if admin list endpoint returns it
+    prices?: ProductPriceDto[]
 }
 
-export type PlanType = 'individual' | 'family'
-export type PlanDuration = '1m' | '3m' | '6m' | '12m'
 
-
-// ✅ برای get (دریافت)
+// GET /admin/products/:id
 export type AdminGetProductResponse = {
     id: number
     title: string
     slug: string
 
     description?: string | null
+    short_description?: string | null
+
+    // 🔹 legacy / preview
     price?: number | null
     compare_at_price?: number | null
+
     category_id?: number | null
     image_url?: string | null
     is_active?: boolean | null
+    is_digital?: boolean | null
 
     delivery_type?: string | null
     platform?: string | null
-    duration?: string | null
     region?: string | null
     stock?: number | null
-    is_digital?: boolean | null
 
-    // ✅ فیلدهای جدید
-    plan_type?: PlanType[] | string | null
-    plan_duration?: PlanDuration[] | string | null
+    personal_account?: boolean | null
+
+    // =========================
+    // ✅ M2M (read)
+    // =========================
+    subscription_types?: PlanRef[]
+    duration_types?: PlanRef[]
+
+    prices?: ProductPriceDto[]
+
+    // =========================
+    // ⚠️ legacy fallback
+    // =========================
+    subscription_type_id?: number | null
+    duration_type_id?: number | null
+    subscription_type?: string | null
+    duration?: string | null
 }
 
 
@@ -54,37 +84,47 @@ export type AdminDeleteProductResponse = {
     deleted_id?: number
 }
 
-
 // POST /admin/products
 export type AdminCreateProductPayload = {
     title: string
     slug: string
+
     category_id?: number
+
+    // 🔹 legacy / preview
     price?: number
     compare_at_price?: number
+
+    // 🔹 product meta
     delivery_type?: string
     platform?: string
-
-    // ✅ NEW preferred fields
-    duration_type_id?: number | null
-    subscription_type_id?: number | null
-    personal_account?: boolean
-
-    // ⚠️ legacy (optional)
-    duration?: string
-    subscription_type?: string
-
     region?: string
     stock?: number
-    is_active?: boolean
     image_url?: string
     short_description?: string
     description?: string
 
-    // ⚠️ قدیمی/نامشخص در بک‌اند فعلی
-    // اگر توی DB/Entity نداری بهتره حذفش کنی، ولی فعلاً نگه می‌دارم که فرانت نشکنه
+    is_active?: boolean
     is_digital?: boolean
+    personal_account?: boolean
+
+    // =========================
+    // ✅ M2M (source of truth)
+    // =========================
+    subscription_type_ids?: number[]
+    duration_type_ids?: number[]
+
+    prices?: ProductPriceDto[]
+
+    // =========================
+    // ⚠️ legacy single-value (optional)
+    // =========================
+    subscription_type_id?: number | null
+    duration_type_id?: number | null
+    subscription_type?: string
+    duration?: string
 }
+
 
 export type AdminCreateProductResponse = {
     id: number
